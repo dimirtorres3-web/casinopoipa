@@ -62,7 +62,7 @@ class BankAccountForm(forms.ModelForm):
 
 
 class LoginForm(AuthenticationForm):
-    username = forms.CharField(label="Usuario", widget=forms.TextInput(attrs={"autofocus": True}))
+    username = forms.EmailField(label="Correo Electronico", widget=forms.TextInput(attrs={"autofocus": True}))
     password = forms.CharField(label="Contraseña", widget=forms.PasswordInput)
 
 
