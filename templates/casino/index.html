@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Dashboard | Casinopoipa{% endblock %}
+{% block content %}
+    <div class="dashboard-page">
+        <div class="layout-shell">
+        <aside class="side-float-menu glass-panel">
+            <div class="floating-control">+</div>
+            <nav class="side-menu">
+                <a href="#perfil">Perfil</a>
+                <a href="#favoritos">Juegos Favoritos</a>
+                <a href="#mis-juegos">Mis Juegos</a>
+            </nav>
+        </aside>
+        <header class="topbar">
+            <div class="brand-hero">
+                <span class="brand-mark">🎡</span>
+                <div>
+                    <p>Bienvenido</p>
+                    <h1>{{ player.nombre }} {{ player.apellido }}</h1>
+                </div>
+            </div>
+            <form class="search-bar">
+                <input type="search" placeholder="Buscar juego o servicio" />
+                <button>Buscar</button>
+            </form>
+            <a href="{% url 'casino:logout' %}" class="btn-ghost">Cerrar sesión</a>
+        </header>
+        <main class="dashboard-grid">
+            <section class="hero-card glass-panel balance-card">
+                <div class="balance-info">
+                    <p>Saldo disponible</p>
+                    <h2>Gs. {{ saldo_real|intcomma }}</h2>
+                </div>
+                <div class="balance-meta">
+                    <span>Seguridad en backend</span>
+                    <p class="balance-note">Tu saldo está protegido y cifrado internamente. Aquí solo ves tu balance real.</p>
+                </div>
+            </section>
+            <section class="games-grid" id="mis-juegos">
+                {% for juego in juegos %}
+                    <a href="{{ juego.url }}" class="game-card glass-panel" data-game-url="{{ juego.url }}">
+                        <span class="game-icon">{{ juego.icono }}</span>
+                        <h3>{{ juego.titulo }}</h3>
+                        <p>{{ juego.description }}</p>
+                    </a>
+                {% endfor %}
+            </section>
+            <section class="play-panel glass-panel" id="favoritos">
+                <h2>Elige tu juego</h2>
+                <p>Selecciona una de las mesas para entrar en una experiencia de apuesta premium sin recarga.</p>
+                <div class="play-help">
+                    <p>Haz clic en cualquier juego para abrir su pantalla independiente y apostar en tiempo real.</p>
+                </div>
+            </section>
+            <section class="cashier-panel glass-panel" id="perfil">
+                <div class="panel-header">
+                    <h2>Cajero automático</h2>
+                    <a href="{% url 'casino:cajero' %}" class="btn-secondary">Abrir Cajero</a>
+                </div>
+                <p>Recargas entre 30.000 Gs. y 1.500.000 Gs. con comprobante seguro.</p>
+            </section>
+            {% if player.is_staff or player.is_superuser %}
+            <section class="admin-panel glass-panel" id="admin-access">
+                <div class="panel-header">
+                    <h2>Panel de administrador</h2>
+                    <a href="/admin/" class="btn-secondary">Ir a Admin</a>
+                </div>
+                <p>Acceso directo al panel de Django para gestionar usuarios y transacciones.</p>
+            </section>
+            {% endif %}
+        </main>
+    </div>
+{% endblock %}

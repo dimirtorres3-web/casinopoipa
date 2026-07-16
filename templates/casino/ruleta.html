@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Ruleta | Casinopoipa{% endblock %}
+{% block content %}
+    <div class="game-page">
+        <div class="layout-shell">
+            <header class="topbar fixed-game-header">
+                <div class="brand-hero">
+                    <span class="brand-mark">🎡</span>
+                    <div>
+                        <p>Ruleta</p>
+                        <h1>Tapete de Apuesta</h1>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="balance-display glass-panel">
+                        <p>Saldo disponible</p>
+                        <h2 id="balance-value">Gs. {{ player.saldo|intcomma }}</h2>
+                    </div>
+                    <a href="{% url 'casino:dashboard' %}" class="btn-secondary">Volver al Menú Principal</a>
+                </div>
+            </header>
+            <main class="game-shell glass-panel roulette-shell">
+                <section class="roulette-board">
+                    <div class="roulette-visual-shell">
+                        <canvas id="roulette-canvas" class="roulette-canvas"></canvas>
+                    </div>
+                    <aside class="roulette-panel">
+                        <div class="roulette-selection-header">
+                            <div>
+                                <p>Apuesta por número</p>
+                                <strong id="selected-roulette-choice">Ninguno</strong>
+                                <div id="selected-roulette-list" class="roulette-selected-list"></div>
+                            </div>
+                            <span class="roulette-hint">Elige hasta 3 números. Se muestran juntos y listos para apostar.</span>
+                        </div>
+                        <div class="roulette-grid" id="roulette-grid"></div>
+                        <div class="game-status" id="game-status">Apuesta mínima 2.000 Gs.</div>
+                        <div class="game-actions">
+                            <input id="ruleta-apuesta" type="number" min="2000" value="2000" class="form-input" />
+                            <button type="button" id="ruleta-bet-button" class="btn-primary">Apostar</button>
+                        </div>
+                    </aside>
+                </section>
+        </div>
+    </div>
+{% endblock %}

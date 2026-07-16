@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Bingo | Casinopoipa{% endblock %}
+{% block content %}
+    <div class="game-page">
+        <div class="layout-shell">
+            <header class="topbar fixed-game-header">
+                <div class="brand-hero">
+                    <span class="brand-mark">🎱</span>
+                    <div>
+                        <p>Bingo</p>
+                        <h1>Cartilla Premium</h1>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="balance-display glass-panel">
+                        <p>Saldo disponible</p>
+                        <h2 id="balance-value">Gs. {{ player.saldo|intcomma }}</h2>
+                    </div>
+                    <a href="{% url 'casino:dashboard' %}" class="btn-secondary">Volver al Menú Principal</a>
+                </div>
+            </header>
+            <main class="game-shell glass-panel bingo-shell">
+                <section class="bingo-board">
+                    <div class="bingo-canvas-shell">
+                        <canvas id="bingo-canvas" class="bingo-canvas"></canvas>
+                        <div class="bingo-selector-shell">
+                            <div class="bingo-ball-display">
+                                <span>Bolilla actual</span>
+                                <strong id="bingo-selected-ball">-</strong>
+                            </div>
+                            <div class="bingo-called-list" id="bingo-called-numbers"></div>
+                        </div>
+                    </div>
+                    <div class="bingo-grid" id="bingo-card"></div>
+                </section>
+                <section class="game-controls">
+                    <div class="game-status" id="game-status">Apuesta mínima 2.000 Gs.</div>
+                    <div class="game-actions">
+                        <input id="bingo-apuesta" type="number" min="2000" value="2000" class="form-input" />
+                        <button type="button" id="bingo-bet-button" class="btn-primary">Apostar</button>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+{% endblock %}

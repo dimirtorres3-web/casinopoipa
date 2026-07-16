@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Casinopoipa{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        copper: '#d35400',
+                        night: '#0f0f12',
+                        slate: '#1f2126',
+                    },
+                },
+            },
+        };
+    </script>
+    <link rel="stylesheet" href="/static/css/casinopoipa.css" />
+</head>
+<body class="bg-night text-white font-sans min-h-screen">
+    {% include 'casino/partials/messages.html' %}
+    {% block content %}{% endblock %}
+    <script src="/static/js/casinopoipa.js"></script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Ingreso | Casinopoipa{% endblock %}
+{% block content %}
+    <main class="auth-shell">
+        <section class="auth-panel glass-panel">
+            <div class="brand-top">
+                <div class="brand-mark">🎡</div>
+                <div>
+                    <h1>Casinopoipa</h1>
+                    <p>Accede a tu lounge nocturno de apuestas premium.</p>
+                </div>
+            </div>
+            <form method="post" class="form-auth">
+                {% csrf_token %}
+                <h2>Ingreso seguro</h2>
+                {% if form.non_field_errors %}
+                    <div class="field-error">{{ form.non_field_errors }}</div>
+                {% endif %}
+                <div class="field-group">
+                    <label for="id_username">Usuario</label>
+                    {{ form.username }}
+                </div>
+                <div class="field-group">
+                    <label for="id_password">Contraseña</label>
+                    {{ form.password }}
+                </div>
+                <button class="btn-primary">Entrar</button>
+                <p class="form-note">¿Nuevo aquí? <a href="{% url 'casino:registro' %}">Regístrate</a></p>
+            </form>
+        </section>
+    </main>
+{% endblock %}

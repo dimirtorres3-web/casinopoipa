@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Panel Administrador | Casinopoipa{% endblock %}
+{% block content %}
+    <div class="dashboard-page">
+        <div class="layout-shell">
+            <header class="topbar">
+                <div class="brand-hero">
+                    <span class="brand-mark">🛡️</span>
+                    <div>
+                        <p>Panel del Administrador</p>
+                        <h1>Control de capital</h1>
+                    </div>
+                </div>
+                <a href="{% url 'casino:dashboard' %}" class="btn-ghost">Volver al Dashboard</a>
+            </header>
+            <main class="admin-shell glass-panel">
+                <div class="admin-hero">
+                    <div>
+                        <h2>Vista ejecutiva</h2>
+                        <p>Administra las cargas y reembolsos en tiempo real con controles seguros.</p>
+                    </div>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span>Usuarios registrados</span>
+                        <h3>{{ total_users }}</h3>
+                    </div>
+                    <div class="metric-card">
+                        <span>Transacciones totales</span>
+                        <h3>{{ total_transactions }}</h3>
+                    </div>
+                    <div class="metric-card">
+                        <span>Transacciones pendientes</span>
+                        <h3>{{ pending_transactions }}</h3>
+                    </div>
+                    <div class="metric-card">
+                        <span>Saldo total del casino</span>
+                        <h3>Gs. {{ total_balance|intcomma }}</h3>
+                    </div>
+                </div>
+                <section class="transactions-list" style="margin-top: 24px;">
+                    <h3>Transacciones pendientes</h3>
+                    {% if transacciones %}
+                        {% for transaccion in transacciones %}
+                            <article class="transaction-card">
+                                <div>
+                                    <p class="meta">{{ transaccion.player.username }} • {{ transaccion.tipo|title }} • {{ transaccion.monto }} Gs.</p>
+                                    <p>Estado: <strong>{{ transaccion.estado|title }}</strong></p>
+                                    <p>Pago: <strong>{{ transaccion.status|title }}</strong></p>
+                                    <p>Creado: {{ transaccion.creado_en }}</p>
+                                    {% if transaccion.tipo == 'retiro' %}
+                                        <div class="bank-details">
+                                            <p><strong>Banco:</strong> {{ transaccion.banco }}</p>
+                                            <p><strong>Tipo de cuenta:</strong> {{ transaccion.tipo_cuenta }}</p>
+                                            <p><strong>Número de cuenta:</strong> {{ transaccion.numero_cuenta }}</p>
+                                            <p><strong>Titular:</strong> {{ transaccion.titular }}</p>
+                                            <p><strong>Cédula:</strong> {{ transaccion.cedula }}</p>
+                                            <p><strong>Teléfono:</strong> {{ transaccion.telefono }}</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                {% if transaccion.comprobante %}
+                                    <img src="{{ transaccion.comprobante.url }}" alt="Comprobante" class="receipt-image" />
+                                {% endif %}
+                                <div class="actions-row">
+                                    {% if transaccion.tipo == 'recarga' %}
+                                        <a href="{% url 'casino:approve_transaction' transaccion.id %}" class="btn-primary small">Aprobar Carga</a>
+                                        <a href="{% url 'casino:refund_transaction' transaccion.id %}" class="btn-secondary small">Hacer Reembolso</a>
+                                    {% elif transaccion.tipo == 'retiro' %}
+                                        <button type="button" class="btn-primary small mark-paid-button" data-url="{% url 'casino:mark_transaction_paid' transaccion.id %}">Marcar como Pagado</button>
+                                    {% endif %}
+                                </div>
+                            </article>
+                        {% endfor %}
+                    {% else %}
+                        <p class="empty-state">No hay transacciones pendientes en este momento.</p>
+                    {% endif %}
+                </section>
+                <script>
+                    function getCookie(name) {
+                        const value = `; ${document.cookie}`;
+                        const parts = value.split(`; ${name}=`);
+                        if (parts.length === 2) return parts.pop().split(';').shift();
+                        return null;
+                    }
+
+                    document.querySelectorAll('.mark-paid-button').forEach((button) => {
+                        button.addEventListener('click', () => {
+                            const url = button.dataset.url;
+                            if (!url) return;
+                            button.disabled = true;
+                            fetch(url, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': getCookie('csrftoken'),
+                                    'Accept': 'application/json',
+                                },
+                                credentials: 'same-origin',
+                            })
+                                .then((response) => response.json())
+                                .then((data) => {
+                                    if (data.success) {
+                                        button.textContent = 'Pagado';
+                                        button.classList.add('btn-success');
+                                        const card = button.closest('.transaction-card');
+                                        if (card) {
+                                            const statusLine = card.querySelector('p strong');
+                                            if (statusLine) {
+                                                statusLine.textContent = 'Pagado';
+                                            }
+                                        }
+                                    } else {
+                                        alert(data.error || 'No se pudo marcar como pagado.');
+                                        button.disabled = false;
+                                    }
+                                })
+                                .catch(() => {
+                                    alert('Error de red al marcar la transacción como pagada.');
+                                    button.disabled = false;
+                                });
+                        });
+                    });
+                </script>
+            </main>
+        </div>
+    </div>
+{% endblock %}

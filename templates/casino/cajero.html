@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Cajero | Casinopoipa{% endblock %}
+{% block content %}
+    <div class="dashboard-page">
+        <div class="layout-shell">
+        <header class="topbar">
+            <div class="brand-hero">
+                <span class="brand-mark">🧾</span>
+                <div>
+                    <p>Cajero Automático</p>
+                    <h1>Operaciones seguras</h1>
+                </div>
+            </div>
+            <a href="{% url 'casino:dashboard' %}" class="btn-ghost">Volver al Dashboard</a>
+        </header>
+        <main class="cashier-shell glass-panel">
+            <section class="tabs-panel">
+                <div class="tab active">Recarga</div>
+                <div class="tab">Retiro</div>
+                <div class="tab">Formas de Pago</div>
+            </section>
+
+            <div class="cashier-grid">
+                <section class="cashier-card">
+                    <h2>Recarga</h2>
+                    <form method="post" enctype="multipart/form-data" class="transaction-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="recarga" />
+                        {% for field in recarga_form %}
+                            <label>{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <small>{{ field.help_text }}</small>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="field-error">{{ field.errors|striptags }}</div>
+                            {% endif %}
+                        {% endfor %}
+                        <button class="btn-primary">Enviar recarga</button>
+                    </form>
+                </section>
+
+                <section class="cashier-card">
+                    <h2>Retiro</h2>
+                    <p>Tu método de pago se guarda aquí. Si no tienes uno, agrégalo en Formas de Pago.</p>
+                    {% if bank_account %}
+                        <div class="bank-summary">
+                            <p><strong>Banco:</strong> {{ bank_account.banco }}</p>
+                            <p><strong>Cuenta:</strong> {{ bank_account.tipo_cuenta }} / {{ bank_account.numero_cuenta }}</p>
+                            <p><strong>Titular:</strong> {{ bank_account.titular }}</p>
+                            <p><strong>Cédula:</strong> {{ bank_account.cedula }}</p>
+                        </div>
+                    {% else %}
+                        <div class="bank-summary">
+                            <p>No tienes método de pago configurado.</p>
+                        </div>
+                    {% endif %}
+                    <form method="post" enctype="multipart/form-data" class="transaction-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="retiro" />
+                        {% for field in retiro_form %}
+                            <label>{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <small>{{ field.help_text }}</small>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="field-error">{{ field.errors|striptags }}</div>
+                            {% endif %}
+                        {% endfor %}
+                        <button class="btn-primary">Solicitar retiro</button>
+                    </form>
+                </section>
+
+                <section class="cashier-card">
+                    <h2>Formas de Pago</h2>
+                    <p>Configura o actualiza tu cuenta bancaria para retirar saldo.</p>
+                    <form method="post" class="transaction-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="guardar_banco" />
+                        {% for field in bank_form %}
+                            <label>{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <small>{{ field.help_text }}</small>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="field-error">{{ field.errors|striptags }}</div>
+                            {% endif %}
+                        {% endfor %}
+                        <button class="btn-primary">Guardar cuenta bancaria</button>
+                    </form>
+                </section>
+            </div>
+        </main>
+    </div>
+{% endblock %}

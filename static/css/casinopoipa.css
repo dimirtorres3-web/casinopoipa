@@ -1,0 +1,1042 @@
+:root {
+    color-scheme: dark;
+    font-family: 'Inter', sans-serif;
+    background: #0f0f12;
+    color: #e8e8ea;
+    --orange-copper: #d35400;
+    --gray-deep: #121214;
+    --gray-soft: #1f2126;
+    --text-soft: #ced0d5;
+    --border: rgba(255, 162, 57, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(circle at top, rgba(211, 84, 0, 0.12), transparent 25%),
+        linear-gradient(180deg, #0b0b0e 0%, #101114 100%);
+}
+
+a {
+    color: var(--orange-copper);
+    text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+.glass-panel {
+    background: rgba(18, 19, 26, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.35);
+    border-radius: 28px;
+}
+
+.page-auth,
+.dashboard-page {
+    min-height: 100vh;
+}
+
+.auth-shell {
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    padding: 24px;
+}
+
+.auth-panel {
+    width: min(520px, 100%);
+    padding: 36px;
+}
+
+.brand-top {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 32px;
+}
+
+.brand-mark {
+    width: 62px;
+    height: 62px;
+    display: grid;
+    place-items: center;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(211, 84, 0, 0.22), rgba(229, 126, 34, 0.08));
+    font-size: 28px;
+}
+
+.brand-top h1,
+.brand-hero h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    letter-spacing: -0.03em;
+}
+
+.brand-top p,
+.brand-hero p,
+.balance-info p,
+.panel-header p {
+    margin: 0;
+    color: #b3b3bd;
+}
+
+.form-auth {
+    display: grid;
+    gap: 18px;
+}
+
+.form-auth h2 {
+    margin: 0;
+    font-size: 1.45rem;
+}
+
+.field-group {
+    display: grid;
+    gap: 8px;
+}
+
+.field-group label {
+    color: #b8b7c0;
+    font-size: 0.95rem;
+}
+
+.field-group input,
+.field-group select,
+.field-group textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    background: #101116;
+    color: #f2f2f7;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-ghost {
+    border: 0;
+    border-radius: 999px;
+    padding: 14px 22px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--orange-copper), #e67e22);
+    color: #0f0f12;
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid rgba(255, 126, 34, 0.28);
+    color: #f6f5f4;
+}
+
+.btn-ghost {
+    background: transparent;
+    color: #e8e8ea;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.form-note {
+    margin-top: 12px;
+    color: #9c9b9f;
+    text-align: center;
+}
+
+.layout-shell {
+    min-height: 100vh;
+    padding: 28px;
+    display: grid;
+    gap: 26px;
+}
+
+.topbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.brand-hero {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.search-bar {
+    display: flex;
+    gap: 10px;
+    flex: 1 1 320px;
+}
+
+.search-bar input {
+    flex: 1;
+    padding: 14px 18px;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: #0f1013;
+    color: #f3f3f7;
+}
+
+.search-bar button {
+    min-width: 130px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) 1.5fr;
+    gap: 24px;
+}
+
+.balance-card,
+.play-panel,
+.cashier-panel,
+.admin-shell {
+    padding: 28px;
+}
+
+.balance-card {
+    display: grid;
+    gap: 18px;
+    background: linear-gradient(180deg, rgba(211, 84, 0, 0.16), rgba(15, 15, 18, 0.95));
+}
+
+.balance-info h2 {
+    margin: 8px 0 0;
+    font-size: 2.6rem;
+    letter-spacing: -0.03em;
+}
+
+.balance-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    color: #c9c7cd;
+}
+
+.balance-meta code {
+    color: #d9d9dd;
+    font-size: 0.9rem;
+    background: rgba(255,255,255,0.04);
+    padding: 10px 12px;
+    border-radius: 14px;
+}
+
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.game-card {
+    padding: 24px;
+    display: grid;
+    gap: 14px;
+    transition: transform 0.25s ease;
+}
+
+.game-card:hover {
+    transform: translateY(-6px);
+}
+
+.game-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    background: rgba(255, 126, 34, 0.14);
+    font-size: 1.6rem;
+}
+
+.play-panel,
+.cashier-panel {
+    display: grid;
+    gap: 18px;
+}
+
+.game-action-form {
+    display: grid;
+    gap: 16px;
+}
+
+.game-action-form label {
+    color: #b8b7c0;
+}
+
+.game-action-form input {
+    width: 160px;
+}
+
+    .fixed-game-header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        padding: 24px 28px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        background: rgba(15, 15, 18, 0.96);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(18px);
+    }
+
+    .header-actions {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .balance-display {
+        padding: 18px 22px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.06);
+        min-width: 260px;
+    }
+
+    .balance-display p {
+        margin: 0;
+        color: #c7c6cc;
+        font-size: 0.95rem;
+    }
+
+    .balance-display h2 {
+        margin: 10px 0 0;
+        font-size: 2rem;
+    }
+
+    .slots-stage,
+    .roulette-board,
+    .table-board,
+    .bingo-board {
+        display: grid;
+        gap: 24px;
+    }
+
+    .slots-board {
+        display: flex;
+        justify-content: center;
+        gap: 18px;
+        padding: 24px;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 30px;
+    }
+
+    .slot-canvas {
+        width: 140px;
+        height: 220px;
+        border-radius: 24px;
+        background: rgba(15, 15, 18, 0.95);
+        border: 1px solid rgba(255, 126, 34, 0.18);
+        box-shadow: inset 0 0 16px rgba(255, 255, 255, 0.04);
+        display: block;
+    }
+
+    .slot-canvas.blur {
+        filter: blur(2px);
+    }
+
+    @keyframes reel-spin {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-50px); }
+    }
+
+    .slots-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 0 18px 18px;
+    }
+
+    .slots-info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .slot-bonus-indicator {
+        display: inline-flex;
+        align-items: center;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(211, 84, 0, 0.16);
+        color: #ffd7b3;
+        font-weight: 700;
+    }
+
+    .poker-shell,
+    .blackjack-shell,
+    .roulette-shell,
+    .bingo-shell {
+        display: grid;
+        gap: 22px;
+        padding: 30px;
+    }
+
+    .table-board,
+    .roulette-board,
+    .bingo-board {
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 28px;
+        padding: 24px;
+    }
+
+    .table-canvas-shell,
+    .bingo-canvas-shell {
+        position: relative;
+        min-height: 360px;
+        display: grid;
+        place-items: center;
+        padding: 18px;
+        background: rgba(15, 15, 18, 0.95);
+        border-radius: 28px;
+        box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.22);
+    }
+
+    .table-overlay {
+        position: absolute;
+        top: 18px;
+        left: 18px;
+        padding: 12px 16px;
+        background: rgba(0, 0, 0, 0.55);
+        border-radius: 16px;
+        color: #fff;
+        font-size: 0.95rem;
+        z-index: 2;
+        pointer-events: none;
+    }
+
+    .table-canvas,
+    .bingo-canvas {
+        width: min(520px, 100%);
+        height: 340px;
+        border-radius: 30px;
+        background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.1), transparent 30%),
+            linear-gradient(180deg, rgba(19, 20, 28, 0.95), rgba(12, 12, 18, 1));
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    .cards-board {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+    }
+
+    .card-zone {
+        display: grid;
+        gap: 10px;
+    }
+
+    .zone-label {
+        color: #b8b7c0;
+        font-size: 0.95rem;
+    }
+
+    .dealer-zone,
+    .player-zone {
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 24px;
+        padding: 16px;
+        min-height: 190px;
+    }
+
+    .card {
+        width: 110px;
+        height: 150px;
+        position: relative;
+        perspective: 1200px;
+    }
+
+    .card__inner {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        transform-style: preserve-3d;
+        transition: transform 0.8s ease;
+        transform-origin: center;
+    }
+
+    .card.flip .card__inner {
+        transform: rotateY(180deg);
+    }
+
+    .card__face {
+        position: absolute;
+        inset: 0;
+        border-radius: 20px;
+        backface-visibility: hidden;
+        display: grid;
+        place-items: center;
+        font-size: 1.6rem;
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.20);
+    }
+
+    .card__face--front {
+        background: linear-gradient(180deg, rgba(28, 28, 36, 0.95), rgba(15, 15, 21, 0.96));
+    }
+
+    .card__face--back {
+        background: linear-gradient(180deg, rgba(211, 84, 0, 0.92), rgba(126, 34, 18, 0.96));
+        transform: rotateY(180deg);
+        color: #fdebd0;
+        font-size: 1.8rem;
+    }
+
+    .card__back-pattern {
+        width: 88%;
+        height: 88%;
+        border-radius: 18px;
+        background: repeating-linear-gradient(45deg, rgba(255,255,255,0.12), rgba(255,255,255,0.12) 8px, rgba(255,255,255,0.02) 8px, rgba(255,255,255,0.02) 16px);
+    }
+
+    .card-clickable {
+        cursor: pointer;
+        transition: transform 0.25s ease;
+    }
+
+    .card-clickable:hover {
+        transform: translateY(-6px);
+    }
+
+    .bingo-selector-shell {
+        position: absolute;
+        top: 22px;
+        right: 22px;
+        width: 220px;
+        display: grid;
+        gap: 16px;
+        padding: 16px;
+        background: rgba(15, 15, 18, 0.92);
+        border-radius: 24px;
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.2);
+    }
+
+    .bingo-ball-display {
+        display: grid;
+        gap: 8px;
+    }
+
+    .bingo-ball-display strong {
+        font-size: 2.25rem;
+        color: #f7f3e9;
+    }
+
+    .bingo-called-list {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 6px;
+        max-height: 90px;
+        overflow-y: auto;
+    }
+
+    .bingo-called-list span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 32px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        color: #e1d9c7;
+        font-size: 0.85rem;
+        padding: 6px 8px;
+    }
+
+    .bingo-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(80px, 1fr));
+        gap: 12px;
+    }
+
+    .bingo-cell {
+        background: rgba(15, 15, 18, 0.95);
+        border-radius: 18px;
+        display: grid;
+        place-items: center;
+        min-height: 70px;
+        font-weight: 700;
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .bingo-cell.marked {
+        border-color: #3b82f6;
+        background: linear-gradient(180deg, rgba(59,130,246,0.20), rgba(12, 34, 82, 0.96));
+        color: #dbeafe;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16);
+    }
+
+    .roulette-tile--selected {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.38), 0 26px 50px rgba(0, 0, 0, 0.28);
+        border-color: rgba(59, 130, 246, 0.55);
+    }
+
+    .card {
+        width: 110px;
+        height: 150px;
+        position: relative;
+        perspective: 1200px;
+    }
+
+    .card__inner {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 0.9s ease;
+        transform-origin: center;
+    }
+
+    .card.flip .card__inner {
+        transform: rotateY(180deg) translateZ(0);
+    }
+
+    .card__face {
+        position: absolute;
+        inset: 0;
+        border-radius: 20px;
+        backface-visibility: hidden;
+        display: grid;
+        place-items: center;
+        font-size: 1.5rem;
+        color: #f7f7f9;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+    }
+
+    .card__face--front {
+        background: linear-gradient(180deg, rgba(24, 24, 30, 0.98), rgba(15, 15, 18, 0.96));
+    }
+
+    .card__face--back {
+        background: linear-gradient(180deg, rgba(211, 84, 0, 0.18), rgba(21, 21, 28, 0.96));
+        transform: rotateY(180deg);
+    }
+
+    .roulette-canvas {
+        width: 340px;
+        height: 340px;
+        border-radius: 50%;
+        background: rgba(12, 12, 16, 0.96);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.02);
+    }
+
+    .roulette-canvas.blur {
+        filter: blur(1.8px);
+    }
+
+    .roulette-visual-shell {
+        display: grid;
+        place-items: center;
+        position: relative;
+    }
+
+    .roulette-panel {
+        display: grid;
+        gap: 18px;
+        padding: 18px;
+        background: rgba(255, 255, 255, 0.04);
+        border-radius: 28px;
+    }
+
+    .roulette-selection-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: center;
+    }
+
+    .roulette-selection-header p {
+        margin: 0;
+        color: #c7c6cc;
+    }
+
+    .roulette-selection-header strong {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 1.25rem;
+        color: #fff;
+    }
+
+    .roulette-selected-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 8px;
+    }
+
+    .roulette-selected-chip {
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #fff;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
+    }
+
+    .roulette-selected-chip--red {
+        background: rgba(206, 43, 43, 0.16);
+        border-color: rgba(255, 100, 100, 0.28);
+    }
+
+    .roulette-selected-chip--black {
+        background: rgba(28, 28, 33, 0.9);
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .roulette-selected-chip--green {
+        background: rgba(83, 176, 132, 0.16);
+        border-color: rgba(97, 211, 155, 0.38);
+    }
+
+    .roulette-hint {
+        color: #b3b3bd;
+        font-size: 0.9rem;
+    }
+
+    .roulette-grid {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 10px;
+        padding: 14px;
+        border-radius: 24px;
+        background: rgba(15, 15, 20, 0.9);
+    }
+
+    .roulette-tile {
+        display: grid;
+        place-items: center;
+        min-height: 72px;
+        border-radius: 18px;
+        cursor: pointer;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 700;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+        transform: perspective(900px) rotateX(8deg);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        box-shadow: 0 18px 34px rgba(0, 0, 0, 0.24);
+    }
+
+    .roulette-tile:hover {
+        transform: perspective(900px) rotateX(14deg) translateY(-3px);
+        box-shadow: 0 26px 48px rgba(0, 0, 0, 0.28);
+    }
+
+    .roulette-tile--red {
+        background: linear-gradient(180deg, rgba(212, 66, 66, 0.95), rgba(173, 33, 33, 0.95));
+        border-color: rgba(255, 98, 98, 0.35);
+    }
+
+    .roulette-tile--black {
+        background: linear-gradient(180deg, rgba(35, 35, 41, 0.95), rgba(8, 8, 13, 0.95));
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .roulette-tile--green {
+        background: linear-gradient(180deg, rgba(36, 99, 78, 0.95), rgba(30, 75, 60, 0.95));
+        border-color: rgba(97, 211, 155, 0.38);
+    }
+
+    .roulette-tile--selected {
+        box-shadow: 0 0 0 3px rgba(255, 183, 77, 0.35), 0 26px 54px rgba(0, 0, 0, 0.28);
+        transform: perspective(900px) rotateX(14deg) translateY(-5px);
+    }
+
+    .roulette-tile span {
+        text-shadow: 0 0 14px rgba(0,0,0,0.18);
+    }
+
+    .game-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .game-status {
+        color: #d7d0c5;
+        font-weight: 600;
+    }
+
+    .roulette-wheel {
+        min-height: 320px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 2rem;
+        padding: 40px;
+        background: radial-gradient(circle at top, rgba(211, 84, 0, 0.22), rgba(15, 15, 18, 0.95));
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .roulette-table {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .bingo-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(80px, 1fr));
+        gap: 12px;
+    }
+
+    .bingo-cell {
+        background: rgba(15, 15, 18, 0.95);
+        border-radius: 18px;
+        display: grid;
+        place-items: center;
+        min-height: 70px;
+        font-weight: 700;
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .bonus-active .fixed-game-header {
+        box-shadow: 0 0 40px rgba(211, 84, 0, 0.55);
+    }
+
+    .bonus-active .balance-display {
+        background: rgba(255, 182, 110, 0.14);
+    }
+
+    .btn-primary {
+        min-width: 180px;
+    }
+
+    .metric-card,
+    .transactions-list,
+    .action-row {
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    .metric-card {
+        padding: 24px;
+        border-radius: 24px;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+    }
+
+    padding: 16px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.04);
+    text-align: center;
+    cursor: pointer;
+    color: #c8c7cd;
+}
+
+.tab.active {
+    background: rgba(211, 84, 0, 0.18);
+    color: #fff;
+}
+
+.transaction-form {
+    display: grid;
+    gap: 18px;
+}
+
+.field-error {
+    color: #ff9181;
+    font-size: 0.9rem;
+}
+
+.side-float-menu {
+    position: fixed;
+    right: 28px;
+    bottom: 28px;
+    width: 72px;
+    height: 72px;
+    padding: 10px;
+    display: grid;
+    place-items: center;
+    z-index: 99;
+}
+
+.floating-control {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(211, 84, 0, 0.85), rgba(229, 126, 34, 0.92));
+    font-size: 2rem;
+    color: #0f0f12;
+    cursor: pointer;
+}
+
+.side-menu {
+    display: none;
+    position: fixed;
+    right: 28px;
+    bottom: 124px;
+    width: 220px;
+    padding: 18px;
+    gap: 14px;
+}
+
+.side-menu a {
+    display: block;
+    padding: 12px 16px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.04);
+}
+
+.transaction-card {
+    padding: 22px;
+    background: rgba(18, 20, 28, 0.92);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 24px;
+    display: grid;
+    gap: 16px;
+}
+
+.transaction-card .meta {
+    color: #d9d9de;
+}
+
+.actions-row {
+    display: flex;
+    gap: 12px;
+}
+
+.small {
+    padding: 12px 16px;
+    font-size: 0.95rem;
+}
+
+.receipt-image {
+    width: 100%;
+    max-height: 260px;
+    object-fit: cover;
+    border-radius: 18px;
+}
+
+.empty-state {
+    color: #9a9aa0;
+}
+
+.toast-notices {
+    position: fixed;
+    top: 22px;
+    right: 22px;
+    display: grid;
+    gap: 12px;
+    z-index: 999;
+}
+
+.toast-item {
+    padding: 16px 20px;
+    border-radius: 18px;
+    min-width: 280px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+    font-weight: 600;
+}
+
+.toast-item.toast-error {
+    background: rgba(207, 63, 49, 0.9);
+    color: #fff;
+}
+
+.toast-item.toast-success {
+    background: rgba(212, 129, 42, 0.95);
+    color: #0f0f12;
+}
+
+.toast-item.toast-warning {
+    background: rgba(216, 173, 39, 0.92);
+    color: #0f0f12;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 22px;
+}
+
+.metric-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 24px;
+    padding: 24px;
+}
+
+.metric-card span {
+    display: block;
+    color: #9d9ba2;
+    margin-bottom: 10px;
+}
+
+.metric-card h3 {
+    margin: 0;
+    font-size: 2rem;
+    color: #fff;
+}
+
+.admin-hero {
+    display: grid;
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.admin-hero h2 {
+    margin: 0;
+}
+
+.admin-hero p {
+    margin: 0;
+    color: #b9b8bf;
+}
+
+@media (max-width: 980px) {
+    .metrics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .topbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-bar {
+        width: 100%;
+    }
+}
