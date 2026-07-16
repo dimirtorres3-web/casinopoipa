@@ -22,6 +22,11 @@ def is_admin(user):
 def register(request):
     if request.method == "POST":
         form = PlayerRegistrationForm(request.POST, request.FILES)
+        from django.core.management import call_command
+        try:
+            call_command('migrate', interactive=False)
+        except Exception:
+            pass
         if form.is_valid():
             is_gift_eligible = Player.objects.count() < 20
             player = form.save(commit=False)
