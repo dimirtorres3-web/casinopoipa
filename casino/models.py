@@ -24,6 +24,7 @@ def banco_paraguay_choices():
 class Player(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
+    email = models.EmailField(unique=True, max_length=254)
     nombre = models.CharField(max_length=64, verbose_name=_("Nombres"))
     apellido = models.CharField(max_length=64, verbose_name=_("Apellidos"))
     edad = models.PositiveSmallIntegerField(verbose_name=_("Edad"), validators=[validar_edad_mayoria])
