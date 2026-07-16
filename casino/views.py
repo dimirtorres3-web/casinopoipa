@@ -60,6 +60,9 @@ def login_view(request):
                     token = generar_jwt({"user_id": user.id, "username": user.username})
                     request.session["jwt_token"] = token
                     return redirect("casino:dashboard")
+                messages.error(request, "Usuario o contraseña incorrectos.")
+            else:
+                messages.error(request, "Por favor completa todos los campos correctamente.")
         except Exception:
             # Avoid raising 500 on unexpected auth errors; show generic message
             messages.error(request, "Error al iniciar sesión. Inténtalo de nuevo.")
