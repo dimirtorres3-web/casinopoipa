@@ -1,28 +1,20 @@
+databases:
+  - name: casinopoipadb
+    plan: free
+
 services:
   - type: web
     name: casinopoipa-web
-    env: python
-    region: oregon
-    plan: starter
+    runtime: python
+    plan: free
     buildCommand: "pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py collectstatic --noinput"
-    startCommand: "gunicorn casinopoipa.wsgi:application --bind 0.0.0.0:$PORT"
-    envVars:
-      - key: DJANGO_DEBUG
-        value: "False"
-      - key: DJANGO_ALLOWED_HOSTS
-        value: "casinopoipa.com.py,*.onrender.com,localhost,127.0.0.1"
-      - key: CASINOPOIPA_SECRET_KEY
-        generate: secret
-      - key: CASINOPOIPA_FERNET_KEY
-        generate: secret
-      - key: CASINOPOIPA_JWT_SECRET
-        generate: secret
-databases:
-  - name: casinopoipa-db
-    provider: postgresql
-    plan: starter
-    region: oregon
-    currentService: casinopoipa-web
+    startCommand: "gunicorn casinopoipa.wsgi:application"
     envVars:
       - key: DATABASE_URL
-        fromDatabase: true
+        fromDatabase:
+          name: casinopoipadb
+          property: connectionString
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
