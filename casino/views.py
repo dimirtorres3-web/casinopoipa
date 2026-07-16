@@ -29,6 +29,8 @@ def register(request):
                 player.saldo += Decimal(10000)
                 player.recibio_regalo = True
             player.save()
+            player.user.is_active = True
+            player.user.save()
             if is_gift_eligible:
                 messages.success(request, "Registro completado. Eres uno de los primeros 20 jugadores y recibiste 10.000 Gs. de regalo.")
             else:
@@ -50,7 +52,7 @@ def login_view(request):
             if form.is_valid():
                 user = authenticate(
                     request,
-                    username=form.cleaned_data["username"],
+                    username=form.cleaned_data["email"],
                     password=form.cleaned_data["password"],
                 )
                 if user is not None:
