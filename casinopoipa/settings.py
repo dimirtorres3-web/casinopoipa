@@ -5,11 +5,7 @@ from urllib.parse import urlparse
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("CASINOPOIPA_SECRET_KEY", "changeme-securely-please")
 DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1")
-ALLOWED_HOSTS = os.environ.get(
-    "DJANGO_ALLOWED_HOSTS",
-    "localhost,127.0.0.1,casinopoipa.com.py",
-).split(",")
-ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS if host.strip()]
+ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
     "django.contrib.admin",
