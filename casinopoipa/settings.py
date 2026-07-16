@@ -111,3 +111,5 @@ JWT_SECRET = os.environ.get("CASINOPOIPA_JWT_SECRET", "please-change-this-secret
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
+LOGIN_REDIRECT_URL = "casino:panel"
+LOGOUT_REDIRECT_URL = "casino:login"
