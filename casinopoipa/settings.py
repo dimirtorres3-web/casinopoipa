@@ -50,11 +50,12 @@ TEMPLATES = [
 WSGI_APPLICATION = "casinopoipa.wsgi.application"
 ASGI_APPLICATION = "casinopoipa.asgi.application"
 
+# Configure DATABASES to require SSL in production (Render enforces SSL)
 DATABASES = {
-    "default": dj_database_url.config(
-        default="sqlite:///" + str(BASE_DIR / "db.sqlite3"),
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
         conn_max_age=600,
-        ssl_require=not DEBUG,
+        ssl_require=True,
     )
 }
 
