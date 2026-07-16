@@ -1,6 +1,5 @@
 import json
 import random
-import requests
 from decimal import Decimal, InvalidOperation
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -41,19 +40,27 @@ def register(request):
 
 
 def login_view(request):
+    # If already authenticated, redirect immediately to dashboard
+    if request.user.is_authenticated:
+        return redirect("casino:dashboard")
+
     if request.method == "POST":
         form = LoginForm(request, data=request.POST)
-        if form.is_valid():
-            user = authenticate(
-                request,
-                username=form.cleaned_data["username"],
-                password=form.cleaned_data["password"],
-            )
-            if user is not None:
-                login(request, user)
-                token = generar_jwt({"user_id": user.id, "username": user.username})
-                request.session["jwt_token"] = token
-                return redirect("casino:dashboard")
+        try:
+            if form.is_valid():
+                user = authenticate(
+                    request,
+                    username=form.cleaned_data["username"],
+                    password=form.cleaned_data["password"],
+                )
+                if user is not None:
+                    login(request, user)
+                    token = generar_jwt({"user_id": user.id, "username": user.username})
+                    request.session["jwt_token"] = token
+                    return redirect("casino:dashboard")
+        except Exception:
+            # Avoid raising 500 on unexpected auth errors; show generic message
+            messages.error(request, "Error al iniciar sesión. Inténtalo de nuevo.")
     else:
         form = LoginForm()
     return render(request, "casino/login.html", {"form": form})
@@ -634,10 +641,10 @@ def ruleta(request):
 
 @login_required
 def health_check(request):
+    # Avoid external network calls in health checks; verify DB connectivity instead
     try:
-        response = requests.get("https://httpbin.org/get", timeout=2)
-        status = response.status_code == 200
-    except requests.RequestException:
+        status = Player.objects.exists()
+    except Exception:
         status = False
     return render(request, "casino/health.html", {"status": status})
 
