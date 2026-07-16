@@ -108,3 +108,6 @@ FERNET_KEY = os.environ.get(
     "V7l4aJqJfqK6lfbJ8vCbwS4yYd7q7Gz-jq2LXsZkqiE=",
 )
 JWT_SECRET = os.environ.get("CASINOPOIPA_JWT_SECRET", "please-change-this-secret")
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
