@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Panel de clientes | Casinopoipa{% endblock %}
+{% block content %}
+<div class="dashboard-page">
+    <div class="layout-shell">
+        <header class="topbar">
+            <div class="brand-hero">
+                <span class="brand-mark">👥</span>
+                <div>
+                    <p>Panel de clientes</p>
+                    <h1>Gestión de jugadores</h1>
+                </div>
+            </div>
+            <a href="{% url 'casino:admin_panel' %}" class="btn-ghost">Volver al panel</a>
+        </header>
+
+        <main class="admin-shell glass-panel">
+            <div class="admin-hero">
+                <div>
+                    <h2>Clientes registrados</h2>
+                    <p>Consulta la información básica de los jugadores y su estado activo.</p>
+                </div>
+            </div>
+
+            <section class="player-list" style="margin-top: 24px;">
+                <div class="players-grid">
+                    {% for jugador in jugadores %}
+                    <div class="player-card">
+                        <p><strong>{{ jugador.nombre }} {{ jugador.apellido }}</strong></p>
+                        <p>{{ jugador.username }}</p>
+                        <p>{{ jugador.email }}</p>
+                        <p>Saldo: Gs. {{ jugador.saldo|intcomma }}</p>
+                        <p>Activo: {{ jugador.is_active }}</p>
+                        <p>Staff: {{ jugador.is_staff }}</p>
+                    </div>
+                    {% empty %}
+                    <p class="empty-state">No hay clientes registrados todavía.</p>
+                    {% endfor %}
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+{% endblock %}

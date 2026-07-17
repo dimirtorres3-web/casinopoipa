@@ -777,6 +777,14 @@ def admin_panel(request):
     }
     return render(request, "casino/admin_panel.html", {"transacciones": transacciones, **stats})
 
+
+@login_required
+@user_passes_test(is_admin)
+def clientes(request):
+    jugadores = Player.objects.all().order_by("username")
+    return render(request, "casino/clientes.html", {"jugadores": jugadores})
+
+
 @login_required
 @user_passes_test(is_admin)
 def approve_transaction(request, transaction_id):

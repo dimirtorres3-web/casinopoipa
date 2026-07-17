@@ -7,7 +7,7 @@ SECRET_KEY = os.environ.get(
     "CASINOPOIPA_SECRET_KEY",
     os.environ.get("SECRET_KEY", "changeme-securely-please"),
 )
-DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1")
+DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() in ("true", "1")
 ALLOWED_HOSTS = ['*']
 RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 

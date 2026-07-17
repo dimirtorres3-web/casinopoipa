@@ -19,6 +19,7 @@ urlpatterns = [
     path("ruleta/", views.ruleta, name="ruleta"),
     path("cajero/", views.cashier, name="cajero"),
     path("admin-panel/", views.admin_panel, name="admin_panel"),
+    path("admin-panel/clientes/", views.clientes, name="clientes"),
     path("admin-panel/aprobar/<int:transaction_id>/", views.approve_transaction, name="approve_transaction"),
     path("admin-panel/reembolso/<int:transaction_id>/", views.refund_transaction, name="refund_transaction"),
     path("admin-panel/pagar/<int:transaction_id>/", views.mark_transaction_paid, name="mark_transaction_paid"),
