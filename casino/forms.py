@@ -42,8 +42,10 @@ class PlayerRegistrationForm(UserCreationForm):
 
     def clean_email(self):
         email = self.cleaned_data["email"].strip().lower()
-        if Player.objects.filter(email__iexact=email).exists():
-            raise ValidationError("Este correo ya está registrado.")
+        if email:
+            existing = Player.objects.filter(email__iexact=email).first()
+            if existing and existing.username != self.cleaned_data.get("username"):
+                raise ValidationError("Este correo ya está registrado.")
         return email
 
     def save(self, commit=True):

@@ -32,52 +32,25 @@ def register(request):
     if request.method == "POST":
         form = PlayerRegistrationForm(request.POST, request.FILES)
         if form.is_valid():
+            email = form.cleaned_data["email"].strip().lower()
+            existing = Player.objects.filter(email__iexact=email).first()
+            if existing and existing.username and existing.username != email:
+                form.add_error("email", "Este correo ya está registrado.")
+                return render(request, "casino/registro.html", {"form": form})
+
             is_gift_eligible = Player.objects.count() < 20
             player = form.save(commit=False)
-            player.is_active = False
+            player.email = email
+            player.username = email
+            player.is_active = True
             if is_gift_eligible:
                 player.saldo += Decimal(10000)
                 player.recibio_regalo = True
             player.save()
 
-            verification_code = "".join(random.choices("0123456789", k=6))
-            request.session["verification_email"] = player.email
-            request.session["verification_code"] = verification_code
-            request.session["unverified_user_id"] = player.id
-            request.session["debug_verification_code"] = verification_code
-
-            email_subject = "Código de verificación Casinopoipa"
-            email_message = (
-                f"Hola {player.nombre},\n\n"
-                f"Tu código de verificación es: {verification_code}\n\n"
-                "Ingresa el código en el sitio para activar tu cuenta."
-            )
-            email_sent = False
-            try:
-                send_mail(
-                    email_subject,
-                    email_message,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [player.email],
-                    fail_silently=False,
-                )
-                email_sent = True
-                if settings.DEBUG or "console" in settings.EMAIL_BACKEND:
-                    messages.info(
-                        request,
-                        "El código de verificación también está disponible aquí porque el correo está en modo desarrollo.",
-                    )
-            except Exception:
-                messages.warning(
-                    request,
-                    "No se pudo enviar el correo. Usa el código que aparece más abajo para verificar tu cuenta.",
-                )
-
-            request.session["show_verification_code"] = not email_sent or settings.DEBUG
-            messages.info(request, "Te enviamos un código de verificación a tu correo electrónico.")
-            if request.session.get("show_verification_code"):
-                messages.info(request, f"Tu código de verificación es: {verification_code}")
-            return redirect("casino:verify_email")
+            login(request, player)
+            messages.success(request, "Cuenta creada correctamente. Ya puedes entrar al dashboard y jugar.")
+            return redirect("casino:dashboard")
     else:
         form = PlayerRegistrationForm()
     return render(request, "casino/registro.html", {"form": form})
