@@ -39,6 +39,19 @@
                         <h3>Gs. {{ total_balance|intcomma }}</h3>
                     </div>
                 </div>
+                <section class="player-list" style="margin-top: 24px;">
+                    <h3>Jugadores activos</h3>
+                    <div class="players-grid">
+                        {% for jugador in jugadores %}
+                        <div class="player-card">
+                            <p><strong>{{ jugador.username }}</strong></p>
+                            <p>{{ jugador.email }}</p>
+                            <p>Saldo: Gs. {{ jugador.saldo|intcomma }}</p>
+                            <p>Activo: {{ jugador.is_active }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
                 <section class="transactions-list" style="margin-top: 24px;">
                     <h3>Transacciones pendientes</h3>
                     {% if transacciones %}

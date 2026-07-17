@@ -141,6 +141,8 @@ def login_view(request):
                     login(request, user)
                     token = generar_jwt({"user_id": user.id, "username": user.username})
                     request.session["jwt_token"] = token
+                    if user.is_staff or user.is_superuser:
+                        return redirect("casino:admin_panel")
                     return redirect("casino:dashboard")
 
                 try:
@@ -162,6 +164,8 @@ def login_view(request):
                         login(request, player)
                         token = generar_jwt({"user_id": player.id, "username": player.username})
                         request.session["jwt_token"] = token
+                        if player.is_staff or player.is_superuser:
+                            return redirect("casino:admin_panel")
                         return redirect("casino:dashboard")
             else:
                 messages.error(request, "Por favor completa todos los campos correctamente.")
@@ -180,6 +184,9 @@ def logout_view(request):
 @login_required
 def dashboard(request):
     player = request.user
+    if player.is_staff or player.is_superuser:
+        return redirect("casino:admin_panel")
+
     saldo_real = player.saldo
     juegos = [
         {
@@ -763,9 +770,10 @@ def admin_panel(request):
     stats = {
         "total_users": Player.objects.count(),
         "total_transactions": Transaction.objects.count(),
-        "pending_transactions": transacciones.count(),
+        "pending_transactions": Transaction.objects.filter(estado="pendiente").count(),
         "approved_transactions": Transaction.objects.filter(estado="aprobado").count(),
         "total_balance": int(total_balance),
+        "jugadores": Player.objects.all().order_by("username"),
     }
     return render(request, "casino/admin_panel.html", {"transacciones": transacciones, **stats})
 

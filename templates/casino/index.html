@@ -64,9 +64,12 @@
             <section class="admin-panel glass-panel" id="admin-access">
                 <div class="panel-header">
                     <h2>Panel de administrador</h2>
-                    <a href="/admin/" class="btn-secondary">Ir a Admin</a>
+                    <div class="admin-links">
+                        <a href="{% url 'casino:admin_panel' %}" class="btn-secondary">Panel interno</a>
+                        <a href="{% url 'admin:index' %}" class="btn-secondary">Django Admin</a>
+                    </div>
                 </div>
-                <p>Acceso directo al panel de Django para gestionar usuarios y transacciones.</p>
+                <p>Accede al panel de control interno o al panel administrativo de Django.</p>
             </section>
             {% endif %}
         </main>
