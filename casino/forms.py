@@ -37,6 +37,7 @@ class PlayerRegistrationForm(UserCreationForm):
 
     def save(self, commit=True):
         player = super().save(commit=False)
+        player.username = self.cleaned_data['email']
         player.nombre = self.cleaned_data["nombre"]
         player.apellido = self.cleaned_data["apellido"]
         player.edad = self.cleaned_data["edad"]
