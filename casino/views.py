@@ -1,16 +1,25 @@
 import json
 import random
 from decimal import Decimal, InvalidOperation
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.mail import send_mail
 from django.db import transaction as db_transaction
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
-from .forms import BankAccountForm, LoginForm, PlayerRegistrationForm, TransactionForm, WithdrawalForm
+from .forms import (
+    BankAccountForm,
+    LoginForm,
+    PlayerRegistrationForm,
+    TransactionForm,
+    VerificationCodeForm,
+    WithdrawalForm,
+)
 from .models import BankAccount, Player, Transaction
 from .utils import generar_jwt
 
@@ -22,28 +31,81 @@ def is_admin(user):
 def register(request):
     if request.method == "POST":
         form = PlayerRegistrationForm(request.POST, request.FILES)
-        from django.core.management import call_command
-        try:
-            call_command('migrate', interactive=False)
-        except Exception:
-            pass
         if form.is_valid():
             is_gift_eligible = Player.objects.count() < 20
             player = form.save(commit=False)
+            player.is_active = False
             if is_gift_eligible:
                 player.saldo += Decimal(10000)
                 player.recibio_regalo = True
             player.save()
-            player.user.is_active = True
-            player.user.save()
-            if is_gift_eligible:
-                messages.success(request, "Registro completado. Eres uno de los primeros 20 jugadores y recibiste 10.000 Gs. de regalo.")
-            else:
-                messages.success(request, "Registro completado. Ya puedes iniciar sesión.")
-            return redirect("casino:login")
+
+            verification_code = "".join(random.choices("0123456789", k=6))
+            request.session["verification_email"] = player.email
+            request.session["verification_code"] = verification_code
+            request.session["unverified_user_id"] = player.id
+
+            email_subject = "Código de verificación Casinopoipa"
+            email_message = (
+                f"Hola {player.nombre},\n\n"
+                f"Tu código de verificación es: {verification_code}\n\n"
+                "Ingresa el código en el sitio para activar tu cuenta."
+            )
+            try:
+                send_mail(
+                    email_subject,
+                    email_message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [player.email],
+                    fail_silently=False,
+                )
+            except Exception:
+                player.delete()
+                messages.error(
+                    request,
+                    "No se pudo enviar el código de verificación. Revisa la configuración del correo e intenta de nuevo.",
+                )
+                return render(request, "casino/registro.html", {"form": form})
+
+            messages.info(request, "Te enviamos un código de verificación a tu correo electrónico.")
+            return redirect("casino:verify_email")
     else:
         form = PlayerRegistrationForm()
     return render(request, "casino/registro.html", {"form": form})
+
+
+def verify_email(request):
+    if request.method == "POST":
+        form = VerificationCodeForm(request.POST)
+        if form.is_valid():
+            code = form.cleaned_data["code"]
+            user_id = request.session.get("unverified_user_id")
+            expected_email = request.session.get("verification_email")
+            expected_code = request.session.get("verification_code")
+            if not user_id or not expected_email or not expected_code:
+                messages.error(request, "No hay un registro pendiente de verificación.")
+                return redirect("casino:registro")
+
+            try:
+                player = Player.objects.get(id=user_id, email__iexact=expected_email)
+            except Player.DoesNotExist:
+                messages.error(request, "No se encontró el usuario para verificar.")
+                return redirect("casino:registro")
+
+            if code != expected_code:
+                messages.error(request, "Código incorrecto. Verifica el correo y vuelve a intentarlo.")
+            else:
+                player.is_active = True
+                player.save()
+                request.session.pop("verification_email", None)
+                request.session.pop("verification_code", None)
+                request.session.pop("unverified_user_id", None)
+                login(request, player)
+                messages.success(request, "Correo verificado. Bienvenido al dashboard.")
+                return redirect("casino:dashboard")
+    else:
+        form = VerificationCodeForm()
+    return render(request, "casino/verify_email.html", {"form": form})
 
 
 def login_view(request):
@@ -55,9 +117,10 @@ def login_view(request):
         form = LoginForm(request, data=request.POST)
         try:
             if form.is_valid():
+                email = form.cleaned_data["username"].strip().lower()
                 user = authenticate(
                     request,
-                    username=form.cleaned_data["email"],
+                    username=email,
                     password=form.cleaned_data["password"],
                 )
                 if user is not None:
@@ -65,7 +128,18 @@ def login_view(request):
                     token = generar_jwt({"user_id": user.id, "username": user.username})
                     request.session["jwt_token"] = token
                     return redirect("casino:dashboard")
-                messages.error(request, "Usuario o contraseña incorrectos.")
+
+                try:
+                    player = Player.objects.get(email__iexact=email)
+                    if not player.is_active:
+                        messages.error(
+                            request,
+                            "Tu cuenta no está verificada. Revisa el correo para completar el registro.",
+                        )
+                    else:
+                        messages.error(request, "Usuario o contraseña incorrectos.")
+                except Player.DoesNotExist:
+                    messages.error(request, "Usuario o contraseña incorrectos.")
             else:
                 messages.error(request, "Por favor completa todos los campos correctamente.")
         except Exception:

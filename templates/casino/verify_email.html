@@ -1,25 +1,22 @@
 {% extends "base.html" %}
-{% block title %}Registro | Casinopoipa{% endblock %}
+{% block title %}Verificar correo | Casinopoipa{% endblock %}
 {% block content %}
     <main class="auth-shell">
         <section class="auth-panel glass-panel">
             <div class="brand-top">
-                <div class="brand-mark">🎡</div>
+                <div class="brand-mark">📧</div>
                 <div>
                     <h1>Casinopoipa</h1>
-                    <p>Registro obligatorio para ingresar al club.</p>
+                    <p>Ingresa el código que recibiste en tu correo para activar la cuenta.</p>
                 </div>
             </div>
             <form method="post" class="form-auth">
                 {% csrf_token %}
-                <h2>Crear cuenta</h2>
+                <h2>Verificación de correo</h2>
                 {% if form.non_field_errors %}
                     <div class="field-error">{{ form.non_field_errors }}</div>
                 {% endif %}
-                {% for hidden in form.hidden_fields %}
-                    {{ hidden }}
-                {% endfor %}
-                {% for field in form.visible_fields %}
+                {% for field in form %}
                     <div class="field-group">
                         {{ field.label_tag }}
                         {{ field }}
@@ -31,8 +28,8 @@
                         {% endif %}
                     </div>
                 {% endfor %}
-                <button class="btn-primary">Registrar</button>
-                <p class="form-note">¿Ya tienes cuenta? <a href="{% url 'casino:login' %}">Ingresa aquí</a></p>
+                <button class="btn-primary">Verificar código</button>
+                <p class="form-note">¿No recibiste el correo? Revisa tu carpeta de spam.</p>
             </form>
         </section>
     </main>

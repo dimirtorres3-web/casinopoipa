@@ -2,10 +2,9 @@ import os
 from pathlib import Path
 import dj_database_url
 
-BASE_DIR = Path(_file_).resolve().parent.parent
-
-SECRET_KEY = os.environ.get("SECRET_KEY", "clave-secreta-temporal")
-DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
+BASE_DIR = Path(__file__).resolve().parent.parent
+SECRET_KEY = os.environ.get("CASINOPOIPA_SECRET_KEY", "changeme-securely-please")
+DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1")
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
@@ -51,14 +50,22 @@ TEMPLATES = [
 WSGI_APPLICATION = "casinopoipa.wsgi.application"
 ASGI_APPLICATION = "casinopoipa.asgi.application"
 
-# Configure DATABASES to require SSL in production (Render enforces SSL)
-DATABASES = {
-     'default': dj_database_url.parse(
-        os.environ.get('DATABASE_URL'),
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -85,9 +92,24 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "localhost")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 25))
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False").lower() in ("true", "1", "yes")
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "no-reply@casinopoipa.com")
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 CSRF_TRUSTED_ORIGINS = [
@@ -109,8 +131,3 @@ FERNET_KEY = os.environ.get(
     "V7l4aJqJfqK6lfbJ8vCbwS4yYd7q7Gz-jq2LXsZkqiE=",
 )
 JWT_SECRET = os.environ.get("CASINOPOIPA_JWT_SECRET", "please-change-this-secret")
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-]
-LOGIN_REDIRECT_URL = "casino:panel"
-LOGOUT_REDIRECT_URL = "casino:login"

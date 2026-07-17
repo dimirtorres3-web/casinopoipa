@@ -6,6 +6,8 @@ from .models import BankAccount, Player, Transaction
 
 
 class PlayerRegistrationForm(UserCreationForm):
+    username = forms.CharField(widget=forms.HiddenInput(), required=False)
+    email = forms.EmailField(label="Correo electrónico")
     nombre = forms.CharField(label="Nombres", max_length=64)
     apellido = forms.CharField(label="Apellidos", max_length=64)
     edad = forms.IntegerField(label="Edad", min_value=18)
@@ -35,9 +37,20 @@ class PlayerRegistrationForm(UserCreationForm):
             "password2",
         ]
 
+    def clean_username(self):
+        return self.cleaned_data.get("email", "").strip().lower()
+
+    def clean_email(self):
+        email = self.cleaned_data["email"].strip().lower()
+        if Player.objects.filter(email__iexact=email).exists():
+            raise ValidationError("Este correo ya está registrado.")
+        return email
+
     def save(self, commit=True):
         player = super().save(commit=False)
-        player.username = self.cleaned_data['email']
+        email = self.cleaned_data["email"].strip().lower()
+        player.email = email
+        player.username = email
         player.nombre = self.cleaned_data["nombre"]
         player.apellido = self.cleaned_data["apellido"]
         player.edad = self.cleaned_data["edad"]
@@ -63,8 +76,29 @@ class BankAccountForm(forms.ModelForm):
 
 
 class LoginForm(AuthenticationForm):
-    username = forms.EmailField(label="Correo Electronico", widget=forms.TextInput(attrs={"autofocus": True}))
+    username = forms.CharField(
+        label="Correo electrónico",
+        widget=forms.TextInput(attrs={"autofocus": True, "placeholder": "ejemplo@correo.com"}),
+    )
     password = forms.CharField(label="Contraseña", widget=forms.PasswordInput)
+
+
+class VerificationCodeForm(forms.Form):
+    code = forms.CharField(
+        label="Código de verificación",
+        max_length=6,
+        min_length=6,
+        widget=forms.TextInput(
+            attrs={
+                "autocomplete": "one-time-code",
+                "placeholder": "000000",
+                "class": "form-input",
+            }
+        ),
+    )
+
+    def clean_code(self):
+        return self.cleaned_data["code"].strip()
 
 
 class TransactionForm(forms.ModelForm):
