@@ -4,7 +4,7 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("CASINOPOIPA_SECRET_KEY", "changeme-securely-please")
-DEBUG = True
+DEBUG = Fase
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
@@ -52,10 +52,10 @@ ASGI_APPLICATION = "casinopoipa.asgi.application"
 
 # Configure DATABASES to require SSL in production (Render enforces SSL)
 DATABASES = {
-     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
+     'default': dj_database_url.parse(
+        os.environ.get('DATABASE_URL'),
         conn_max_age=600,
-        ssl_require=True
+        conn_health_checks=True,
     )
 }
 
