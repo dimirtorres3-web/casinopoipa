@@ -52,10 +52,10 @@ ASGI_APPLICATION = "casinopoipa.asgi.application"
 
 # Configure DATABASES to require SSL in production (Render enforces SSL)
 DATABASES = {
-    'default': dj_database_url.config(
+     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL'),
         conn_max_age=600,
-        ssl_require=True,
+        ssl_require=True
     )
 }
 
