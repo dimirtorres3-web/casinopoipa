@@ -30,6 +30,11 @@
                 {% endfor %}
                 <button class="btn-primary">Verificar código</button>
                 <p class="form-note">¿No recibiste el correo? Revisa tu carpeta de spam.</p>
+                {% if verification_code %}
+                    <div class="field-note">
+                        <strong>Código de verificación:</strong> {{ verification_code }}
+                    </div>
+                {% endif %}
             </form>
         </section>
     </main>

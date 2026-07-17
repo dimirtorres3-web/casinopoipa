@@ -44,6 +44,7 @@ def register(request):
             request.session["verification_email"] = player.email
             request.session["verification_code"] = verification_code
             request.session["unverified_user_id"] = player.id
+            request.session["debug_verification_code"] = verification_code
 
             email_subject = "Código de verificación Casinopoipa"
             email_message = (
@@ -51,6 +52,7 @@ def register(request):
                 f"Tu código de verificación es: {verification_code}\n\n"
                 "Ingresa el código en el sitio para activar tu cuenta."
             )
+            email_sent = False
             try:
                 send_mail(
                     email_subject,
@@ -59,14 +61,19 @@ def register(request):
                     [player.email],
                     fail_silently=False,
                 )
+                email_sent = True
+                if settings.DEBUG or "console" in settings.EMAIL_BACKEND:
+                    messages.info(
+                        request,
+                        "El código de verificación también está disponible aquí porque el correo está en modo desarrollo.",
+                    )
             except Exception:
-                player.delete()
-                messages.error(
+                messages.warning(
                     request,
-                    "No se pudo enviar el código de verificación. Revisa la configuración del correo e intenta de nuevo.",
+                    "No se pudo enviar el correo. Usa el código que aparece más abajo para verificar tu cuenta.",
                 )
-                return render(request, "casino/registro.html", {"form": form})
 
+            request.session["show_verification_code"] = not email_sent or settings.DEBUG
             messages.info(request, "Te enviamos un código de verificación a tu correo electrónico.")
             return redirect("casino:verify_email")
     else:
@@ -105,7 +112,11 @@ def verify_email(request):
                 return redirect("casino:dashboard")
     else:
         form = VerificationCodeForm()
-    return render(request, "casino/verify_email.html", {"form": form})
+
+    context = {"form": form}
+    if request.session.get("show_verification_code"):
+        context["verification_code"] = request.session.get("debug_verification_code")
+    return render(request, "casino/verify_email.html", context)
 
 
 def login_view(request):
@@ -118,10 +129,11 @@ def login_view(request):
         try:
             if form.is_valid():
                 email = form.cleaned_data["username"].strip().lower()
+                password = form.cleaned_data["password"]
                 user = authenticate(
                     request,
                     username=email,
-                    password=form.cleaned_data["password"],
+                    password=password,
                 )
                 if user is not None:
                     login(request, user)
@@ -131,15 +143,24 @@ def login_view(request):
 
                 try:
                     player = Player.objects.get(email__iexact=email)
-                    if not player.is_active:
-                        messages.error(
-                            request,
-                            "Tu cuenta no está verificada. Revisa el correo para completar el registro.",
-                        )
-                    else:
-                        messages.error(request, "Usuario o contraseña incorrectos.")
                 except Player.DoesNotExist:
                     messages.error(request, "Usuario o contraseña incorrectos.")
+                else:
+                    if not player.check_password(password):
+                        messages.error(request, "Usuario o contraseña incorrectos.")
+                    elif not player.is_active:
+                        request.session["verification_email"] = player.email
+                        request.session["unverified_user_id"] = player.id
+                        messages.error(
+                            request,
+                            "Tu cuenta no está verificada. Revisa el correo o vuelve a generar el código.",
+                        )
+                        return redirect("casino:verify_email")
+                    else:
+                        login(request, player)
+                        token = generar_jwt({"user_id": player.id, "username": player.username})
+                        request.session["jwt_token"] = token
+                        return redirect("casino:dashboard")
             else:
                 messages.error(request, "Por favor completa todos los campos correctamente.")
         except Exception:
