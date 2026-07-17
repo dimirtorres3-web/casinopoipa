@@ -33,6 +33,12 @@
                         <p>Saldo: Gs. {{ jugador.saldo|intcomma }}</p>
                         <p>Activo: {{ jugador.is_active }}</p>
                         <p>Staff: {{ jugador.is_staff }}</p>
+                        <form method="post" action="{% url 'casino:toggle_player_status' jugador.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-secondary small">
+                                {% if jugador.is_active %}Desactivar{% else %}Activar{% endif %}
+                            </button>
+                        </form>
                     </div>
                     {% empty %}
                     <p class="empty-state">No hay clientes registrados todavía.</p>

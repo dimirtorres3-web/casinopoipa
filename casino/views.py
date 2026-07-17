@@ -122,7 +122,6 @@ def verify_email(request):
 
 
 def login_view(request):
-    # If already authenticated, redirect immediately to dashboard
     if request.user.is_authenticated:
         return redirect("casino:dashboard")
 
@@ -130,13 +129,13 @@ def login_view(request):
         form = LoginForm(request, data=request.POST)
         try:
             if form.is_valid():
-                email = form.cleaned_data["username"].strip().lower()
+                identity = form.cleaned_data["username"].strip().lower()
                 password = form.cleaned_data["password"]
-                user = authenticate(
-                    request,
-                    username=email,
-                    password=password,
-                )
+
+                user = authenticate(request, username=identity, password=password)
+                if user is None:
+                    user = authenticate(request, username=identity, password=password)
+
                 if user is not None:
                     login(request, user)
                     token = generar_jwt({"user_id": user.id, "username": user.username})
@@ -146,31 +145,31 @@ def login_view(request):
                     return redirect("casino:dashboard")
 
                 try:
-                    player = Player.objects.get(email__iexact=email)
+                    player = Player.objects.get(email__iexact=identity)
                 except Player.DoesNotExist:
-                    messages.error(request, "Usuario o contraseña incorrectos.")
-                else:
-                    if not player.check_password(password):
+                    try:
+                        player = Player.objects.get(username__iexact=identity)
+                    except Player.DoesNotExist:
                         messages.error(request, "Usuario o contraseña incorrectos.")
-                    elif not player.is_active:
-                        request.session["verification_email"] = player.email
-                        request.session["unverified_user_id"] = player.id
-                        messages.error(
-                            request,
-                            "Tu cuenta no está verificada. Revisa el correo o vuelve a generar el código.",
-                        )
-                        return redirect("casino:verify_email")
-                    else:
-                        login(request, player)
-                        token = generar_jwt({"user_id": player.id, "username": player.username})
-                        request.session["jwt_token"] = token
-                        if player.is_staff or player.is_superuser:
-                            return redirect("casino:admin_panel")
-                        return redirect("casino:dashboard")
+                        return render(request, "casino/login.html", {"form": form})
+
+                if not player.check_password(password):
+                    messages.error(request, "Usuario o contraseña incorrectos.")
+                    return render(request, "casino/login.html", {"form": form})
+
+                if not player.is_active:
+                    player.is_active = True
+                    player.save(update_fields=["is_active"])
+
+                login(request, player)
+                token = generar_jwt({"user_id": player.id, "username": player.username})
+                request.session["jwt_token"] = token
+                if player.is_staff or player.is_superuser:
+                    return redirect("casino:admin_panel")
+                return redirect("casino:dashboard")
             else:
                 messages.error(request, "Por favor completa todos los campos correctamente.")
         except Exception:
-            # Avoid raising 500 on unexpected auth errors; show generic message
             messages.error(request, "Error al iniciar sesión. Inténtalo de nuevo.")
     else:
         form = LoginForm()
@@ -783,6 +782,16 @@ def admin_panel(request):
 def clientes(request):
     jugadores = Player.objects.all().order_by("username")
     return render(request, "casino/clientes.html", {"jugadores": jugadores})
+
+
+@login_required
+@user_passes_test(is_admin)
+def toggle_player_status(request, player_id):
+    player = get_object_or_404(Player, id=player_id)
+    player.is_active = not player.is_active
+    player.save(update_fields=["is_active"])
+    messages.success(request, f"Estado del jugador actualizado a {'activo' if player.is_active else 'inactivo'}.")
+    return redirect("casino:clientes")
 
 
 @login_required
