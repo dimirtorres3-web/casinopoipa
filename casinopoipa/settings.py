@@ -2,9 +2,10 @@ import os
 from pathlib import Path
 import dj_database_url
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = os.environ.get("CASINOPOIPA_SECRET_KEY", "changeme-securely-please")
-DEBUG = False
+BASE_DIR = Path(_file_).resolve().parent.parent
+
+SECRET_KEY = os.environ.get("SECRET_KEY", "clave-secreta-temporal")
+DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
