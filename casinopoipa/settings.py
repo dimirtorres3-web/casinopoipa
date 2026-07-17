@@ -9,6 +9,7 @@ SECRET_KEY = os.environ.get(
 )
 DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1")
 ALLOWED_HOSTS = ['*']
+RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -120,6 +121,8 @@ CSRF_TRUSTED_ORIGINS = []
 for host in ALLOWED_HOSTS:
     if host and host not in ["127.0.0.1", "localhost", "*"]:
         CSRF_TRUSTED_ORIGINS.append(f"https://{host}")
+if RENDER_EXTERNAL_HOSTNAME:
+    CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 SECURE_SSL_REDIRECT = not DEBUG

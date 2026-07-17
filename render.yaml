@@ -18,3 +18,9 @@ services:
         value: "False"
       - key: CASINOPOIPA_SECRET_KEY
         generateValue: true
+      - key: EMAIL_BACKEND
+        value: "django.core.mail.backends.console.EmailBackend"
+      - key: DEFAULT_FROM_EMAIL
+        value: "no-reply@casinopoipa.com"
+      - key: DJANGO_SETTINGS_MODULE
+        value: "casinopoipa.settings"
