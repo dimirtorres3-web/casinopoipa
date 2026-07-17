@@ -75,6 +75,8 @@ def register(request):
 
             request.session["show_verification_code"] = not email_sent or settings.DEBUG
             messages.info(request, "Te enviamos un código de verificación a tu correo electrónico.")
+            if request.session.get("show_verification_code"):
+                messages.info(request, f"Tu código de verificación es: {verification_code}")
             return redirect("casino:verify_email")
     else:
         form = PlayerRegistrationForm()

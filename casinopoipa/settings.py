@@ -3,7 +3,10 @@ from pathlib import Path
 import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = os.environ.get("CASINOPOIPA_SECRET_KEY", "changeme-securely-please")
+SECRET_KEY = os.environ.get(
+    "CASINOPOIPA_SECRET_KEY",
+    os.environ.get("SECRET_KEY", "changeme-securely-please"),
+)
 DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1")
 ALLOWED_HOSTS = ['*']
 
@@ -100,6 +103,7 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
@@ -112,9 +116,10 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "no-reply@casinopoipa.com")
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-CSRF_TRUSTED_ORIGINS = [
-    f"https://{host}" for host in ALLOWED_HOSTS if host and host not in ["127.0.0.1", "localhost"]
-]
+CSRF_TRUSTED_ORIGINS = []
+for host in ALLOWED_HOSTS:
+    if host and host not in ["127.0.0.1", "localhost", "*"]:
+        CSRF_TRUSTED_ORIGINS.append(f"https://{host}")
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 SECURE_SSL_REDIRECT = not DEBUG

@@ -13,6 +13,7 @@
             <form method="post" class="form-auth">
                 {% csrf_token %}
                 <h2>Crear cuenta</h2>
+                <p class="form-subtitle">Regístrate con tu correo y desbloquea beneficios VIP.</p>
                 {% if form.non_field_errors %}
                     <div class="field-error">{{ form.non_field_errors }}</div>
                 {% endif %}

@@ -14,7 +14,7 @@ services:
         fromDatabase:
           name: casinopoipadb
           property: connectionString
-      - key: DEBUG
+      - key: DJANGO_DEBUG
         value: "False"
-      - key: SECRET_KEY
+      - key: CASINOPOIPA_SECRET_KEY
         generateValue: true

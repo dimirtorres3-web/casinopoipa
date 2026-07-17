@@ -13,6 +13,7 @@
             <form method="post" class="form-auth">
                 {% csrf_token %}
                 <h2>Verificación de correo</h2>
+                <p class="form-subtitle">Introduce el código que te enviamos para activar tu cuenta.</p>
                 {% if form.non_field_errors %}
                     <div class="field-error">{{ form.non_field_errors }}</div>
                 {% endif %}
@@ -29,7 +30,7 @@
                     </div>
                 {% endfor %}
                 <button class="btn-primary">Verificar código</button>
-                <p class="form-note">¿No recibiste el correo? Revisa tu carpeta de spam.</p>
+                <p class="form-note">¿No recibiste el correo? Revisa tu carpeta de spam o espera unos minutos.</p>
                 {% if verification_code %}
                     <div class="field-note">
                         <strong>Código de verificación:</strong> {{ verification_code }}

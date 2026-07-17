@@ -148,6 +148,25 @@ textarea {
     border: 1px solid rgba(255,255,255,0.08);
 }
 
+.form-subtitle {
+    margin: 0;
+    color: #c7c5cc;
+    font-size: 0.98rem;
+    line-height: 1.6;
+}
+
+.field-note {
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #d8d7df;
+    font-size: 0.95rem;
+}
+
+.field-note strong {
+    color: #f1f1f7;
+}
+
 .form-note {
     margin-top: 12px;
     color: #9c9b9f;

@@ -13,6 +13,7 @@ class Command(BaseCommand):
 
         user, created = User.objects.get_or_create(username=username, defaults={
             "email": email,
+            "is_active": True,
             "is_staff": True,
             "is_superuser": True,
         })
@@ -25,6 +26,9 @@ class Command(BaseCommand):
             ))
         else:
             updated = False
+            if not user.is_active:
+                user.is_active = True
+                updated = True
             if not user.is_staff:
                 user.is_staff = True
                 updated = True
