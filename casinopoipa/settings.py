@@ -4,7 +4,7 @@ import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("CASINOPOIPA_SECRET_KEY", "changeme-securely-please")
-DEBUG = True
+DEBUG = Fase
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
