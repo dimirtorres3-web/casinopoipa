@@ -20,7 +20,7 @@
                 <form method="post">
                     {% csrf_token %}
                     <label for="email">Correo electrónico</label>
-                    <input id="email" name="email" class="form-input" placeholder="usuario@correo.com" required />
+                    <input type="email" id="email" name="email" class="form-input" placeholder="usuario@correo.com" required />
                     <div style="margin-top:12px;">
                         <button class="btn-primary">Promover</button>
                         <a href="{% url 'casino:clientes' %}" class="btn-secondary">Cancelar</a>

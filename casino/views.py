@@ -7,11 +7,11 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.mail import send_mail
 from django.db import transaction as db_transaction
+from django.db.models import Sum
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
-
 from .forms import (
     BankAccountForm,
     LoginForm,
@@ -600,7 +600,10 @@ def mark_transaction_paid(request, transaction_id):
     transaccion.status = "pagado"
     transaccion.estado = "aprobado"
     transaccion.save()
-    return JsonResponse({"success": True, "transaction_id": transaction_id, "status": transaccion.status})
+    messages.success(request, "Retiro marcado como pagado.")
+    if request.headers.get("x-requested-with") == "XMLHttpRequest" or "application/json" in request.headers.get("Accept", ""):
+        return JsonResponse({"success": True, "transaction_id": transaction_id, "status": transaccion.status})
+    return redirect("casino:admin_panel")
 
 @login_required
 def play_game(request):
@@ -706,17 +709,37 @@ def health_check(request):
 @login_required
 @user_passes_test(is_admin)
 def admin_panel(request):
-    transacciones = Transaction.objects.filter(estado="pendiente").order_by("-creado_en")
-    total_balance = sum((player.saldo or Decimal(0)) for player in Player.objects.all())
+    jugadores = Player.objects.all().order_by("username")
+    transacciones = Transaction.objects.order_by("-creado_en")
+    total_balance = sum((player.saldo or Decimal(0)) for player in jugadores)
+
+    jugadores_data = []
+    for jugador in jugadores:
+        recargas = Transaction.objects.filter(player=jugador, tipo="recarga")
+        retiros = Transaction.objects.filter(player=jugador, tipo="retiro")
+        jugadores_data.append({
+            "player": jugador,
+            "is_admin": jugador.is_staff or jugador.is_superuser,
+            "total_recarga": recargas.aggregate(total=Sum("monto"))["total"] or 0,
+            "total_retiro": retiros.aggregate(total=Sum("monto"))["total"] or 0,
+            "recarga_pendiente": recargas.filter(estado="pendiente").aggregate(total=Sum("monto"))["total"] or 0,
+            "recarga_aprobada": recargas.filter(estado="aprobado").aggregate(total=Sum("monto"))["total"] or 0,
+            "retiro_pendiente": retiros.filter(status="pendiente").aggregate(total=Sum("monto"))["total"] or 0,
+            "retiro_pagado": retiros.filter(status="pagado").aggregate(total=Sum("monto"))["total"] or 0,
+        })
+
     stats = {
-        "total_users": Player.objects.count(),
-        "total_transactions": Transaction.objects.count(),
-        "pending_transactions": Transaction.objects.filter(estado="pendiente").count(),
-        "approved_transactions": Transaction.objects.filter(estado="aprobado").count(),
+        "total_users": jugadores.count(),
+        "total_transactions": transacciones.count(),
+        "pending_transactions": transacciones.filter(estado="pendiente").count(),
+        "approved_transactions": transacciones.filter(estado="aprobado").count(),
         "total_balance": int(total_balance),
-        "jugadores": Player.objects.all().order_by("username"),
+        "jugadores_data": jugadores_data,
+        "transacciones": transacciones,
+        "admin_panel_url": reverse("casino:admin_panel"),
+        "promote_admin_url": reverse("casino:add_admin"),
     }
-    return render(request, "casino/admin_panel.html", {"transacciones": transacciones, **stats})
+    return render(request, "casino/admin_panel.html", stats)
 
 
 @login_required
@@ -744,9 +767,37 @@ def add_admin(request):
         player.is_superuser = True
         player.save(update_fields=["is_staff", "is_superuser"])
         messages.success(request, f"{email} ahora tiene privilegios de administrador.")
-        return redirect("casino:clientes")
+        return redirect("casino:admin_panel")
 
     return render(request, "casino/add_admin.html")
+
+
+@login_required
+@user_passes_test(is_admin)
+@require_POST
+def promote_to_admin(request, player_id):
+    player = get_object_or_404(Player, id=player_id)
+    if player.is_staff and player.is_superuser:
+        messages.info(request, "Ese usuario ya es administrador.")
+    else:
+        player.is_staff = True
+        player.is_superuser = True
+        player.save(update_fields=["is_staff", "is_superuser"])
+        messages.success(request, f"{player.email} ahora es administrador.")
+    return redirect("casino:admin_panel")
+
+
+@login_required
+@user_passes_test(is_admin)
+@require_POST
+def delete_player(request, player_id):
+    player = get_object_or_404(Player, id=player_id)
+    if request.user == player:
+        messages.error(request, "No puedes eliminar tu propia cuenta.")
+    else:
+        player.delete()
+        messages.success(request, "Jugador eliminado correctamente.")
+    return redirect("casino:admin_panel")
 
 
 @login_required
@@ -761,10 +812,12 @@ def toggle_player_status(request, player_id):
 
 @login_required
 @user_passes_test(is_admin)
+@require_POST
 def approve_transaction(request, transaction_id):
     transaccion = get_object_or_404(Transaction, id=transaction_id, estado="pendiente")
     with db_transaction.atomic():
         transaccion.estado = "aprobado"
+        transaccion.status = "pagado"
         transaccion.save()
         if transaccion.tipo == "recarga":
             player = transaccion.player
@@ -775,6 +828,7 @@ def approve_transaction(request, transaction_id):
 
 @login_required
 @user_passes_test(is_admin)
+@require_POST
 def refund_transaction(request, transaction_id):
     transaccion = get_object_or_404(Transaction, id=transaction_id, estado="pendiente")
     with db_transaction.atomic():

@@ -9,21 +9,23 @@
                     <span class="brand-mark">🛡️</span>
                     <div>
                         <p>Panel del Administrador</p>
-                        <h1>Control de capital</h1>
+                        <h1>Gestión centralizada</h1>
                     </div>
                 </div>
                 <a href="{% url 'casino:dashboard' %}" class="btn-ghost">Volver al Dashboard</a>
             </header>
+
             <main class="admin-shell glass-panel">
                 <div class="admin-hero">
                     <div>
-                        <h2>Vista ejecutiva</h2>
-                        <p>Administra las cargas, reembolsos y clientes en tiempo real con controles seguros.</p>
+                        <h2>Control total</h2>
+                        <p>Desde aquí ves quién es administrador, quién recargó, cuánto retiró y el estado de cada transacción.</p>
                     </div>
                     <div class="admin-links">
-                        <a href="{% url 'casino:clientes' %}" class="btn-secondary">Panel de clientes</a>
+                        <a href="{% url 'casino:add_admin' %}" class="btn-secondary">Promover nuevo admin</a>
                     </div>
                 </div>
+
                 <div class="metrics-grid">
                     <div class="metric-card">
                         <span>Usuarios registrados</span>
@@ -42,102 +44,87 @@
                         <h3>Gs. {{ total_balance|intcomma }}</h3>
                     </div>
                 </div>
+
                 <section class="player-list" style="margin-top: 24px;">
-                    <h3>Jugadores activos</h3>
+                    <h3>Resumen de jugadores</h3>
                     <div class="players-grid">
-                        {% for jugador in jugadores %}
-                        <div class="player-card">
-                            <p><strong>{{ jugador.username }}</strong></p>
-                            <p>{{ jugador.email }}</p>
-                            <p>Saldo: Gs. {{ jugador.saldo|intcomma }}</p>
-                            <p>Activo: {{ jugador.is_active }}</p>
-                        </div>
+                        {% for entry in jugadores_data %}
+                        <article class="player-card">
+                            <div class="player-card-header">
+                                <div>
+                                    <h4>{{ entry.player.username }}</h4>
+                                    <p>{{ entry.player.email }}</p>
+                                </div>
+                                <span class="status-chip {% if entry.is_admin %}status-active{% else %}status-secondary{% endif %}">{{ entry.is_admin|yesno:"Administrador,Jugador" }}</span>
+                            </div>
+                            <p><strong>Saldo:</strong> Gs. {{ entry.player.saldo|intcomma }}</p>
+                            <p><strong>Total recargado:</strong> Gs. {{ entry.total_recarga|intcomma }}</p>
+                            <p><strong>Total retirado:</strong> Gs. {{ entry.total_retiro|intcomma }}</p>
+                            <p><strong>Recarga pendiente:</strong> Gs. {{ entry.recarga_pendiente|intcomma }}</p>
+                            <p><strong>Retiro pendiente:</strong> Gs. {{ entry.retiro_pendiente|intcomma }}</p>
+                            <div class="actions-row" style="margin-top: 12px;">
+                                {% if not entry.is_admin %}
+                                    <form method="post" action="{% url 'casino:promote_to_admin' entry.player.id %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-secondary small">Promover admin</button>
+                                    </form>
+                                {% endif %}
+                                <form method="post" action="{% url 'casino:delete_player' entry.player.id %}" style="display:inline; margin-left: 8px;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-danger small">Eliminar jugador</button>
+                                </form>
+                            </div>
+                        </article>
                         {% endfor %}
                     </div>
                 </section>
+
                 <section class="transactions-list" style="margin-top: 24px;">
-                    <h3>Transacciones pendientes</h3>
+                    <h3>Transacciones recientes</h3>
                     {% if transacciones %}
                         {% for transaccion in transacciones %}
-                            <article class="transaction-card">
+                        <article class="transaction-card">
+                            <div class="transaction-header">
                                 <div>
-                                    <p class="meta">{{ transaccion.player.username }} • {{ transaccion.tipo|title }} • {{ transaccion.monto }} Gs.</p>
-                                    <p>Estado: <strong>{{ transaccion.estado|title }}</strong></p>
-                                    <p>Pago: <strong>{{ transaccion.status|title }}</strong></p>
-                                    <p>Creado: {{ transaccion.creado_en }}</p>
-                                    {% if transaccion.tipo == 'retiro' %}
-                                        <div class="bank-details">
-                                            <p><strong>Banco:</strong> {{ transaccion.banco }}</p>
-                                            <p><strong>Tipo de cuenta:</strong> {{ transaccion.tipo_cuenta }}</p>
-                                            <p><strong>Número de cuenta:</strong> {{ transaccion.numero_cuenta }}</p>
-                                            <p><strong>Titular:</strong> {{ transaccion.titular }}</p>
-                                            <p><strong>Cédula:</strong> {{ transaccion.cedula }}</p>
-                                            <p><strong>Teléfono:</strong> {{ transaccion.telefono }}</p>
-                                        </div>
-                                    {% endif %}
+                                    <p class="meta"><strong>{{ transaccion.player.username }}</strong> • {{ transaccion.tipo|title }} • Gs. {{ transaccion.monto|intcomma }}</p>
+                                    <p>{{ transaccion.creado_en }}</p>
                                 </div>
-                                {% if transaccion.comprobante %}
-                                    <img src="{{ transaccion.comprobante.url }}" alt="Comprobante" class="receipt-image" />
+                                <div>
+                                    <span class="status-chip {% if transaccion.estado == 'aprobado' %}status-active{% elif transaccion.estado == 'pendiente' %}status-warning{% else %}status-secondary{% endif %}">{{ transaccion.estado|title }}</span>
+                                    <span class="status-chip {% if transaccion.status == 'pagado' %}status-active{% else %}status-warning{% endif %}">{{ transaccion.status|title }}</span>
+                                </div>
+                            </div>
+                            <p><strong>Banco:</strong> {{ transaccion.banco }}</p>
+                            <p><strong>Cuenta:</strong> {{ transaccion.tipo_cuenta }}</p>
+                            <p><strong>Titular:</strong> {{ transaccion.titular }}</p>
+                            <p><strong>Cédula:</strong> {{ transaccion.cedula }}</p>
+                            <p><strong>Teléfono:</strong> {{ transaccion.telefono }}</p>
+                            {% if transaccion.comprobante %}
+                                <img src="{{ transaccion.comprobante.url }}" alt="Comprobante" class="receipt-image" />
+                            {% endif %}
+                            <div class="actions-row" style="margin-top: 12px;">
+                                {% if transaccion.tipo == 'recarga' and transaccion.estado == 'pendiente' %}
+                                    <form method="post" action="{% url 'casino:approve_transaction' transaccion.id %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-primary small">Aprobar carga</button>
+                                    </form>
+                                    <form method="post" action="{% url 'casino:refund_transaction' transaccion.id %}" style="display:inline; margin-left: 8px;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-secondary small">Reembolsar</button>
+                                    </form>
+                                {% elif transaccion.tipo == 'retiro' and transaccion.status == 'pendiente' %}
+                                    <form method="post" action="{% url 'casino:mark_transaction_paid' transaccion.id %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-primary small">Marcar pagado</button>
+                                    </form>
                                 {% endif %}
-                                <div class="actions-row">
-                                    {% if transaccion.tipo == 'recarga' %}
-                                        <a href="{% url 'casino:approve_transaction' transaccion.id %}" class="btn-primary small">Aprobar Carga</a>
-                                        <a href="{% url 'casino:refund_transaction' transaccion.id %}" class="btn-secondary small">Hacer Reembolso</a>
-                                    {% elif transaccion.tipo == 'retiro' %}
-                                        <button type="button" class="btn-primary small mark-paid-button" data-url="{% url 'casino:mark_transaction_paid' transaccion.id %}">Marcar como Pagado</button>
-                                    {% endif %}
-                                </div>
-                            </article>
+                            </div>
+                        </article>
                         {% endfor %}
                     {% else %}
-                        <p class="empty-state">No hay transacciones pendientes en este momento.</p>
+                        <p class="empty-state">No hay transacciones registradas todavía.</p>
                     {% endif %}
                 </section>
-                <script>
-                    function getCookie(name) {
-                        const value = `; ${document.cookie}`;
-                        const parts = value.split(`; ${name}=`);
-                        if (parts.length === 2) return parts.pop().split(';').shift();
-                        return null;
-                    }
-
-                    document.querySelectorAll('.mark-paid-button').forEach((button) => {
-                        button.addEventListener('click', () => {
-                            const url = button.dataset.url;
-                            if (!url) return;
-                            button.disabled = true;
-                            fetch(url, {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRFToken': getCookie('csrftoken'),
-                                    'Accept': 'application/json',
-                                },
-                                credentials: 'same-origin',
-                            })
-                                .then((response) => response.json())
-                                .then((data) => {
-                                    if (data.success) {
-                                        button.textContent = 'Pagado';
-                                        button.classList.add('btn-success');
-                                        const card = button.closest('.transaction-card');
-                                        if (card) {
-                                            const statusLine = card.querySelector('p strong');
-                                            if (statusLine) {
-                                                statusLine.textContent = 'Pagado';
-                                            }
-                                        }
-                                    } else {
-                                        alert(data.error || 'No se pudo marcar como pagado.');
-                                        button.disabled = false;
-                                    }
-                                })
-                                .catch(() => {
-                                    alert('Error de red al marcar la transacción como pagada.');
-                                    button.disabled = false;
-                                });
-                        });
-                    });
-                </script>
             </main>
         </div>
     </div>

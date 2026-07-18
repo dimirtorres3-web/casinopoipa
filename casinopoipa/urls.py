@@ -5,8 +5,8 @@ from django.urls import include, path
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include(("casino.urls", "casino"), namespace="casino")),
-    path("casino/", include("casino.urls")),
+    path("", include("casino.urls")),
+    path("casino/", include(("casino.urls", "casino"), namespace="casino_prefix")),
 ]
 
 if settings.DEBUG:
