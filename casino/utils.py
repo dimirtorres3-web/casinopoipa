@@ -5,7 +5,20 @@ from django.conf import settings
 
 
 def get_cipher():
-    return Fernet(settings.FERNET_KEY.encode())
+    """Return a Fernet cipher ensuring the key is bytes.
+
+    Accepts `FERNET_KEY` as str or bytes and converts as needed.
+    """
+    key = settings.FERNET_KEY
+    if isinstance(key, str):
+        key_bytes = key.encode()
+    elif isinstance(key, (bytes, bytearray, memoryview)):
+        key_bytes = bytes(key)
+    else:
+        key_bytes = str(key).encode()
+    return Fernet(key_bytes)
+
+
 
 
 def encrypt_balance(value: int) -> str:
@@ -14,10 +27,22 @@ def encrypt_balance(value: int) -> str:
     return base64.urlsafe_b64encode(token).decode()
 
 
-def decrypt_balance(token: str) -> int:
+def decrypt_balance(token: str | bytes) -> int:
     cipher = get_cipher()
     try:
-        decoded = base64.urlsafe_b64decode(token.encode())
+        # Accept either the base64-encoded string produced by
+        # `encrypt_balance` or raw encrypted bytes coming from some DBs.
+        if isinstance(token, str):
+            decoded = base64.urlsafe_b64decode(token.encode())
+        elif isinstance(token, (bytes, bytearray, memoryview)):
+            # try to treat as base64-encoded bytes first, fall back to raw
+            try:
+                decoded = base64.urlsafe_b64decode(bytes(token))
+            except Exception:
+                decoded = bytes(token)
+        else:
+            return 0
+
         plaintext = cipher.decrypt(decoded)
         return int(plaintext.decode())
     except (InvalidToken, ValueError, TypeError):

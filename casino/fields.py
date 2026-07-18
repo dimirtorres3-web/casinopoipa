@@ -1,10 +1,12 @@
 from decimal import Decimal
 from typing import Any
 
-from cryptography.fernet import Fernet, InvalidToken
+from cryptography.fernet import InvalidToken
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+
+from .utils import get_cipher
 
 
 class EncryptedDecimalField(models.BinaryField):
@@ -22,13 +24,24 @@ class EncryptedDecimalField(models.BinaryField):
             value = str(value.normalize())
         else:
             value = str(value)
-        cipher = Fernet(settings.FERNET_KEY.encode())
+        cipher = get_cipher()
         return cipher.encrypt(value.encode())
 
     def from_db_value(self, value: bytes | None, expression, connection) -> Decimal | None:
         if value is None:
             return None
-        cipher = Fernet(settings.FERNET_KEY.encode())
+        cipher = get_cipher()
+        # Accept bytes, memoryview or base64-encoded str stored in some DBs
+        if isinstance(value, memoryview) or isinstance(value, bytearray):
+            value = bytes(value)
+        if isinstance(value, str):
+            try:
+                import base64
+
+                value = base64.urlsafe_b64decode(value.encode())
+            except Exception:
+                value = value.encode()
+
         try:
             plain = cipher.decrypt(value)
             return Decimal(plain.decode())
@@ -40,8 +53,8 @@ class EncryptedDecimalField(models.BinaryField):
             return None
         if isinstance(value, Decimal):
             return value
-        if isinstance(value, bytes):
-            return self.from_db_value(value, None, None)
+        if isinstance(value, (bytes, memoryview, bytearray)):
+            return self.from_db_value(bytes(value), None, None)
         return Decimal(str(value))
 
     def formfield(self, **kwargs: Any):
