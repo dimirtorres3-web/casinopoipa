@@ -15,14 +15,15 @@
         </header>
         <main class="cashier-shell glass-panel">
             <section class="tabs-panel">
-                <div class="tab active">Recarga</div>
-                <div class="tab">Retiro</div>
-                <div class="tab">Formas de Pago</div>
+                <a href="?tab=deposito" class="tab{% if selected_tab == 'deposito' %} active{% endif %}">Depósito</a>
+                <a href="?tab=retiro" class="tab{% if selected_tab == 'retiro' %} active{% endif %}">Retiro</a>
+                <a href="?tab=forma_pago" class="tab{% if selected_tab == 'forma_pago' %} active{% endif %}">Formas de Pago</a>
             </section>
 
             <div class="cashier-grid">
-                <section class="cashier-card">
-                    <h2>Recarga</h2>
+                <section class="cashier-card"{% if selected_tab != 'deposito' %} style="display:none;"{% endif %}>
+                    <h2>Depósito</h2>
+                    <p>Transferencia bancaria directa. Selecciona el monto y sube el comprobante.</p>
                     <form method="post" enctype="multipart/form-data" class="transaction-form">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="recarga" />
@@ -36,23 +37,24 @@
                                 <div class="field-error">{{ field.errors|striptags }}</div>
                             {% endif %}
                         {% endfor %}
-                        <button class="btn-primary">Enviar recarga</button>
+                        <button class="btn-primary">Enviar comprobante</button>
                     </form>
                 </section>
 
-                <section class="cashier-card">
+                <section class="cashier-card"{% if selected_tab != 'retiro' %} style="display:none;"{% endif %}>
                     <h2>Retiro</h2>
-                    <p>Tu método de pago se guarda aquí. Si no tienes uno, agrégalo en Formas de Pago.</p>
+                    <p>Solicita tu retiro a tu cuenta bancaria registrada.</p>
                     {% if bank_account %}
                         <div class="bank-summary">
                             <p><strong>Banco:</strong> {{ bank_account.banco }}</p>
+                            <p><strong>Alias:</strong> {{ bank_account.alias }}</p>
                             <p><strong>Cuenta:</strong> {{ bank_account.tipo_cuenta }} / {{ bank_account.numero_cuenta }}</p>
                             <p><strong>Titular:</strong> {{ bank_account.titular }}</p>
                             <p><strong>Cédula:</strong> {{ bank_account.cedula }}</p>
                         </div>
                     {% else %}
                         <div class="bank-summary">
-                            <p>No tienes método de pago configurado.</p>
+                            <p>No tienes una cuenta bancaria registrada. Agrega tus datos en Formas de Pago.</p>
                         </div>
                     {% endif %}
                     <form method="post" enctype="multipart/form-data" class="transaction-form">
@@ -72,9 +74,9 @@
                     </form>
                 </section>
 
-                <section class="cashier-card">
+                <section class="cashier-card"{% if selected_tab != 'forma_pago' %} style="display:none;"{% endif %}>
                     <h2>Formas de Pago</h2>
-                    <p>Configura o actualiza tu cuenta bancaria para retirar saldo.</p>
+                    <p>Registra tu cuenta bancaria para recibir retiros.</p>
                     <form method="post" class="transaction-form">
                         {% csrf_token %}
                         <input type="hidden" name="action" value="guardar_banco" />

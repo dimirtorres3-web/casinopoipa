@@ -1,6 +1,6 @@
 from decimal import Decimal
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from .models import BankAccount, Player, Transaction
 
@@ -64,9 +64,10 @@ class PlayerRegistrationForm(UserCreationForm):
 class BankAccountForm(forms.ModelForm):
     class Meta:
         model = BankAccount
-        fields = ["banco", "tipo_cuenta", "numero_cuenta", "titular", "cedula", "telefono"]
+        fields = ["banco", "alias", "tipo_cuenta", "numero_cuenta", "titular", "cedula", "telefono"]
         widgets = {
             "banco": forms.TextInput(attrs={"class": "form-input", "placeholder": "Ej. Banco Continental"}),
+            "alias": forms.TextInput(attrs={"class": "form-input", "placeholder": "Alias de la cuenta"}),
             "tipo_cuenta": forms.TextInput(attrs={"class": "form-input", "placeholder": "Cuenta corriente / ahorro"}),
             "numero_cuenta": forms.TextInput(attrs={"class": "form-input", "placeholder": "Número de cuenta"}),
             "titular": forms.TextInput(attrs={"class": "form-input", "placeholder": "Nombre del titular"}),
@@ -75,12 +76,15 @@ class BankAccountForm(forms.ModelForm):
         }
 
 
-class LoginForm(AuthenticationForm):
-    username = forms.CharField(
+class LoginForm(forms.Form):
+    email = forms.EmailField(
         label="Correo electrónico",
-        widget=forms.TextInput(attrs={"autofocus": True, "placeholder": "ejemplo@correo.com"}),
+        widget=forms.EmailInput(attrs={"autofocus": True, "placeholder": "ejemplo@correo.com", "class": "form-input"}),
     )
-    password = forms.CharField(label="Contraseña", widget=forms.PasswordInput)
+    password = forms.CharField(label="Contraseña", widget=forms.PasswordInput(attrs={"class": "form-input"}))
+
+    def clean_email(self):
+        return self.cleaned_data["email"].strip().lower()
 
 
 class VerificationCodeForm(forms.Form):
@@ -131,6 +135,7 @@ class WithdrawalForm(TransactionForm):
             "tipo",
             "monto",
             "banco",
+            "alias",
             "tipo_cuenta",
             "numero_cuenta",
             "titular",
@@ -142,6 +147,7 @@ class WithdrawalForm(TransactionForm):
             "tipo": forms.HiddenInput(),
             "monto": forms.NumberInput(attrs={"class": "form-input", "min": "30000", "placeholder": "Monto para retirar"}),
             "banco": forms.TextInput(attrs={"class": "form-input", "placeholder": "Nombre del banco"}),
+            "alias": forms.TextInput(attrs={"class": "form-input", "placeholder": "Alias de la cuenta"}),
             "tipo_cuenta": forms.TextInput(attrs={"class": "form-input", "placeholder": "Tipo de cuenta"}),
             "numero_cuenta": forms.TextInput(attrs={"class": "form-input", "placeholder": "Número de cuenta"}),
             "titular": forms.TextInput(attrs={"class": "form-input", "placeholder": "Nombre del titular"}),

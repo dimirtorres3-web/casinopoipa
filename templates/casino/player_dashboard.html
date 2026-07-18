@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Panel de Jugador | Casinopoipa{% endblock %}
+{% block content %}
+<div class="dashboard-page">
+    <div class="layout-shell">
+        <header class="topbar">
+            <div class="brand-hero">
+                <span class="brand-mark">🎮</span>
+                <div>
+                    <p>Panel del jugador</p>
+                    <h1>{{ player.nombre }} {{ player.apellido }}</h1>
+                </div>
+            </div>
+            <a href="{% url 'casino:logout' %}" class="btn-ghost">Cerrar sesión</a>
+        </header>
+
+        <main class="dashboard-grid">
+            <section class="hero-card glass-panel balance-card">
+                <div class="balance-info">
+                    <p>Saldo disponible</p>
+                    <h2>Gs. {{ player.saldo|intcomma }}</h2>
+                </div>
+                <div class="balance-meta">
+                    <span>Operaciones rápidas</span>
+                    <p class="balance-note">Usa depósito o retiro para manejar tu saldo. Solo transferencia bancaria.</p>
+                </div>
+                <div class="dashboard-actions">
+                    <a href="{% url 'casino:cajero' %}?tab=deposito" class="btn-primary">Depósito</a>
+                    <a href="{% url 'casino:cajero' %}?tab=retiro" class="btn-secondary">Retiro</a>
+                </div>
+            </section>
+
+            <section class="hero-card glass-panel games-card">
+                <h2>Juegos disponibles</h2>
+                <div class="games-grid">
+                    {% for juego in juegos %}
+                    <article class="game-card">
+                        <div class="game-card-icon">{{ juego.icono }}</div>
+                        <h3>{{ juego.titulo }}</h3>
+                        <p>{{ juego.description }}</p>
+                        <a href="{{ juego.url }}" class="btn-primary">Jugar</a>
+                    </article>
+                    {% endfor %}
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+{% endblock %}

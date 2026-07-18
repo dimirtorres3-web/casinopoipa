@@ -49,10 +49,12 @@
                     </article>
                     {% endfor %}
                 </div>
+                {% if user.is_staff or user.is_superuser %}
                 <div class="admin-links">
                     <a href="{% url 'admin:index' %}" class="btn-secondary">Django Admin</a>
                 </div>
                 <p>Accede al panel de control interno o al panel administrativo de Django.</p>
+                {% endif %}
             </section>
         </main>
     </div>

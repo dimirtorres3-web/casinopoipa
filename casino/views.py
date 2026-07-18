@@ -99,10 +99,10 @@ def login_view(request):
         return redirect("casino:dashboard")
 
     if request.method == "POST":
-        form = LoginForm(request, data=request.POST)
+        form = LoginForm(request.POST)
         try:
             if form.is_valid():
-                identity = form.cleaned_data["username"].strip().lower()
+                identity = form.cleaned_data["email"]
                 password = form.cleaned_data["password"]
 
                 user = authenticate(request, username=identity, password=password)
@@ -120,11 +120,8 @@ def login_view(request):
                 try:
                     player = Player.objects.get(email__iexact=identity)
                 except Player.DoesNotExist:
-                    try:
-                        player = Player.objects.get(username__iexact=identity)
-                    except Player.DoesNotExist:
-                        messages.error(request, "Usuario o contraseña incorrectos.")
-                        return render(request, "casino/login.html", {"form": form})
+                    messages.error(request, "Usuario o contraseña incorrectos.")
+                    return render(request, "casino/login.html", {"form": form})
 
                 if not player.check_password(password):
                     messages.error(request, "Usuario o contraseña incorrectos.")
@@ -159,7 +156,6 @@ def dashboard(request):
     if player.is_staff or player.is_superuser:
         return redirect("casino:admin_panel")
 
-    saldo_real = player.saldo
     juegos = [
         {
             "titulo": "Tragamonedas",
@@ -168,34 +164,19 @@ def dashboard(request):
             "description": "Gira los rodillos y busca la combinación perfecta.",
         },
         {
-            "titulo": "Big Bass Splash",
-            "icono": "🎣",
-            "url": reverse("casino:big_bass_splash"),
-            "description": "Pesca el gran premio en esta tragamonedas de pesca.",
-        },
-        {
-            "titulo": "Rise of Olympus",
-            "icono": "⚡",
-            "url": reverse("casino:rise_of_olympus"),
-            "description": "Entra en la mitología y gana favores de los dioses.",
-        },
-        {
             "titulo": "Ruleta",
             "icono": "🎡",
             "url": reverse("casino:ruleta"),
             "description": "Apuesta al rojo, negro o al número ganador.",
         },
     ]
-    return render(request, "casino/index.html", {
+    return render(request, "casino/player_dashboard.html", {
         "player": player,
-        "saldo_real": saldo_real,
         "juegos": juegos,
     })
 
 GAME_MULTIPLIERS = {
     "tragamonedas": 2.5,
-    "big_bass_splash": 2.7,
-    "rise_of_olympus": 3.0,
     "ruleta": 2.3,
 }
 
@@ -508,12 +489,7 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
     player.save()
 
     # Select animation type per game
-    if game in ["big_bass_splash"]:
-        animation_type = "fishing"
-    elif game in ["rise_of_olympus"]:
-        animation_type = "olympus"
-    else:
-        animation_type = "roulette"
+    animation_type = "roulette"
 
     response = {
         "game": game,
@@ -638,8 +614,19 @@ def cashier(request):
     retiro_form = WithdrawalForm()
     bank_form = BankAccountForm(instance=bank_account)
 
+    selected_tab = request.GET.get("tab", "deposito")
+    if selected_tab not in ["deposito", "retiro", "forma_pago"]:
+        selected_tab = "deposito"
+
     if request.method == "POST":
         action = request.POST.get("action")
+        if action == "deposito":
+            selected_tab = "deposito"
+        elif action == "retiro":
+            selected_tab = "retiro"
+        elif action == "guardar_banco":
+            selected_tab = "forma_pago"
+
         if action == "recarga":
             recarga_form = TransactionForm(request.POST, request.FILES)
             if recarga_form.is_valid():
@@ -657,7 +644,7 @@ def cashier(request):
                 bank.player = player
                 bank.save()
                 messages.success(request, "Método de pago guardado correctamente.")
-                return redirect("casino:cajero")
+                return redirect(f"{reverse('casino:cajero')}?tab=forma_pago")
         elif action == "retiro":
             bank_form = BankAccountForm(request.POST, instance=bank_account)
             retiro_form = WithdrawalForm(request.POST, request.FILES)
@@ -693,6 +680,7 @@ def cashier(request):
             "retiro_form": retiro_form,
             "bank_form": bank_form,
             "bank_account": bank_account,
+            "selected_tab": selected_tab,
         },
     )
 
@@ -704,14 +692,6 @@ def ruleta(request):
     return render(request, "casino/ruleta.html", {"player": request.user})
 
 
-@login_required
-def big_bass_splash(request):
-    return render(request, "casino/big_bass_splash.html", {"player": request.user})
-
-
-@login_required
-def rise_of_olympus(request):
-    return render(request, "casino/rise_of_olympus.html", {"player": request.user})
 
 
 @login_required
