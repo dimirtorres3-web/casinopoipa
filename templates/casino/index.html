@@ -36,36 +36,24 @@
                     <span>Seguridad en backend</span>
                     <p class="balance-note">Tu saldo está protegido y cifrado internamente. Aquí solo ves tu balance real.</p>
                 </div>
-            {
-                "titulo": "Tragamonedas",
-                "icono": "🎰",
-                "url": reverse("casino:tragamonedas"),
-                "description": "Gira los rodillos y busca la combinación perfecta.",
-            },
-            {
-                "titulo": "Big Bass Splash",
-                "icono": "🎣",
-                "url": reverse("casino:big_bass_splash"),
-                "description": "Pesca el gran premio en esta tragamonedas de pesca.",
-            },
-            {
-                "titulo": "Rise of Olympus",
-                "icono": "⚡",
-                "url": reverse("casino:rise_of_olympus"),
-                "description": "Entra en la mitología y gana favores de los dioses.",
-            },
-            {
-                "titulo": "Ruleta",
-                "icono": "🎡",
-                "url": reverse("casino:ruleta"),
-                "description": "Apuesta al rojo, negro o al número ganador.",
-            },
-                        <a href="{% url 'admin:index' %}" class="btn-secondary">Django Admin</a>
-                    </div>
+            </section>
+
+            <section class="hero-card glass-panel games-card">
+                <div class="games-grid">
+                    {% for juego in juegos %}
+                    <article class="game-card">
+                        <div class="game-card-icon">{{ juego.icono }}</div>
+                        <h3>{{ juego.titulo }}</h3>
+                        <p>{{ juego.description }}</p>
+                        <a href="{{ juego.url }}" class="btn-primary">Jugar</a>
+                    </article>
+                    {% endfor %}
+                </div>
+                <div class="admin-links">
+                    <a href="{% url 'admin:index' %}" class="btn-secondary">Django Admin</a>
                 </div>
                 <p>Accede al panel de control interno o al panel administrativo de Django.</p>
             </section>
-            {% endif %}
         </main>
     </div>
 {% endblock %}
