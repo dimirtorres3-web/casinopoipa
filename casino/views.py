@@ -34,7 +34,7 @@ def register(request):
         if form.is_valid():
             email = form.cleaned_data["email"].strip().lower()
             existing = Player.objects.filter(email__iexact=email).first()
-            if existing and existing.username and existing.username != email:
+            if existing:
                 form.add_error("email", "Este correo ya está registrado.")
                 return render(request, "casino/registro.html", {"form": form})
 
