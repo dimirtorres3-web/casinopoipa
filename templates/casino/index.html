@@ -36,36 +36,30 @@
                     <span>Seguridad en backend</span>
                     <p class="balance-note">Tu saldo está protegido y cifrado internamente. Aquí solo ves tu balance real.</p>
                 </div>
-            </section>
-            <section class="games-grid" id="mis-juegos">
-                {% for juego in juegos %}
-                    <a href="{{ juego.url }}" class="game-card glass-panel" data-game-url="{{ juego.url }}">
-                        <span class="game-icon">{{ juego.icono }}</span>
-                        <h3>{{ juego.titulo }}</h3>
-                        <p>{{ juego.description }}</p>
-                    </a>
-                {% endfor %}
-            </section>
-            <section class="play-panel glass-panel" id="favoritos">
-                <h2>Elige tu juego</h2>
-                <p>Selecciona una de las mesas para entrar en una experiencia de apuesta premium sin recarga.</p>
-                <div class="play-help">
-                    <p>Haz clic en cualquier juego para abrir su pantalla independiente y apostar en tiempo real.</p>
-                </div>
-            </section>
-            <section class="cashier-panel glass-panel" id="perfil">
-                <div class="panel-header">
-                    <h2>Cajero automático</h2>
-                    <a href="{% url 'casino:cajero' %}" class="btn-secondary">Abrir Cajero</a>
-                </div>
-                <p>Recargas entre 30.000 Gs. y 1.500.000 Gs. con comprobante seguro.</p>
-            </section>
-            {% if player.is_staff or player.is_superuser %}
-            <section class="admin-panel glass-panel" id="admin-access">
-                <div class="panel-header">
-                    <h2>Panel de administrador</h2>
-                    <div class="admin-links">
-                        <a href="{% url 'casino:admin_panel' %}" class="btn-secondary">Panel interno</a>
+            {
+                "titulo": "Tragamonedas",
+                "icono": "🎰",
+                "url": reverse("casino:tragamonedas"),
+                "description": "Gira los rodillos y busca la combinación perfecta.",
+            },
+            {
+                "titulo": "Big Bass Splash",
+                "icono": "🎣",
+                "url": reverse("casino:big_bass_splash"),
+                "description": "Pesca el gran premio en esta tragamonedas de pesca.",
+            },
+            {
+                "titulo": "Rise of Olympus",
+                "icono": "⚡",
+                "url": reverse("casino:rise_of_olympus"),
+                "description": "Entra en la mitología y gana favores de los dioses.",
+            },
+            {
+                "titulo": "Ruleta",
+                "icono": "🎡",
+                "url": reverse("casino:ruleta"),
+                "description": "Apuesta al rojo, negro o al número ganador.",
+            },
                         <a href="{% url 'admin:index' %}" class="btn-secondary">Django Admin</a>
                     </div>
                 </div>

@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Big Bass Splash | Casinopoipa{% endblock %}
+{% block content %}
+<div class="game-page">
+  <div class="layout-shell">
+    <header class="topbar fixed-game-header">
+      <div class="brand-hero">
+        <span class="brand-mark">🎣</span>
+        <div>
+          <p>Big Bass Splash</p>
+          <h1>Pescando el Gran Premio</h1>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="balance-display glass-panel">
+          <p>Saldo disponible</p>
+          <h2 id="balance-value">Gs. {{ player.saldo|intcomma }}</h2>
+        </div>
+        <a href="{% url 'casino:dashboard' %}" class="btn-secondary">Volver al Menú Principal</a>
+      </div>
+    </header>
+    <main class="game-shell glass-panel fishing-shell">
+      <section class="fishing-stage">
+        <canvas id="fishing-canvas" width="900" height="500"></canvas>
+      </section>
+      <section class="game-controls">
+        <div class="game-status" id="game-status">Apuesta mínima 2.000 Gs.</div>
+        <div class="game-actions">
+          <input id="fishing-apuesta" type="number" min="2000" value="2000" class="form-input" />
+          <button type="button" id="fishing-bet-button" class="btn-primary">Apostar</button>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('fishing-canvas');
+  const ctx = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+
+  let fish = [];
+  for(let i=0;i<12;i++){
+    fish.push({x: Math.random()*width, y: Math.random()*(height-200)+100, vx:(Math.random()*1.2+0.3)*(Math.random()<0.5?-1:1), size: 20+(Math.random()*40)});
+  }
+
+  function drawBackground(){
+    const g = ctx.createLinearGradient(0,0,0,height);
+    g.addColorStop(0,'#8fd1ff');
+    g.addColorStop(0.6,'#2b7fb2');
+    g.addColorStop(1,'#08344c');
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,width,height);
+
+    // sun
+    ctx.beginPath(); ctx.fillStyle='#ffd860'; ctx.arc(80,80,40,0,Math.PI*2); ctx.fill();
+  }
+
+  function drawFish(f){
+    ctx.save();
+    ctx.translate(f.x,f.y);
+    ctx.scale(f.vx>0?1:-1,1);
+    ctx.beginPath();
+    ctx.fillStyle = '#ff6b6b';
+    ctx.ellipse(0,0,f.size, f.size*0.6, 0, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(f.size*0.3,-f.size*0.1,f.size*0.12,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+
+  let bobber = {x: width/2, y: 60, vy:0, caught:false};
+
+  function update(dt){
+    for(const f of fish){
+      f.x += f.vx * dt;
+      if(f.x < -50) f.x = width+50;
+      if(f.x > width+50) f.x = -50;
+    }
+
+    // bobber physics
+    bobber.vy += 0.02*dt;
+    bobber.y += bobber.vy * dt;
+    if(bobber.y>height-60){ bobber.y = height-60; bobber.vy *= -0.4; }
+  }
+
+  function drawBobber(){
+    ctx.beginPath(); ctx.fillStyle='#ff2e2e'; ctx.arc(bobber.x, bobber.y,10,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.strokeStyle='#222'; ctx.moveTo(bobber.x,bobber.y); ctx.lineTo(bobber.x,20); ctx.stroke();
+  }
+
+  let last = performance.now();
+  function loop(now){
+    const dt = Math.min((now-last)/16, 4);
+    last = now;
+    update(dt);
+    drawBackground();
+    for(const f of fish) drawFish(f);
+    drawBobber();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  document.getElementById('fishing-bet-button').addEventListener('click', function(){
+    const wager = parseInt(document.getElementById('fishing-apuesta').value)||2000;
+    fetch('{% url "casino:api_play" %}', {
+      method:'POST',
+      headers: {'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken')},
+      body: JSON.stringify({game:'big_bass_splash', apuesta: wager})
+    }).then(r=>r.json()).then(j=>{
+      if(j.success){ document.getElementById('balance-value').innerText = 'Gs. '+(j.new_balance).toLocaleString(); alert(j.message); }
+      else alert(j.error||'Error');
+    });
+  });
+})();
+</script>
+
+{% endblock %}

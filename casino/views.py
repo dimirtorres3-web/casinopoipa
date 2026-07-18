@@ -168,22 +168,16 @@ def dashboard(request):
             "description": "Gira los rodillos y busca la combinación perfecta.",
         },
         {
-            "titulo": "Póker",
-            "icono": "🂡",
-            "url": reverse("casino:poker"),
-            "description": "Estrategia, faroles y cartas altas.",
+            "titulo": "Big Bass Splash",
+            "icono": "🎣",
+            "url": reverse("casino:big_bass_splash"),
+            "description": "Pesca el gran premio en esta tragamonedas de pesca.",
         },
         {
-            "titulo": "Blackjack",
-            "icono": "🃏",
-            "url": reverse("casino:blackjack"),
-            "description": "Acércate a 21 sin pasarte para vencer a la banca.",
-        },
-        {
-            "titulo": "Bingo",
-            "icono": "🎱",
-            "url": reverse("casino:bingo"),
-            "description": "Marca tus números y completa la cartilla primero.",
+            "titulo": "Rise of Olympus",
+            "icono": "⚡",
+            "url": reverse("casino:rise_of_olympus"),
+            "description": "Entra en la mitología y gana favores de los dioses.",
         },
         {
             "titulo": "Ruleta",
@@ -200,9 +194,8 @@ def dashboard(request):
 
 GAME_MULTIPLIERS = {
     "tragamonedas": 2.5,
-    "poker": 2.2,
-    "blackjack": 2.0,
-    "bingo": 2.4,
+    "big_bass_splash": 2.7,
+    "rise_of_olympus": 3.0,
     "ruleta": 2.3,
 }
 
@@ -514,18 +507,21 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
         message = f"Derrota en {game.capitalize()}. Perdiste {apuesta} Gs."
     player.save()
 
+    # Select animation type per game
+    if game in ["big_bass_splash"]:
+        animation_type = "fishing"
+    elif game in ["rise_of_olympus"]:
+        animation_type = "olympus"
+    else:
+        animation_type = "roulette"
+
     response = {
         "game": game,
         "win": win,
         "payout": payout,
         "message": message,
-        "animation": "cards" if game in ["poker", "blackjack"] else "roulette",
+        "animation": animation_type,
     }
-    if game in ["poker", "blackjack"]:
-        response["player_cards"] = deal_cards(2)
-        response["dealer_cards"] = deal_cards(2)
-    if game == "bingo":
-        response["bingo_cards"] = [random.sample([str(i) for i in range(1, 76)], 5) for _ in range(2)]
     return build_response_payload(player, **response)
 
 @login_required
@@ -703,26 +699,19 @@ def cashier(request):
 @login_required
 def tragamonedas(request):
     return render(request, "casino/tragamonedas.html", {"player": request.user})
-
-
-@login_required
-def poker(request):
-    return render(request, "casino/poker.html", {"player": request.user})
-
-
-@login_required
-def blackjack(request):
-    return render(request, "casino/blackjack.html", {"player": request.user})
-
-
-@login_required
-def bingo(request):
-    return render(request, "casino/bingo.html", {"player": request.user})
-
-
 @login_required
 def ruleta(request):
     return render(request, "casino/ruleta.html", {"player": request.user})
+
+
+@login_required
+def big_bass_splash(request):
+    return render(request, "casino/big_bass_splash.html", {"player": request.user})
+
+
+@login_required
+def rise_of_olympus(request):
+    return render(request, "casino/rise_of_olympus.html", {"player": request.user})
 
 
 @login_required

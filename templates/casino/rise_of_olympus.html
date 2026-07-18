@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Rise of Olympus | Casinopoipa{% endblock %}
+{% block content %}
+<div class="game-page">
+  <div class="layout-shell">
+    <header class="topbar fixed-game-header">
+      <div class="brand-hero">
+        <span class="brand-mark">⚡</span>
+        <div>
+          <p>Rise of Olympus</p>
+          <h1>Poderes de los Dioses</h1>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="balance-display glass-panel">
+          <p>Saldo disponible</p>
+          <h2 id="balance-value">Gs. {{ player.saldo|intcomma }}</h2>
+        </div>
+        <a href="{% url 'casino:dashboard' %}" class="btn-secondary">Volver al Menú Principal</a>
+      </div>
+    </header>
+    <main class="game-shell glass-panel olympus-shell">
+      <section class="olympus-stage">
+        <canvas id="olympus-canvas" width="900" height="500"></canvas>
+      </section>
+      <section class="game-controls">
+        <div class="game-status" id="game-status">Apuesta mínima 2.000 Gs.</div>
+        <div class="game-actions">
+          <input id="olympus-apuesta" type="number" min="2000" value="2000" class="form-input" />
+          <button type="button" id="olympus-bet-button" class="btn-primary">Apostar</button>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('olympus-canvas');
+  const ctx = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+
+  let bolts = [];
+  function spawnBolt(){
+    bolts.push({x: Math.random()*width, y: -50, vy: Math.random()*6+6, life: 0});
+  }
+
+  function drawBackground(){
+    const g = ctx.createLinearGradient(0,0,0,height);
+    g.addColorStop(0,'#0b2238');
+    g.addColorStop(1,'#2b4f6f');
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,width,height);
+  }
+
+  function drawBolt(b){
+    ctx.save();
+    ctx.beginPath();
+    ctx.strokeStyle='rgba(255,230,150,'+Math.min(1,b.life/20)+')';
+    ctx.lineWidth=4;
+    ctx.moveTo(b.x,b.y);
+    ctx.lineTo(b.x+10,b.y+40);
+    ctx.lineTo(b.x-10,b.y+80);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  let last = performance.now();
+  function loop(now){
+    const dt = Math.min((now-last)/16,4);
+    last = now;
+    // spawn sometimes
+    if(Math.random()<0.03) spawnBolt();
+    for(const b of bolts){
+      b.vy += 0.6*dt;
+      b.y += b.vy*dt;
+      b.life += dt;
+    }
+    bolts = bolts.filter(b=>b.y < height+100 && b.life<120);
+
+    drawBackground();
+    for(const b of bolts) drawBolt(b);
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  document.getElementById('olympus-bet-button').addEventListener('click', function(){
+    const wager = parseInt(document.getElementById('olympus-apuesta').value)||2000;
+    fetch('{% url "casino:api_play" %}', {
+      method:'POST',
+      headers: {'Content-Type':'application/json','X-CSRFToken': getCookie('csrftoken')},
+      body: JSON.stringify({game:'rise_of_olympus', apuesta: wager})
+    }).then(r=>r.json()).then(j=>{
+      if(j.success){ document.getElementById('balance-value').innerText = 'Gs. '+(j.new_balance).toLocaleString(); alert(j.message); }
+      else alert(j.error||'Error');
+    });
+  });
+})();
+</script>
+
+{% endblock %}
