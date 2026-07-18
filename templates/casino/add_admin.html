@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Promover Administrador | Casinopoipa{% endblock %}
+{% block content %}
+<div class="dashboard-page">
+    <div class="layout-shell">
+        <header class="topbar">
+            <div class="brand-hero">
+                <span class="brand-mark">🛠️</span>
+                <div>
+                    <p>Promover Usuario</p>
+                    <h1>Dar permisos de administrador</h1>
+                </div>
+            </div>
+            <a href="{% url 'casino:admin_panel' %}" class="btn-ghost">Volver al Panel</a>
+        </header>
+        <main class="admin-shell glass-panel">
+            <section style="max-width:640px;margin:24px auto;">
+                <h2>Promover a administrador</h2>
+                <p>Escribe el correo del jugador que quieres convertir en administrador.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <label for="email">Correo electrónico</label>
+                    <input id="email" name="email" class="form-input" placeholder="usuario@correo.com" required />
+                    <div style="margin-top:12px;">
+                        <button class="btn-primary">Promover</button>
+                        <a href="{% url 'casino:clientes' %}" class="btn-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+</div>
+{% endblock %}

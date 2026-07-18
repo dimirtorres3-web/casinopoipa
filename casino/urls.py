@@ -17,6 +17,7 @@ urlpatterns = [
     path("cajero/", views.cashier, name="cajero"),
     path("admin-panel/", views.admin_panel, name="admin_panel"),
     path("admin-panel/clientes/", views.clientes, name="clientes"),
+    path("admin-panel/add-admin/", views.add_admin, name="add_admin"),
     path("admin-panel/clientes/<int:player_id>/toggle/", views.toggle_player_status, name="toggle_player_status"),
     path("admin-panel/aprobar/<int:transaction_id>/", views.approve_transaction, name="approve_transaction"),
     path("admin-panel/reembolso/<int:transaction_id>/", views.refund_transaction, name="refund_transaction"),

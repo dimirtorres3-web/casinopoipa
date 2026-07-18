@@ -728,6 +728,29 @@ def clientes(request):
 
 @login_required
 @user_passes_test(is_admin)
+def add_admin(request):
+    if request.method == "POST":
+        email = request.POST.get("email", "").strip().lower()
+        if not email:
+            messages.error(request, "Ingresa un correo válido.")
+            return redirect("casino:add_admin")
+        try:
+            player = Player.objects.get(email__iexact=email)
+        except Player.DoesNotExist:
+            messages.error(request, "No se encontró un usuario con ese correo.")
+            return redirect("casino:add_admin")
+
+        player.is_staff = True
+        player.is_superuser = True
+        player.save(update_fields=["is_staff", "is_superuser"])
+        messages.success(request, f"{email} ahora tiene privilegios de administrador.")
+        return redirect("casino:clientes")
+
+    return render(request, "casino/add_admin.html")
+
+
+@login_required
+@user_passes_test(is_admin)
 def toggle_player_status(request, player_id):
     player = get_object_or_404(Player, id=player_id)
     player.is_active = not player.is_active
