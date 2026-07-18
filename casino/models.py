@@ -66,7 +66,7 @@ class Player(AbstractUser):
 class BankAccount(models.Model):
     player = models.OneToOneField(Player, on_delete=models.CASCADE, related_name="bank_account")
     banco = models.CharField(max_length=64, verbose_name=_("Banco de preferencia"))
-    alias = models.CharField(max_length=64, verbose_name=_("Alias"), help_text=_("Ej. Ahorros personal"))
+    alias = models.CharField(max_length=64, verbose_name=_("Alias"), help_text=_("Ej. Ahorros personal"), blank=True, null=True)
     tipo_cuenta = models.CharField(max_length=32, verbose_name=_("Tipo de Cuenta"))
     numero_cuenta = models.CharField(max_length=32, verbose_name=_("Número de Cuenta"))
     titular = models.CharField(max_length=128, verbose_name=_("Nombre del Titular"))
