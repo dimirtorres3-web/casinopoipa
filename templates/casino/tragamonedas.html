@@ -2,14 +2,14 @@
 {% load humanize %}
 {% block title %}Tragamonedas | Casinopoipa{% endblock %}
 {% block content %}
-    <div class="game-page">
+    <div class="game-page" data-game="{{ game_slug }}">
         <div class="layout-shell">
             <header class="topbar fixed-game-header">
                 <div class="brand-hero">
                     <span class="brand-mark">🎰</span>
                     <div>
                         <p>Tragamonedas</p>
-                        <h1>Five Star Deluxe</h1>
+                        <h1>{{ game_meta.title }}</h1>
                     </div>
                 </div>
                 <div class="header-actions">
@@ -31,10 +31,9 @@
                             <div class="slot-hero-visual" aria-hidden="true"></div>
                         </div>
                         <div class="jackpot-strip">
-                            <div class="jackpot-pill"><span>JOKER</span><strong>1.240.000</strong></div>
-                            <div class="jackpot-pill"><span>GRAND</span><strong>540.000</strong></div>
-                            <div class="jackpot-pill"><span>MAJOR</span><strong>220.000</strong></div>
-                            <div class="jackpot-pill"><span>MINOR</span><strong>98.000</strong></div>
+                            {% for pot in game_meta.jackpots %}
+                            <div class="jackpot-pill"><span>{{ pot }}</span><strong>--</strong></div>
+                            {% endfor %}
                         </div>
                     </div>
                     <div class="slot-machine-stage">

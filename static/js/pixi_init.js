@@ -4,9 +4,13 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
     }
 
-    function createPixiIn(containerSelector) {
-        const container = document.querySelector(containerSelector);
+    function createPixiIn(container) {
+        // container is an Element
         if (!container) return null;
+
+        // find game slug from closest .game-page or data attribute
+        const gamePage = container.closest('.game-page');
+        const gameSlug = (gamePage && gamePage.dataset && gamePage.dataset.game) || 'five-star';
 
         // Clear and prepare
         container.innerHTML = '';
@@ -24,12 +28,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const rotor = new PIXI.Container();
         app.stage.addChild(rotor);
 
-        const ring = new PIXI.Graphics();
-        ring.beginFill(0x000000, 0.15);
-        ring.drawEllipse(0, 0, 1, 1);
-        ring.endFill();
-        rotor.addChild(ring);
-
         function rebuild() {
             rotor.removeChildren();
             const w = app.renderer.width;
@@ -39,23 +37,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const radius = Math.min(w, h) * 0.36;
 
+            const palette = {
+                'five-star': {accent: 0xffb94d, marks: 0xffd9a8, bg: 0x0b0b10},
+                'joker-jackpot': {accent: 0xd86aff, marks: 0xff6ad1, bg: 0x2b0b2e},
+                'betty-boris-boo': {accent: 0xd9c27a, marks: 0xffe3b8, bg: 0x0c0810},
+                '777-strike': {accent: 0xff4d4d, marks: 0xffb4b4, bg: 0x12090a},
+            }[gameSlug] || {accent: 0xffb94d, marks: 0xffd9a8, bg: 0x0b0b10};
+
             const bg = new PIXI.Graphics();
-            bg.beginFill(0x000000, 0.12);
+            bg.beginFill(palette.bg, 0.9);
             bg.drawRoundedRect(-w / 2 + 8, -h / 2 + 8, w - 16, h - 16, 18);
             bg.endFill();
             app.stage.addChild(bg);
 
             const ringG = new PIXI.Graphics();
-            ringG.lineStyle(4, 0xffb94d, 0.18);
+            ringG.lineStyle(4, palette.accent, 0.18);
             ringG.drawCircle(0, 0, radius + 6);
             rotor.addChild(ringG);
 
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 12; i++) {
                 const mark = new PIXI.Graphics();
-                mark.beginFill(0xffd9a8);
-                mark.drawRoundedRect(-6, -radius, 12, 24, 6);
+                mark.beginFill(palette.marks);
+                mark.drawRoundedRect(-6, -radius, 12, 28, 6);
                 mark.endFill();
-                const ang = (i / 10) * Math.PI * 2;
+                const ang = (i / 12) * Math.PI * 2;
                 mark.x = Math.cos(ang) * radius;
                 mark.y = Math.sin(ang) * radius;
                 mark.rotation = ang + Math.PI / 2;
@@ -63,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const center = new PIXI.Graphics();
-            center.beginFill(0xffffff, 0.95);
+            center.beginFill(0xffffff, 0.98);
             center.drawCircle(0, 0, Math.max(6, Math.floor(radius * 0.08)));
             center.endFill();
             rotor.addChild(center);
@@ -72,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
         rebuild();
 
         app.ticker.add((delta) => {
-            rotor.rotation += 0.01 * delta;
+            rotor.rotation += 0.008 * delta;
         });
 
         window.addEventListener('resize', () => {
@@ -82,6 +87,5 @@ document.addEventListener('DOMContentLoaded', function () {
         return app;
     }
 
-    createPixiIn('.slot-canvas');
-    createPixiIn('.roulette-canvas');
+    document.querySelectorAll('.slot-canvas, .roulette-canvas').forEach((el) => createPixiIn(el));
 });

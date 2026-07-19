@@ -13,6 +13,7 @@ urlpatterns = [
     path("api/play/", views.api_play, name="api_play"),
     path("api/withdraw/", views.api_withdraw, name="api_withdraw"),
     path("tragamonedas/", views.tragamonedas, name="tragamonedas"),
+    path("tragamonedas/<slug:slug>/", views.tragamonedas, name="tragamonedas_slug"),
     path("ruleta/", views.ruleta, name="ruleta"),
     path("poker/", views.poker, name="poker"),
     path("blackjack/", views.blackjack, name="blackjack"),

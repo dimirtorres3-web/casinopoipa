@@ -160,26 +160,30 @@ def dashboard(request):
         {
             "titulo": "Five Star",
             "icono": "⭐",
-            "url": reverse("casino:tragamonedas"),
-            "description": "Frutas premium con rodillos brillantes y modo turbo.",
+            "slug": "five-star",
+            "url": reverse("casino:tragamonedas_slug", kwargs={"slug": "five-star"}),
+            "cover": "/static/img/games/five-star.jpg",
         },
         {
             "titulo": "Joker Jackpot",
             "icono": "🃏",
-            "url": reverse("casino:tragamonedas"),
-            "description": "Jackpots multi-nivel con multiplicadores flotantes.",
+            "slug": "joker-jackpot",
+            "url": reverse("casino:tragamonedas_slug", kwargs={"slug": "joker-jackpot"}),
+            "cover": "/static/img/games/joker-jackpot.jpg",
         },
         {
             "titulo": "Betty, Boris & Boo",
             "icono": "🕯️",
-            "url": reverse("casino:tragamonedas"),
-            "description": "Aventura gótica con ambientación de fantasía oscura.",
+            "slug": "betty-boris-boo",
+            "url": reverse("casino:tragamonedas_slug", kwargs={"slug": "betty-boris-boo"}),
+            "cover": "/static/img/games/betty-boris-boo.jpg",
         },
         {
             "titulo": "777 Strike",
             "icono": "💎",
-            "url": reverse("casino:tragamonedas"),
-            "description": "Tabla de pagos dinámica y premios en tiempo real.",
+            "slug": "777-strike",
+            "url": reverse("casino:tragamonedas_slug", kwargs={"slug": "777-strike"}),
+            "cover": "/static/img/games/777-strike.jpg",
         },
         {
             "titulo": "Poker Royale",
@@ -198,6 +202,7 @@ def dashboard(request):
         "player": player,
         "juegos": juegos,
     })
+
 
 GAME_MULTIPLIERS = {
     "tragamonedas": 2.5,
@@ -749,8 +754,16 @@ def cashier(request):
     )
 
 @login_required
-def tragamonedas(request):
-    return render(request, "casino/tragamonedas.html", {"player": request.user})
+def tragamonedas(request, slug=None):
+    # Provide per-game metadata so templates and frontend can render unique visuals
+    default = {
+        "five-star": {"title": "Five Star Deluxe", "theme": "stars", "jackpots": ["JOKER","GRAND","MAJOR","MINOR"]},
+        "joker-jackpot": {"title": "Joker Jackpot", "theme": "joker", "jackpots": ["JOKER","GRAND","MAJOR","MINOR"]},
+        "betty-boris-boo": {"title": "Betty, Boris & Boo", "theme": "gothic", "jackpots": ["GOLD","SILVER","BRONZE","MINOR"]},
+        "777-strike": {"title": "777 Strike", "theme": "seven", "jackpots": ["CROWN","ROYAL","STRIKE","MINOR"]},
+    }
+    meta = default.get(slug, default["five-star"]) if slug else default["five-star"]
+    return render(request, "casino/tragamonedas.html", {"player": request.user, "game_slug": slug or "five-star", "game_meta": meta})
 @login_required
 def ruleta(request):
     return render(request, "casino/ruleta.html", {"player": request.user})
