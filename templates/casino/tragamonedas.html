@@ -23,53 +23,115 @@
                     <a href="{% url 'casino:dashboard' %}" class="btn-secondary">Volver</a>
                 </div>
             </header>
-            <main class="game-shell glass-panel">
-                <section class="premium-slot-shell">
-                    <div class="slot-hero-panel">
-                        <div class="slot-hero-title">
-                            <span class="slot-kicker">Premium casino</span>
-                            <div class="slot-hero-visual" aria-hidden="true"></div>
+            <main class="game-shell glass-panel game-shell--five-star">
+                <section class="five-star-shell">
+                    <div class="five-star-header">
+                        <div class="five-star-info">
+                            <div class="slot-label-group">
+                                <span class="slot-label">Five Star Deluxe</span>
+                                <strong class="slot-subtitle">Máquina premium de 60 FPS</strong>
+                            </div>
+                            <div class="slot-meta-pill">8 símbolos oficiales · Payout elevado</div>
                         </div>
-                        <div class="jackpot-strip">
-                            {% for pot in game_meta.jackpots %}
-                            <div class="jackpot-pill"><span>{{ pot }}</span><strong>--</strong></div>
-                            {% endfor %}
+                        <div class="balance-inline">
+                            <div class="balance-chip">
+                                <span>SALDO PYG</span>
+                                <strong id="balance-value">Gs. {{ player.saldo|intcomma }}</strong>
+                            </div>
+                            <button type="button" class="btn-primary btn-small" id="quick-deposit-btn">Depositar</button>
                         </div>
                     </div>
-                    <div class="slot-machine-stage">
-                        <div class="slot-reel-board">
-                            <div class="slot-reel-card">
-                                <canvas id="slot-canvas-1" class="slot-canvas"></canvas>
-                            </div>
-                            <div class="slot-reel-card">
-                                <canvas id="slot-canvas-2" class="slot-canvas"></canvas>
-                            </div>
-                            <div class="slot-reel-card">
-                                <canvas id="slot-canvas-3" class="slot-canvas"></canvas>
+
+                    <div class="five-star-layout">
+                        <div class="five-star-view">
+                            <div id="five-star-reel-stage" class="five-star-pixi-stage" aria-label="Escena de tragamonedas Five Star"></div>
+                            <div class="five-star-badge-panel">
+                                <div class="five-star-badge">
+                                    <span>Jackpot</span>
+                                    <strong>5,200,000</strong>
+                                </div>
+                                <div class="five-star-badge">
+                                    <span>Bonificación</span>
+                                    <strong>Coin Star</strong>
+                                </div>
                             </div>
                         </div>
-                        <aside class="slot-side-panel">
-                            <div class="paytable-card">
-                                <h3>Tabla de pagos</h3>
-                                <ul>
-                                    <li><span>⭐</span> 3x = 15x</li>
-                                    <li><span>7</span> 3x = 25x</li>
-                                    <li><span>🍒</span> 3x = 10x</li>
-                                    <li><span>🔔</span> 3x = 8x</li>
-                                </ul>
-                            </div>
-                            <div class="controls-card">
-                                <div class="control-buttons-row">
-                                    <button type="button" id="slot-turbo-btn" class="control-chip">⚡ Turbo</button>
-                                    <button type="button" id="slot-auto-btn" class="control-chip">Auto</button>
+
+                        <aside class="five-star-side">
+                            <div class="paytable-card paytable-card--visual">
+                                <div class="paytable-card__header">
+                                    <h3>Tabla de pagos</h3>
                                 </div>
-                                <label class="control-label" for="slot-apuesta">Apuesta</label>
-                                <input id="slot-apuesta" type="number" min="2000" value="2000" class="form-input" />
-                                <button type="button" id="slot-bet-button" class="btn-primary btn-block">Girar</button>
-                                <span id="slots-status" class="status-pill">Listo para apostar</span>
-                                <div id="slots-bonus" class="slot-bonus-indicator hidden">BONO DISPONIBLE</div>
+                                <div class="paytable-grid">
+                                    <div class="paytable-row">
+                                        <span class="symbol-icon symbol-icon--seven">7</span>
+                                        <span class="symbol-info">7 Rojo</span>
+                                        <strong>3x = 25x</strong>
+                                    </div>
+                                    <div class="paytable-row">
+                                        <span class="symbol-icon symbol-icon--coin">★</span>
+                                        <span class="symbol-info">Five Star Coin</span>
+                                        <strong>3x = 20x</strong>
+                                    </div>
+                                    <div class="paytable-row">
+                                        <span class="symbol-icon symbol-icon--watermelon">🍉</span>
+                                        <span class="symbol-info">Sandía</span>
+                                        <strong>3x = 15x</strong>
+                                    </div>
+                                    <div class="paytable-row">
+                                        <span class="symbol-icon symbol-icon--grapes">🍇</span>
+                                        <span class="symbol-info">Uvas</span>
+                                        <strong>3x = 12x</strong>
+                                    </div>
+                                    <div class="paytable-row">
+                                        <span class="symbol-icon symbol-icon--plum">🍑</span>
+                                        <span class="symbol-info">Ciruela</span>
+                                        <strong>3x = 10x</strong>
+                                    </div>
+                                    <div class="paytable-row">
+                                        <span class="symbol-icon symbol-icon--orange">🍊</span>
+                                        <span class="symbol-info">Naranja</span>
+                                        <strong>3x = 8x</strong>
+                                    </div>
+                                    <div class="paytable-row">
+                                        <span class="symbol-icon symbol-icon--lemon">🍋</span>
+                                        <span class="symbol-info">Limón</span>
+                                        <strong>3x = 6x</strong>
+                                    </div>
+                                    <div class="paytable-row">
+                                        <span class="symbol-icon symbol-icon--cherries">🍒</span>
+                                        <span class="symbol-info">Cerezas</span>
+                                        <strong>3x = 5x</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="controls-card controls-card--five-star">
+                                <div class="controls-top-row">
+                                    <label class="control-label" for="slot-apuesta">Apuesta</label>
+                                    <input id="slot-apuesta" type="number" min="2000" value="2000" class="form-input" />
+                                </div>
+                                <div class="control-buttons-row control-buttons-row--full">
+                                    <button type="button" id="slot-auto-btn" class="control-chip">Auto</button>
+                                    <button type="button" id="slot-turbo-btn" class="control-chip">Turbo</button>
+                                </div>
+                                <button type="button" id="slot-bet-button" class="btn-primary btn-spin">GIRAR</button>
+                                <div class="status-footer">
+                                    <span id="slots-status" class="status-pill">Listo para girar</span>
+                                    <span id="bonus-info" class="status-pill status-pill--soft">Bonos: {{ player.bonus_balance|intcomma }}</span>
+                                </div>
                             </div>
                         </aside>
+                    </div>
+
+                    <div id="quick-deposit-modal" class="modal hidden" aria-hidden="true">
+                        <div class="modal-panel">
+                            <button type="button" class="modal-close" id="deposit-modal-close">×</button>
+                            <h3>Recarga rápida</h3>
+                            <p>Ingresa el monto y continúa jugando sin salir.</p>
+                            <input id="deposit-amount" type="number" min="10000" value="10000" class="form-input" />
+                            <button type="button" id="deposit-confirm-btn" class="btn-primary btn-block">Ir a depositar</button>
+                        </div>
                     </div>
                 </section>
             </main>
