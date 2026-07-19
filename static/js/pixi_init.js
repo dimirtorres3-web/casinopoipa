@@ -34,8 +34,81 @@ document.addEventListener('DOMContentLoaded', function () {
             const h = app.renderer.height;
             rotor.x = w / 2;
             rotor.y = h / 2;
+            // --- CONFIGURACIÓN DE EMOJIS POR CADA JUEGO ORIGINAL ---
+    let symbols = [];
+    if (gameSlug === 'frutas-de-fuego-777') {
+        symbols = [
+            ["👑7️⃣🔥", "🍉", "🍋", "🍒"],
+            ["🪙⭐", "🍒", "🍇", "🍊"],
+            ["👑7️⃣🔥", "🍇", "🍉", "🪙⭐"]
+        ];
+    } else if (gameSlug === 'palacio-arlequin') {
+        symbols = [
+            ["🃏✨", "🔔", "💎", "❤️"],
+            ["🟪", "🔔", "🃏✨", "💎"],
+            ["🃏✨", "❤️", "🟪", "🔔"]
+        ];
+    } else if (gameSlug === 'mansion-embrujada') {
+        symbols = [
+            ["👻💖", "☎️👑", "🕯️🔱", "💚💎"],
+            ["👻💙", "📖🔮", "💜💎", "☎️👑"],
+            ["👻💚", "🕯️🔱", "📖🔮", "👻💖"]
+        ];
+    } else if (gameSlug === 'coronas-fortuna') {
+        symbols = [
+            ["👑A️⃣", "👑K️⃣", "🍋", "🍒"],
+            ["👑Q️⃣", "👑J️⃣", "🍒", "👑A️⃣"],
+            ["👑K️⃣", "👑A️⃣", "👑Q️⃣", "🍋"]
+        ];
+    }
 
-            const radius = Math.min(w, h) * 0.36;
+           // --- CONFIGURACIÓN DE EMOJIS POR CADA JUEGO ORIGINAL ---
+    let symbols = [];
+    if (gameSlug === 'frutas-de-fuego-777') {
+        symbols = [
+            ["👑7️⃣🔥", "🍉", "🍋", "🍒"],
+            ["🪙⭐", "🍒", "🍇", "🍊"],
+            ["👑7️⃣🔥", "🍇", "🍉", "🪙⭐"]
+        ];
+    } else if (gameSlug === 'palacio-arlequin') {
+        symbols = [
+            ["🃏✨", "🔔", "💎", "❤️"],
+            ["🟪", "🔔", "🃏✨", "💎"],
+            ["🃏✨", "❤️", "🟪", "🔔"]
+        ];
+    } else if (gameSlug === 'mansion-embrujada') {
+        symbols = [
+            ["👻💖", "☎️👑", "🕯️🔱", "💚💎"],
+            ["👻💙", "📖🔮", "💜💎", "☎️👑"],
+            ["👻💚", "🕯️🔱", "📖🔮", "👻💖"]
+        ];
+    } else if (gameSlug === 'coronas-fortuna') {
+        symbols = [
+            ["👑A️⃣", "👑K️⃣", "🍋", "🍒"],
+            ["👑Q️⃣", "👑J️⃣", "🍒", "👑A️⃣"],
+            ["👑K️⃣", "👑A️⃣", "👑Q️⃣", "🍋"]
+        ];
+    }
+
+    // --- RENDERIZADOR DE FIGURAS EN LOS RODILLOS ---
+    if (symbols.length > 0) {
+        symbols.forEach((column, columnIndex) => {
+            column.forEach((emoji, rowIndex) => {
+                const style = new PIXI.TextStyle({
+                    fontSize: 54, // Tamaño ideal para celulares
+                    fontFamily: ['Segoe UI Emoji', 'Apple Color Emoji', 'Arial']
+                });
+                const textIcon = new PIXI.Text(emoji, style);
+                
+                // Alineación simétrica en los 3 rieles de la pantalla
+                textIcon.anchor.set(0.5);
+                textIcon.x = (columnIndex - 1) * (w * 0.28);
+                textIcon.y = (rowIndex - 1.5) * (h * 0.22);
+                
+                rotor.addChild(textIcon);
+            });
+        });
+    }
 
             const palette = {
                 'frutas-de-fuego-777': {accent: 0xff6a6a, marks: 0xffd9a8, bg: 0x3d1a1f},
