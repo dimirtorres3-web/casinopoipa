@@ -55,6 +55,28 @@ class Player(AbstractUser):
         verbose_name=_("Jugadas consecutivas de tragamonedas"),
         help_text=_("Contador acumulado de giros de tragamonedas para habilitar jackpots de retención."),
     )
+    bonus_balance = models.DecimalField(
+        max_digits=14,
+        decimal_places=0,
+        default=0,
+        verbose_name=_("Saldo de bono"),
+    )
+    bonus_rollover = models.DecimalField(
+        max_digits=14,
+        decimal_places=0,
+        default=0,
+        verbose_name=_("Rollover acumulado"),
+    )
+    bonus_rollover_target = models.DecimalField(
+        max_digits=14,
+        decimal_places=0,
+        default=0,
+        verbose_name=_("Meta de rollover"),
+    )
+    free_spins = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_("Giros gratis disponibles"),
+    )
 
     REQUIRED_FIELDS = ["email", "nombre", "apellido", "edad", "sexo", "estado_civil"]
 

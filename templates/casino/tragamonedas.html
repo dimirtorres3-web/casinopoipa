@@ -16,7 +16,10 @@
                     <div class="balance-display glass-panel">
                         <p>Saldo disponible</p>
                         <h2 id="balance-value">Gs. {{ player.saldo|intcomma }}</h2>
+                        <p id="bonus-balance" style="margin-top:6px; color:#ffd9a8;">Bono: Gs. {{ player.bonus_balance|intcomma }}</p>
+                        <p id="free-spins-indicator" style="margin-top:4px; color:#8be28b;">Free spins: {{ player.free_spins }}</p>
                     </div>
+                    <button type="button" class="btn-primary" id="quick-deposit-btn">Depositar</button>
                     <a href="{% url 'casino:dashboard' %}" class="btn-secondary">Volver al Menú Principal</a>
                 </div>
             </header>

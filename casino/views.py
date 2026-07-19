@@ -180,6 +180,17 @@ GAME_MULTIPLIERS = {
     "ruleta": 2.3,
 }
 
+SLOT_TEMPLATES = [
+    {"id": "aurora", "name": "Aurora Glow", "theme": "Brillo nocturno", "symbol": "✨"},
+    {"id": "golden", "name": "Golden Rush", "theme": "Oro premium", "symbol": "💰"},
+    {"id": "dragon", "name": "Dragon Flame", "theme": "Fuego y fortuna", "symbol": "🐉"},
+]
+
+BONUS_RTP_WEIGHTS = {
+    "low": [(10, 35), (20, 30), (40, 20), (80, 15)],
+    "medium": [(15, 30), (25, 35), (50, 25), (100, 10)],
+}
+
 SLOT_SYMBOLS = ["🍒", "7", "🍋", "🔔", "🍉"]
 BONUS_SYMBOL = "BONO"
 ROULETTE_SLOTS = [
@@ -284,6 +295,10 @@ def build_response_payload(player, **extra):
     return JsonResponse({
         "success": True,
         "new_balance": int(player.saldo),
+        "bonus_balance": int(player.bonus_balance),
+        "free_spins": player.free_spins,
+        "bonus_rollover": int(player.bonus_rollover),
+        "bonus_rollover_target": int(player.bonus_rollover_target),
         **extra,
     })
 
@@ -294,6 +309,14 @@ def first_withdrawal_threshold(player):
 
 def has_existing_withdrawals(player):
     return Transaction.objects.filter(player=player, tipo="retiro").exists()
+
+
+def apply_bonus_deposit(player, amount):
+    if player.bonus_balance <= 0 and player.bonus_rollover_target <= 0:
+        player.bonus_balance += amount * 2
+        player.bonus_rollover = 0
+        player.bonus_rollover_target = amount * 3
+    return player
 
 
 def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
@@ -377,6 +400,9 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
 
         with db_transaction.atomic():
             player.slot_play_count += 1
+            if player.free_spins > 0 and not bonus_spin:
+                player.free_spins -= 1
+                bonus_spin = True
             win = random.random() < 0.40
             payout = 0
             bonus_active = False
@@ -385,6 +411,13 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
                 payout = int(apuesta * GAME_MULTIPLIERS[game])
                 player.saldo += Decimal(payout)
                 bonus_active = random.random() < 0.05
+                if bonus_active:
+                    player.free_spins += random.randint(1, 2)
+                    bonus_info = {
+                        "free_spins": player.free_spins,
+                        "accumulated_percentage": 0,
+                        "bonus_wager": int(apuesta),
+                    }
                 if bonus_active:
                     free_spins = random.randint(1, 5)
                     bonus_info = {
@@ -638,6 +671,10 @@ def cashier(request):
                 transaction.estado = "pendiente"
                 transaction.status = "pendiente"
                 transaction.save()
+                if not player.recibio_regalo and player.transactions.count() <= 1:
+                    apply_bonus_deposit(player, int(transaction.monto or 0))
+                    player.recibio_regalo = True
+                    player.save()
                 messages.success(request, "Solicitud de recarga enviada. Espera aprobación del cajero.")
                 return redirect("casino:dashboard")
         elif action == "guardar_banco":

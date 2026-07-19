@@ -340,6 +340,84 @@ textarea {
         font-size: 2rem;
     }
 
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 12px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.08);
+        color: #f2f2f6;
+        font-size: 0.9rem;
+        border: 1px solid rgba(255,126,34,0.16);
+    }
+
+    .premium-machine {
+        position: relative;
+        overflow: hidden;
+        border-radius: 28px;
+        padding: 22px;
+        background: linear-gradient(135deg, rgba(211,84,0,0.22), rgba(15,15,18,0.95));
+        border: 1px solid rgba(255,126,34,0.2);
+        box-shadow: 0 24px 60px rgba(0,0,0,0.28);
+    }
+
+    .premium-machine::after {
+        content: '';
+        position: absolute;
+        inset: auto -20% -30% auto;
+        width: 180px;
+        height: 180px;
+        background: radial-gradient(circle, rgba(255, 183, 77, 0.35), transparent 70%);
+        filter: blur(24px);
+    }
+
+    .corner-balance {
+        position: fixed;
+        top: 18px;
+        right: 18px;
+        z-index: 60;
+        padding: 12px 16px;
+        border-radius: 16px;
+        background: rgba(15, 15, 18, 0.95);
+        border: 1px solid rgba(255, 126, 34, 0.28);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+        min-width: 200px;
+    }
+
+    .corner-balance p {
+        margin: 0;
+        color: #b8b7c0;
+        font-size: 0.82rem;
+    }
+
+    .corner-balance strong {
+        display: block;
+        margin-top: 4px;
+        font-size: 1rem;
+        color: #fff;
+    }
+
+    .insufficient-popup {
+        position: fixed;
+        left: 50%;
+        bottom: 24px;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, rgba(211, 84, 0, 0.98), rgba(221, 120, 27, 0.96));
+        color: #fff;
+        padding: 14px 20px;
+        border-radius: 999px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+        z-index: 80;
+        animation: pulse 1s infinite;
+        font-weight: 700;
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: translateX(-50%) scale(1); }
+        50% { transform: translateX(-50%) scale(1.03); }
+    }
+
     .slots-stage,
     .roulette-board,
     .table-board,

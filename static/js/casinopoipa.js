@@ -29,8 +29,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateBalance(value) {
         const balanceEl = document.getElementById('balance-value');
-        if (!balanceEl) return;
-        balanceEl.textContent = `Gs. ${new Intl.NumberFormat('es-PY').format(value)}`;
+        const cornerEl = document.getElementById('corner-balance-value');
+        const formatted = `Gs. ${new Intl.NumberFormat('es-PY').format(value)}`;
+        if (balanceEl) {
+            balanceEl.textContent = formatted;
+        }
+        if (cornerEl) {
+            cornerEl.textContent = formatted;
+        }
+    }
+
+    function showInsufficientFunds() {
+        if (document.getElementById('insufficient-popup')) return;
+        const popup = document.createElement('div');
+        popup.id = 'insufficient-popup';
+        popup.className = 'insufficient-popup';
+        popup.textContent = 'Saldo insuficiente. Por favor, realiza un depósito';
+        document.body.appendChild(popup);
+        setTimeout(() => popup.remove(), 2200);
+    }
+
+    function openQuickDeposit() {
+        window.location.href = '/cajero/?tab=deposito';
     }
 
     function animateBalanceChange(current, target) {
@@ -107,6 +127,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const blackjackButton = document.getElementById('blackjack-bet-button');
     const bingoButton = document.getElementById('bingo-bet-button');
     const ruletaButton = document.getElementById('ruleta-bet-button');
+    const quickDepositButtons = document.querySelectorAll('#quick-deposit-btn');
     const rouletteCanvas = document.getElementById('roulette-canvas');
     const rouletteGrid = document.getElementById('roulette-grid');
     const selectedRouletteChoiceEl = document.getElementById('selected-roulette-choice');
@@ -503,12 +524,21 @@ document.addEventListener('DOMContentLoaded', function () {
         updateBalance(result.new_balance);
     }
 
+    quickDepositButtons.forEach((button) => {
+        button.addEventListener('click', openQuickDeposit);
+    });
+
     if (slotButton) {
         slotButton.addEventListener('click', function () {
             const storedWager = currentSlotBonus && currentSlotBonus.remaining > 0 ? currentSlotBonus.wager : Number(document.getElementById('slot-apuesta').value || 0);
             const isBonusSpin = currentSlotBonus && currentSlotBonus.remaining > 0;
             if (!isBonusSpin && storedWager < 2000) {
                 showStatus('La apuesta mínima es de 2.000 Gs.', 'warning');
+                return;
+            }
+            const currentBalance = Number(document.getElementById('balance-value')?.textContent?.replace(/[^0-9]/g, '') || 0);
+            if (storedWager > currentBalance) {
+                showInsufficientFunds();
                 return;
             }
             showStatus(isBonusSpin ? 'Ejecutando giro gratis...' : 'GIRANDO...', 'success');
@@ -572,8 +602,13 @@ document.addEventListener('DOMContentLoaded', function () {
     if (ruletaButton) {
         ruletaButton.addEventListener('click', function () {
             const apuesta = Number(document.getElementById('ruleta-apuesta').value || 0);
+            const currentBalance = Number(document.getElementById('balance-value')?.textContent?.replace(/[^0-9]/g, '') || 0);
             if (!selectedRouletteChoices.length) {
                 showStatus('Selecciona al menos un número de ruleta antes de apostar.');
+                return;
+            }
+            if (apuesta > currentBalance) {
+                showInsufficientFunds();
                 return;
             }
             showStatus('Girando la ruleta...');
