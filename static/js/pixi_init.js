@@ -28,16 +28,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const rotor = new PIXI.Container();
         app.stage.addChild(rotor);
 
-        function rebuild() {
-            rotor.removeChildren();
-            const w = app.renderer.width;
-            const h = app.renderer.height;
-            rotor.x = w / 2;
-            rotor.y = h / 2;
-           // --- CONFIGURACIÓN DE EMOJIS COMPATIBLE Y BLINDADA ---
+       function rebuild() {
+    rotor.removeChildren();
+    const w = app.renderer.width;
+    const h = app.renderer.height;
+    rotor.x = w / 2;
+    rotor.y = h / 2;
+
+    // --- 1. MATRICES DE EMOJIS PARA TODOS LOS JUEGOS (INCLUYE RULETA) ---
     let symbols = [];
     
-    // Usamos .includes() para que detecte el juego aunque cambien los guiones
     if (!gameSlug || gameSlug.includes('frutas') || gameSlug.includes('777')) {
         symbols = [
             ["👑7️⃣🔥", "🍉", "🍋", "🍒"],
@@ -62,81 +62,57 @@ document.addEventListener('DOMContentLoaded', function () {
             ["👑Q️⃣", "👑J️⃣", "🍒", "👑A️⃣"],
             ["👑K️⃣", "👑A️⃣", "👑Q️⃣", "🍋"]
         ];
-    } else {
-        // COMODÍN DE SEGURIDAD: Si falla el nombre, carga frutas para no quedar en blanco
+    } else if (gameSlug.includes('ruleta') || gameSlug.includes('imperial')) {
+        // --- AQUÍ ESTÁ TU RULETA IMPERIAL ---
         symbols = [
-            ["👑7️⃣🔥", "🍉", "🍋", "🍒"],
-            ["🪙⭐", "🍒", "🍇", "🍊"],
-            ["👑7️⃣🔥", "🍇", "🍉", "🪙⭐"]
+            ["🔄🎡", "🔴1️⃣", "⚫2️⃣", "🟢0️⃣"],
+            ["🎰 fichas", "🔴3️⃣", "⚫4️⃣", "🔴5️⃣"],
+            ["🔄 de giro", "⚫6️⃣", "🔴7️⃣", "⚫8️⃣"]
         ];
     }
 
-           // --- CONFIGURACIÓN DE EMOJIS POR CADA JUEGO ORIGINAL ---
-    let symbols = [];
-    if (gameSlug === 'frutas-de-fuego-777') {
-        symbols = [
-            ["👑7️⃣🔥", "🍉", "🍋", "🍒"],
-            ["🪙⭐", "🍒", "🍇", "🍊"],
-            ["👑7️⃣🔥", "🍇", "🍉", "🪙⭐"]
-        ];
-    } else if (gameSlug === 'palacio-arlequin') {
-        symbols = [
-            ["🃏✨", "🔔", "💎", "❤️"],
-            ["🟪", "🔔", "🃏✨", "💎"],
-            ["🃏✨", "❤️", "🟪", "🔔"]
-        ];
-    } else if (gameSlug === 'mansion-embrujada') {
-        symbols = [
-            ["👻💖", "☎️👑", "🕯️🔱", "💚💎"],
-            ["👻💙", "📖🔮", "💜💎", "☎️👑"],
-            ["👻💚", "🕯️🔱", "📖🔮", "👻💖"]
-        ];
-    } else if (gameSlug === 'coronas-fortuna') {
-        symbols = [
-            ["👑A️⃣", "👑K️⃣", "🍋", "🍒"],
-            ["👑Q️⃣", "👑J️⃣", "🍒", "👑A️⃣"],
-            ["👑K️⃣", "👑A️⃣", "👑Q️⃣", "🍋"]
-        ];
-    }
-
-    // --- RENDERIZADOR DE FIGURAS EN LOS RODILLOS ---
+    // --- 2. RENDERIZADOR UNIVERSAL DE FIGURAS ---
     if (symbols.length > 0) {
         symbols.forEach((column, columnIndex) => {
             column.forEach((emoji, rowIndex) => {
                 const style = new PIXI.TextStyle({
-                    fontSize: 54, // Tamaño ideal para celulares
-                    fontFamily: ['Segoe UI Emoji', 'Apple Color Emoji', 'Arial']
+                    fontSize: 52,
+                    fontFamily: ['Segoe UI Emoji', 'Apple Color Emoji', 'Arial', 'sans-serif']
                 });
                 const textIcon = new PIXI.Text(emoji, style);
-                
-                // Alineación simétrica en los 3 rieles de la pantalla
                 textIcon.anchor.set(0.5);
                 textIcon.x = (columnIndex - 1) * (w * 0.28);
                 textIcon.y = (rowIndex - 1.5) * (h * 0.22);
-                
                 rotor.addChild(textIcon);
             });
         });
     }
 
-            const palette = {
-                'frutas-de-fuego-777': {accent: 0xff6a6a, marks: 0xffd9a8, bg: 0x3d1a1f},
-                'palacio-arlequin': {accent: 0xd86aff, marks: 0xff6ad1, bg: 0x2b0b2e},
-                'mansion-embrujada': {accent: 0xd9c27a, marks: 0xffe3b8, bg: 0x0c0810},
-                'coronas-fortuna': {accent: 0x64c864, marks: 0x8be28b, bg: 0x0f3d1a},
-                'ruleta-imperial': {accent: 0x427ef4, marks: 0x669cea, bg: 0x1a1a3d},
-            }[gameSlug] || {accent: 0xff6a6a, marks: 0xffd9a8, bg: 0x3d1a1f};
+    // --- 3. PALETA DE COLORES DE FONDO (LÍNEA 117 DE TU FOTO) ---
+    const palette = {
+        'frutas-de-fuego-777': { bg: 0x3d1a1f, accent: 0xffd700 },
+        'palacio-arlequin': { bg: 0x0c0810, accent: 0xbf55ec },
+        'mansion-embrujada': { bg: 0x141018, accent: 0x2ecc71 },
+        'coronas-fortuna': { bg: 0x081c14, accent: 0xff4d4d },
+        'ruleta-imperial': { bg: 0x071a11, accent: 0xffa500 }
+    };
 
-            const bg = new PIXI.Graphics();
-            bg.beginFill(palette.bg, 0.9);
-            bg.drawRoundedRect(-w / 2 + 8, -h / 2 + 8, w - 16, h - 16, 18);
-            bg.endFill();
-            app.stage.addChild(bg);
+    const currentPalette = palette[gameSlug] || { bg: 0x0a0a0f, accent: 0xffffff };
+    
+    // Pinta el fondo del juego correspondiente
+    if (app.renderer.background) {
+        app.renderer.background.color = currentPalette.bg;
+    } else {
+        app.renderer.backgroundColor = currentPalette.bg;
+    }
 
-            const ringG = new PIXI.Graphics();
-            ringG.lineStyle(4, palette.accent, 0.18);
-            ringG.drawCircle(0, 0, radius + 6);
-            rotor.addChild(ringG);
+    // Dibuja el fondo interno del Canvas usando el color de la paleta
+    const bg = new PIXI.Graphics();
+    bg.beginFill(currentPalette.bg, 0.9);
+    bg.drawRoundedRect(-w / 2 + 8, -h / 2 + 8, w - 16, h - 16, 16);
+    bg.endFill();
+    rotor.addChild(bg);
+}
 
             for (let i = 0; i < 12; i++) {
                 const mark = new PIXI.Graphics();
@@ -168,8 +144,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         return app;
-    }
-
+    
+        
     document.querySelectorAll('.slot-canvas, .roulette-canvas').forEach((el) => createPixiIn(el));
 
     const gamePage = document.querySelector('.game-page');
