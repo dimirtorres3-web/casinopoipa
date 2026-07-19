@@ -34,31 +34,40 @@ document.addEventListener('DOMContentLoaded', function () {
             const h = app.renderer.height;
             rotor.x = w / 2;
             rotor.y = h / 2;
-            // --- CONFIGURACIÓN DE EMOJIS POR CADA JUEGO ORIGINAL ---
+           // --- CONFIGURACIÓN DE EMOJIS COMPATIBLE Y BLINDADA ---
     let symbols = [];
-    if (gameSlug === 'frutas-de-fuego-777') {
+    
+    // Usamos .includes() para que detecte el juego aunque cambien los guiones
+    if (!gameSlug || gameSlug.includes('frutas') || gameSlug.includes('777')) {
         symbols = [
             ["👑7️⃣🔥", "🍉", "🍋", "🍒"],
             ["🪙⭐", "🍒", "🍇", "🍊"],
             ["👑7️⃣🔥", "🍇", "🍉", "🪙⭐"]
         ];
-    } else if (gameSlug === 'palacio-arlequin') {
+    } else if (gameSlug.includes('arlequin') || gameSlug.includes('palacio')) {
         symbols = [
             ["🃏✨", "🔔", "💎", "❤️"],
             ["🟪", "🔔", "🃏✨", "💎"],
             ["🃏✨", "❤️", "🟪", "🔔"]
         ];
-    } else if (gameSlug === 'mansion-embrujada') {
+    } else if (gameSlug.includes('mansion') || gameSlug.includes('embrujada')) {
         symbols = [
             ["👻💖", "☎️👑", "🕯️🔱", "💚💎"],
             ["👻💙", "📖🔮", "💜💎", "☎️👑"],
             ["👻💚", "🕯️🔱", "📖🔮", "👻💖"]
         ];
-    } else if (gameSlug === 'coronas-fortuna') {
+    } else if (gameSlug.includes('coronas') || gameSlug.includes('fortuna')) {
         symbols = [
             ["👑A️⃣", "👑K️⃣", "🍋", "🍒"],
             ["👑Q️⃣", "👑J️⃣", "🍒", "👑A️⃣"],
             ["👑K️⃣", "👑A️⃣", "👑Q️⃣", "🍋"]
+        ];
+    } else {
+        // COMODÍN DE SEGURIDAD: Si falla el nombre, carga frutas para no quedar en blanco
+        symbols = [
+            ["👑7️⃣🔥", "🍉", "🍋", "🍒"],
+            ["🪙⭐", "🍒", "🍇", "🍊"],
+            ["👑7️⃣🔥", "🍇", "🍉", "🪙⭐"]
         ];
     }
 
