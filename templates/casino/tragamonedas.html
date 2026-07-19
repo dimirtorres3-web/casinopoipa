@@ -23,7 +23,130 @@
                     <a href="{% url 'casino:dashboard' %}" class="btn-secondary">Volver</a>
                 </div>
             </header>
-            <main class="game-shell glass-panel game-shell--five-star">
+            <main class="game-shell glass-panel {% if game_slug == 'palacio-arlequin' %}joker-jackpot-shell{% elif game_slug == 'mansion-embrujada' %}betty-boris-boo-shell{% else %}game-shell--five-star{% endif %}">
+                {% if game_slug == 'palacio-arlequin' %}
+                <section class="joker-jackpot-shell">
+                    <div class="joker-jackpot-header">
+                        <div class="joker-jackpot-title">
+                            <span class="joker-mark">🃏</span>
+                            <div>
+                                <p>Tragamonedas premium</p>
+                                <h2>Joker Jackpot</h2>
+                            </div>
+                        </div>
+                        <div class="balance-inline balance-inline--corner">
+                            <div class="balance-chip balance-chip--compact">
+                                <span>SALDO PYG</span>
+                                <strong id="balance-value">Gs. {{ player.saldo|intcomma }}</strong>
+                            </div>
+                            <button type="button" class="btn-primary btn-small" id="quick-deposit-btn">Depositar</button>
+                        </div>
+                    </div>
+
+                    <div class="joker-jackpot-topbar">
+                        <article class="jackpot-board jackpot-board--joker">
+                            <span>JOKER</span>
+                            <strong id="joker-jackpot-joker">6,420,000</strong>
+                        </article>
+                        <article class="jackpot-board jackpot-board--grand">
+                            <span>GRAND</span>
+                            <strong id="joker-jackpot-grand">14,300,000</strong>
+                        </article>
+                        <article class="jackpot-board jackpot-board--major">
+                            <span>MAJOR</span>
+                            <strong id="joker-jackpot-major">4,220,000</strong>
+                        </article>
+                        <article class="jackpot-board jackpot-board--minor">
+                            <span>MINOR</span>
+                            <strong id="joker-jackpot-minor">920,000</strong>
+                        </article>
+                    </div>
+
+                    <div class="joker-jackpot-layout">
+                        <div class="joker-jackpot-stage-shell">
+                            <div id="joker-jackpot-stage" class="joker-jackpot-pixi-stage" aria-label="Escena de Joker Jackpot"></div>
+                        </div>
+                        <aside class="joker-jackpot-controls">
+                            <div class="joker-controls-card">
+                                <div class="joker-control-row">
+                                    <label for="slot-apuesta">Apuesta</label>
+                                    <input id="slot-apuesta" type="number" min="2000" value="2000" class="form-input" />
+                                </div>
+                                <div class="joker-modes-row">
+                                    <button type="button" id="slot-auto-btn" class="control-chip control-chip--neon">Auto</button>
+                                    <button type="button" id="slot-turbo-btn" class="control-chip control-chip--neon">Turbo</button>
+                                </div>
+                                <button type="button" id="slot-bet-button" class="btn-primary btn-spin btn-spin--joker">GIRAR</button>
+                                <div class="status-footer">
+                                    <span id="slots-status" class="status-pill">Listo para Joker Spin</span>
+                                    <span id="bonus-info" class="status-pill status-pill--soft">Bonos: {{ player.bonus_balance|intcomma }}</span>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </section>
+                {% elif game_slug == 'mansion-embrujada' %}
+                <section class="betty-boris-boo-shell">
+                    <div class="betty-boris-boo-header">
+                        <div class="betty-boris-boo-title">
+                            <span class="betty-mark">👻</span>
+                            <div>
+                                <p>Aventura gótica</p>
+                                <h2>{{ game_meta.title }}</h2>
+                            </div>
+                        </div>
+                        <div class="balance-inline balance-inline--corner">
+                            <div class="balance-chip balance-chip--compact">
+                                <span>SALDO PYG</span>
+                                <strong id="balance-value">Gs. {{ player.saldo|intcomma }}</strong>
+                            </div>
+                            <button type="button" class="btn-primary btn-small" id="quick-deposit-btn">Depositar</button>
+                        </div>
+                    </div>
+
+                    <div class="betty-boris-boo-topbar">
+                        <article class="jackpot-board jackpot-board--gold">
+                            <span>GOLD</span>
+                            <strong id="betty-jackpot-gold">9,125,000</strong>
+                        </article>
+                        <article class="jackpot-board jackpot-board--silver">
+                            <span>SILVER</span>
+                            <strong id="betty-jackpot-silver">4,920,000</strong>
+                        </article>
+                        <article class="jackpot-board jackpot-board--bronze">
+                            <span>BRONZE</span>
+                            <strong id="betty-jackpot-bronze">2,450,000</strong>
+                        </article>
+                        <article class="jackpot-board jackpot-board--minor">
+                            <span>MINOR</span>
+                            <strong id="betty-jackpot-minor">780,000</strong>
+                        </article>
+                    </div>
+
+                    <div class="betty-boris-boo-layout">
+                        <div class="betty-boris-boo-stage-shell">
+                            <div id="betty-boris-boo-stage" class="betty-boris-boo-pixi-stage" aria-label="Escena de Betty Boris Boo"></div>
+                        </div>
+                        <aside class="betty-boris-boo-controls">
+                            <div class="betty-controls-card">
+                                <div class="betty-control-row">
+                                    <label for="slot-apuesta">Apuesta</label>
+                                    <input id="slot-apuesta" type="number" min="2000" value="2000" class="form-input" />
+                                </div>
+                                <div class="betty-modes-row">
+                                    <button type="button" id="slot-auto-btn" class="control-chip control-chip--gothic">Auto</button>
+                                    <button type="button" id="slot-turbo-btn" class="control-chip control-chip--gothic">Turbo</button>
+                                </div>
+                                <button type="button" id="slot-bet-button" class="btn-primary btn-spin btn-spin--gothic">GIRAR</button>
+                                <div class="status-footer">
+                                    <span id="slots-status" class="status-pill">Explorando la cripta</span>
+                                    <span id="bonus-info" class="status-pill status-pill--soft">Bonos: {{ player.bonus_balance|intcomma }}</span>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </section>
+                {% else %}
                 <section class="five-star-shell">
                     <div class="five-star-header">
                         <div class="five-star-info">
@@ -123,17 +246,17 @@
                             </div>
                         </aside>
                     </div>
-
-                    <div id="quick-deposit-modal" class="modal hidden" aria-hidden="true">
-                        <div class="modal-panel">
-                            <button type="button" class="modal-close" id="deposit-modal-close">×</button>
-                            <h3>Recarga rápida</h3>
-                            <p>Ingresa el monto y continúa jugando sin salir.</p>
-                            <input id="deposit-amount" type="number" min="10000" value="10000" class="form-input" />
-                            <button type="button" id="deposit-confirm-btn" class="btn-primary btn-block">Ir a depositar</button>
-                        </div>
-                    </div>
                 </section>
+                {% endif %}
+                <div id="quick-deposit-modal" class="modal hidden" aria-hidden="true">
+                    <div class="modal-panel">
+                        <button type="button" class="modal-close" id="deposit-modal-close">×</button>
+                        <h3>Recarga rápida</h3>
+                        <p>Ingresa el monto y continúa jugando sin salir.</p>
+                        <input id="deposit-amount" type="number" min="10000" value="10000" class="form-input" />
+                        <button type="button" id="deposit-confirm-btn" class="btn-primary btn-block">Ir a depositar</button>
+                    </div>
+                </div>
             </main>
         </div>
     </div>

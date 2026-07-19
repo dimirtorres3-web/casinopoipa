@@ -21,10 +21,10 @@ class PremiumLobbyTests(TestCase):
         self.client.force_login(self.player)
         response = self.client.get(reverse("casino:dashboard"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Five Star")
-        self.assertContains(response, "Joker Jackpot")
-        self.assertContains(response, "Betty, Boris")
-        self.assertContains(response, "777 Strike")
+        self.assertContains(response, "FRUTAS DE FUEGO 777")
+        self.assertContains(response, "EL PALACIO DEL ARLEQUÍN")
+        self.assertContains(response, "MANSIÓN EMBRUJADA")
+        self.assertContains(response, "CORONAS DE LA FORTUNA")
         self.assertContains(response, "Poker Royale")
 
     def test_premium_game_routes_are_available(self):

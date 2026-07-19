@@ -165,32 +165,32 @@ def dashboard(request):
 
     juegos = [
         {
-            "titulo": "Five Star",
-            "icono": "⭐",
-            "slug": "five-star",
-            "url": reverse("casino:tragamonedas_slug", kwargs={"slug": "five-star"}),
-            "cover": "/static/img/games/five-star.svg",
+            "titulo": "FRUTAS DE FUEGO 777",
+            "icono": "🔥",
+            "slug": "frutas-de-fuego-777",
+            "url": reverse("casino:tragamonedas_slug", kwargs={"slug": "frutas-de-fuego-777"}),
+            "cover": "/static/img/games/frutas-de-fuego-777.svg",
         },
         {
-            "titulo": "Joker Jackpot",
+            "titulo": "EL PALACIO DEL ARLEQUÍN",
             "icono": "🃏",
-            "slug": "joker-jackpot",
-            "url": reverse("casino:tragamonedas_slug", kwargs={"slug": "joker-jackpot"}),
-            "cover": "/static/img/games/joker-jackpot.svg",
+            "slug": "palacio-arlequin",
+            "url": reverse("casino:tragamonedas_slug", kwargs={"slug": "palacio-arlequin"}),
+            "cover": "/static/img/games/palacio-arlequin.svg",
         },
         {
-            "titulo": "Betty, Boris & Boo",
-            "icono": "🕯️",
-            "slug": "betty-boris-boo",
-            "url": reverse("casino:tragamonedas_slug", kwargs={"slug": "betty-boris-boo"}),
-            "cover": "/static/img/games/betty-boris-boo.svg",
+            "titulo": "MANSIÓN EMBRUJADA",
+            "icono": "👻",
+            "slug": "mansion-embrujada",
+            "url": reverse("casino:tragamonedas_slug", kwargs={"slug": "mansion-embrujada"}),
+            "cover": "/static/img/games/mansion-embrujada.svg",
         },
         {
-            "titulo": "777 Strike",
-            "icono": "💎",
-            "slug": "777-strike",
-            "url": reverse("casino:tragamonedas_slug", kwargs={"slug": "777-strike"}),
-            "cover": "/static/img/games/777-strike.svg",
+            "titulo": "CORONAS DE LA FORTUNA",
+            "icono": "👑",
+            "slug": "coronas-fortuna",
+            "url": reverse("casino:tragamonedas_slug", kwargs={"slug": "coronas-fortuna"}),
+            "cover": "/static/img/games/coronas-fortuna.svg",
         },
         {
             "titulo": "Poker Royale",
@@ -200,11 +200,11 @@ def dashboard(request):
             "cover": "/static/img/games/poker.svg",
         },
         {
-            "titulo": "Roulette Pro",
+            "titulo": "RULETA IMPERIAL",
             "icono": "🎡",
-            "slug": "ruleta",
+            "slug": "ruleta-imperial",
             "url": reverse("casino:ruleta"),
-            "cover": "/static/img/games/ruleta.svg",
+            "cover": "/static/img/games/ruleta-imperial.svg",
         },
     ]
     return render(request, "casino/player_dashboard.html", {
@@ -760,13 +760,13 @@ def cashier(request):
 def tragamonedas(request, slug=None):
     # Provide per-game metadata so templates and frontend can render unique visuals
     default = {
-        "five-star": {"title": "Five Star Deluxe", "theme": "stars", "jackpots": ["JOKER","GRAND","MAJOR","MINOR"]},
-        "joker-jackpot": {"title": "Joker Jackpot", "theme": "joker", "jackpots": ["JOKER","GRAND","MAJOR","MINOR"]},
-        "betty-boris-boo": {"title": "Betty, Boris & Boo", "theme": "gothic", "jackpots": ["GOLD","SILVER","BRONZE","MINOR"]},
-        "777-strike": {"title": "777 Strike", "theme": "seven", "jackpots": ["CROWN","ROYAL","STRIKE","MINOR"]},
+        "frutas-de-fuego-777": {"title": "FRUTAS DE FUEGO 777", "theme": "fruits", "jackpots": ["FUEGO","CORONADO","DORADO","MENOR"]},
+        "palacio-arlequin": {"title": "EL PALACIO DEL ARLEQUÍN", "theme": "harlequin", "jackpots": ["JOKER","GRAND","MAJOR","MINOR"]},
+        "mansion-embrujada": {"title": "MANSIÓN EMBRUJADA", "theme": "gothic", "jackpots": ["ESPECTRO","PLATA","BRONCE","MENOR"]},
+        "coronas-fortuna": {"title": "CORONAS DE LA FORTUNA", "theme": "crowns", "jackpots": ["CORONA","REAL","FORTUNAS","MENOR"]},
     }
-    meta = default.get(slug, default["five-star"]) if slug else default["five-star"]
-    return render(request, "casino/tragamonedas.html", {"player": request.user, "game_slug": slug or "five-star", "game_meta": meta})
+    meta = default.get(slug, default["frutas-de-fuego-777"]) if slug else default["frutas-de-fuego-777"]
+    return render(request, "casino/tragamonedas.html", {"player": request.user, "game_slug": slug or "frutas-de-fuego-777", "game_meta": meta})
 @login_required
 def ruleta(request):
     return render(request, "casino/ruleta.html", {"player": request.user})

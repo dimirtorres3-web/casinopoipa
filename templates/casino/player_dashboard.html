@@ -54,7 +54,7 @@
                 <div class="games-grid">
                     {% for juego in juegos %}
                     <article class="game-card premium-machine game-card--{{ juego.slug }}">
-                        <a class="game-cover-link" href="{{ juego.url }}">
+                        <a class="game-cover-link" href="{{ juego.url }}" aria-label="Jugar {{ juego.titulo }}">
                             <div class="game-cover" style="background-image: url('{{ juego.cover }}')" aria-hidden="true"></div>
                             <div class="game-overlay">
                                 <div class="game-title">{{ juego.titulo }}</div>

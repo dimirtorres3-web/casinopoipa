@@ -578,10 +578,11 @@ textarea {
     .play-badge { background: #ff8a00; padding: 10px 16px; border-radius: 999px; color: #0f0f12; font-weight:700; text-transform: uppercase; letter-spacing: 0.08em; box-shadow: 0 8px 20px rgba(255, 138, 0, 0.35); }
     .game-card .play-badge { pointer-events: none; }
 
-    .game-card--joker .game-cover { background-color: #2b0b2e; background-image: linear-gradient(135deg, rgba(216,106,255,0.12), rgba(255,106,209,0.06)); }
-    .game-card--betty-boris-boo .game-cover { background-color: #0c0810; background-image: linear-gradient(135deg, rgba(217,194,122,0.06), rgba(255,227,184,0.02)); }
-    .game-card--777-strike .game-cover { background-color: #12090a; background-image: linear-gradient(135deg, rgba(255,77,77,0.08), rgba(255,180,180,0.02)); }
-    .game-card--five-star .game-cover { background-color: #0b0b10; background-image: linear-gradient(135deg, rgba(255,185,77,0.06), rgba(255,126,34,0.02)); }
+    .game-card--frutas-de-fuego-777 .game-cover { background-color: #3d1a1f; background-image: linear-gradient(135deg, rgba(255,106,106,0.18), rgba(220,53,69,0.12)); }
+    .game-card--palacio-arlequin .game-cover { background-color: #2b0b2e; background-image: linear-gradient(135deg, rgba(216,106,255,0.18), rgba(255,106,209,0.12)); }
+    .game-card--mansion-embrujada .game-cover { background-color: #0c0810; background-image: linear-gradient(135deg, rgba(217,194,122,0.08), rgba(255,227,184,0.04)); }
+    .game-card--coronas-fortuna .game-cover { background-color: #0f3d1a; background-image: linear-gradient(135deg, rgba(102,200,100,0.16), rgba(76,175,80,0.10)); }
+    .game-card--ruleta-imperial .game-cover { background-color: #1a1a3d; background-image: linear-gradient(135deg, rgba(102,126,234,0.16), rgba(66,133,244,0.10)); }
 
     .slot-machine-stage {
         display: grid;
