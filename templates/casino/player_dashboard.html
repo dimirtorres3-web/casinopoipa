@@ -17,22 +17,26 @@
 
         <main class="dashboard-grid">
             <section class="hero-card glass-panel balance-card">
-                <div class="balance-info">
-                    <p>Saldo disponible</p>
-                    <h2 id="balance-value">Gs. {{ player.saldo|intcomma }}</h2>
+                <div class="finance-row" style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div class="balance-display">
+                            <div>
+                                <p style="margin:0; color:#c7c6cc; font-size:0.85rem;">Saldo</p>
+                                <strong id="balance-value">Gs. {{ player.saldo|intcomma }}</strong>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:8px; align-items:center;">
+                            <a href="{% url 'casino:cajero' %}?tab=deposito" class="btn-primary">Depositar</a>
+                            <a href="{% url 'casino:cajero' %}?tab=retiro" class="btn-secondary">Retirar</a>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <span class="badge">Bono: Gs. {{ player.bonus_balance|intcomma }}</span>
+                        <span class="badge">Giros: {{ player.free_spins }}</span>
+                    </div>
                 </div>
-                <div class="balance-meta">
-                    <span>Operaciones rápidas</span>
-                    <p class="balance-note">Usa depósito o retiro para manejar tu saldo. Solo transferencia bancaria.</p>
-                </div>
-                <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                    <span class="badge">Saldo real: Gs. {{ player.saldo|intcomma }}</span>
-                    <span class="badge">Bono: Gs. {{ player.bonus_balance|intcomma }}</span>
-                    <span class="badge">Free spins: {{ player.free_spins }}</span>
-                </div>
-                <div class="dashboard-actions" style="display:flex; gap:12px; flex-wrap:wrap;">
-                    <a href="{% url 'casino:cajero' %}?tab=deposito" class="btn-primary">Depositar</a>
-                    <a href="{% url 'casino:cajero' %}?tab=retiro" class="btn-secondary">Retirar</a>
+                <div class="balance-meta" style="margin-top:10px;">
+                    <p class="balance-note">Operaciones rápidas · Transferencia bancaria</p>
                 </div>
             </section>
 

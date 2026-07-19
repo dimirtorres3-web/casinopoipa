@@ -226,24 +226,64 @@ document.addEventListener('DOMContentLoaded', function () {
         const width = canvas.clientWidth;
         const height = canvas.clientHeight;
         ctx.clearRect(0, 0, width, height);
-        const gradient = ctx.createLinearGradient(0, 0, 0, height);
-        gradient.addColorStop(0, '#111214');
-        gradient.addColorStop(1, '#17181e');
-        ctx.fillStyle = gradient;
+        // background panel with subtle vignette
+        const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+        bgGrad.addColorStop(0, '#16161a');
+        bgGrad.addColorStop(1, '#0f0f12');
+        ctx.fillStyle = bgGrad;
         ctx.fillRect(0, 0, width, height);
-        if (blur) {
-            ctx.filter = 'blur(3px)';
-        } else {
-            ctx.filter = 'none';
-        }
-        ctx.fillStyle = '#f4f4f8';
-        ctx.font = 'bold 4rem Inter, sans-serif';
+        // reel inner card
+        ctx.save();
+        const pad = 12;
+        const innerW = width - pad * 2;
+        const innerH = height - pad * 2;
+        const x = pad;
+        const y = pad;
+        const corner = 18;
+        // outer frame
+        ctx.fillStyle = 'rgba(255,255,255,0.02)';
+        roundRect(ctx, x, y, innerW, innerH, corner, true, false);
+        // glow
+        ctx.shadowColor = 'rgba(255,183,77,0.18)';
+        ctx.shadowBlur = blur ? 24 : 12;
+        ctx.fillStyle = 'rgba(255,183,77,0.03)';
+        roundRect(ctx, x + 2, y + 2, innerW - 4, innerH - 4, corner - 4, true, false);
+        ctx.shadowBlur = 0;
+        // draw symbol badge
+        const badgeW = innerW * 0.72;
+        const badgeH = innerH * 0.48;
+        const bx = x + (innerW - badgeW) / 2;
+        const by = y + (innerH - badgeH) / 2;
+        // badge background with radial shine
+        const rg = ctx.createRadialGradient(bx + badgeW * 0.3, by + badgeH * 0.2, 10, bx + badgeW / 2, by + badgeH / 2, badgeW);
+        rg.addColorStop(0, 'rgba(255,255,255,0.08)');
+        rg.addColorStop(1, 'rgba(255,255,255,0.00)');
+        ctx.fillStyle = rg;
+        roundRect(ctx, bx, by, badgeW, badgeH, 14, true, false);
+        // drop shadow for symbol
+        ctx.shadowColor = 'rgba(0,0,0,0.45)';
+        ctx.shadowBlur = 18;
+        // symbol text
+        ctx.font = Math.round(badgeH * 0.7) + 'px Inter, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.shadowColor = 'rgba(255, 255, 255, 0.35)';
-        ctx.shadowBlur = blur ? 24 : 8;
-        ctx.fillText(symbol, width / 2, height / 2);
+        ctx.fillStyle = '#fff';
+        ctx.fillText(symbol, bx + badgeW / 2, by + badgeH / 2 + (blur ? 4 : 0));
         ctx.shadowBlur = 0;
+        ctx.restore();
+    }
+
+    function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+        if (typeof r === 'undefined') r = 5;
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+        if (fill) ctx.fill();
+        if (stroke) ctx.stroke();
     }
 
     function renderSelectedRouletteChips() {
@@ -369,16 +409,27 @@ document.addEventListener('DOMContentLoaded', function () {
     function startSlotSpin() {
         if (!slotCanvases.length) return;
         slotSpinning = true;
+        const duration = 1400; // ms
+        const start = performance.now();
         slotCanvases.forEach((canvas) => canvas.classList.add('blur'));
 
-        function spin() {
+        function spin(now) {
             if (!slotSpinning) return;
+            const t = Math.min(1, (now - start) / duration);
+            // ease out
+            const eased = 1 - Math.pow(1 - t, 3);
             slotCanvases.forEach((canvas) => {
+                // while spinning, use random symbols and a motion blur effect
                 drawSlotReel(canvas, getRandomSlotSymbol(), true);
             });
-            slotAnimationFrame = requestAnimationFrame(spin);
+            if (t < 1) {
+                slotAnimationFrame = requestAnimationFrame(spin);
+            } else {
+                // leave spinning state until stopped by stopSlotSpin
+                slotAnimationFrame = null;
+            }
         }
-        spin();
+        slotAnimationFrame = requestAnimationFrame(spin);
     }
 
     function stopSlotSpin(symbols) {
@@ -421,6 +472,21 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         rotate();
     }
+
+    // idle subtle rotation for roulette wheel when not actively spinning
+    (function setupRouletteIdle() {
+        let last = performance.now();
+        function idle(now) {
+            const dt = now - last;
+            last = now;
+            if (!rouletteSpinState.spinning && rouletteCanvas) {
+                rouletteSpinState.angle += (dt / 1000) * 0.06; // slow rotation
+                drawRouletteWheel(rouletteSpinState.angle);
+            }
+            requestAnimationFrame(idle);
+        }
+        requestAnimationFrame(idle);
+    })();
 
     function stopRouletteSpin(result) {
         if (!rouletteCanvas) return;
@@ -577,6 +643,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 showStatus('La apuesta mínima es de 2.000 Gs.', 'warning');
                 return;
             }
+            // show total bet before sending
+            const totalBet = apuesta * selectedRouletteChoices.length;
+            const betTotalEl = document.getElementById('bet-total');
+            if (betTotalEl) betTotalEl.textContent = `Apuesta total: Gs. ${new Intl.NumberFormat('es-PY').format(totalBet)}`;
             const currentBalance = Number(document.getElementById('balance-value')?.textContent?.replace(/[^0-9]/g, '') || 0);
             if (storedWager > currentBalance) {
                 showInsufficientFunds();

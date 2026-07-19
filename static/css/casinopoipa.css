@@ -306,9 +306,9 @@ textarea {
 }
 
 .balance-info h2 {
-    margin: 8px 0 0;
-    font-size: 2.6rem;
-    letter-spacing: -0.03em;
+    margin: 6px 0 0;
+    font-size: 1.6rem;
+    letter-spacing: -0.01em;
 }
 
 .balance-meta {
@@ -390,16 +390,20 @@ textarea {
 
     .header-actions {
         display: flex;
-        gap: 16px;
+        gap: 12px;
         align-items: center;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        justify-content: flex-end;
     }
 
     .balance-display {
-        padding: 18px 22px;
-        border-radius: 20px;
-        background: rgba(255, 255, 255, 0.06);
-        min-width: 260px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        min-width: 170px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
 
     .balance-display p {
@@ -417,12 +421,12 @@ textarea {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 10px 12px;
+        padding: 8px 10px;
         border-radius: 999px;
-        background: rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.06);
         color: #f2f2f6;
-        font-size: 0.9rem;
-        border: 1px solid rgba(255,126,34,0.16);
+        font-size: 0.85rem;
+        border: 1px solid rgba(255,126,34,0.12);
     }
 
     .premium-machine {
@@ -553,6 +557,15 @@ textarea {
     .jackpot-pill strong {
         font-size: 1rem;
         color: #fff;
+    }
+
+    .slot-hero-visual {
+        width: 220px;
+        height: 46px;
+        border-radius: 14px;
+        background: linear-gradient(90deg, rgba(255,183,77,0.18), rgba(255,126,34,0.12));
+        box-shadow: 0 12px 30px rgba(255,183,77,0.06) inset, 0 10px 30px rgba(0,0,0,0.35);
+        border: 1px solid rgba(255,183,77,0.22);
     }
 
     .slot-machine-stage {
@@ -798,6 +811,17 @@ textarea {
         border: 1px solid rgba(255, 183, 77, 0.22);
         background: rgba(255, 183, 77, 0.12);
         color: #fde7c6;
+    }
+
+    #bet-total {
+        font-weight: 800;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,183,77,0.12);
+        padding: 8px 12px;
+        border-radius: 999px;
+        color: #fff;
+        display: inline-block;
+        margin-top: 8px;
     }
 
     .roulette-grid {
