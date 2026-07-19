@@ -41,11 +41,14 @@
             <section class="hero-card glass-panel games-card">
                 <div class="games-grid">
                     {% for juego in juegos %}
-                    <article class="game-card">
-                        <div class="game-card-icon">{{ juego.icono }}</div>
-                        <h3>{{ juego.titulo }}</h3>
-                        <p>{{ juego.description }}</p>
-                        <a href="{{ juego.url }}" class="btn-primary">Jugar</a>
+                    <article class="game-card premium-machine game-card--{{ juego.slug }}">
+                        <a class="game-cover-link" href="{{ juego.url }}" aria-label="Jugar {{ juego.titulo }}">
+                            <div class="game-cover" style="background-image: url('{{ juego.cover }}')" aria-hidden="true"></div>
+                            <div class="game-overlay">
+                                <div class="game-title">{{ juego.titulo }}</div>
+                                <div class="play-badge">JUGAR</div>
+                            </div>
+                        </a>
                     </article>
                     {% endfor %}
                 </div>

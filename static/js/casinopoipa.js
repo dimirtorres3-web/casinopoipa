@@ -39,6 +39,22 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    function bindGameCardNavigation() {
+        document.querySelectorAll('.game-card').forEach((card) => {
+            const link = card.querySelector('.game-cover-link');
+            if (!link) return;
+            card.addEventListener('click', (event) => {
+                const target = event.target;
+                if (target instanceof HTMLAnchorElement || target.closest('a')) {
+                    return;
+                }
+                window.location.href = link.href;
+            });
+        });
+    }
+
+    bindGameCardNavigation();
+
     function showInsufficientFunds() {
         if (document.getElementById('insufficient-popup')) return;
         const popup = document.createElement('div');
