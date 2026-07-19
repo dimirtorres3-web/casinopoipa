@@ -1,5 +1,5 @@
 import base64
-import random
+import secrets
 from cryptography.fernet import Fernet, InvalidToken
 from django.conf import settings
 
@@ -64,8 +64,68 @@ def verificar_jwt(token: str) -> dict | None:
         return None
 
 
+def secure_choice(sequence):
+    if not sequence:
+        raise ValueError("secure_choice requires a non-empty sequence.")
+    index = secrets.randbelow(len(sequence))
+    return sequence[index]
+
+
+def secure_randbelow(upper: int) -> int:
+    if upper <= 0:
+        raise ValueError("secure_randbelow requires upper > 0")
+    return secrets.randbelow(upper)
+
+
+def secure_randint(low: int, high: int) -> int:
+    if high < low:
+        raise ValueError("secure_randint requires high >= low")
+    return low + secrets.randbelow(high - low + 1)
+
+
+def secure_bool(chance: float) -> bool:
+    if chance <= 0:
+        return False
+    if chance >= 1:
+        return True
+    threshold = int(chance * 1_000_000)
+    return secrets.randbelow(1_000_000) < threshold
+
+
+def secure_sample(population, k):
+    population = list(population)
+    if k < 0 or k > len(population):
+        raise ValueError("secure_sample requires 0 <= k <= len(population)")
+    result = []
+    for _ in range(k):
+        index = secrets.randbelow(len(population))
+        result.append(population.pop(index))
+    return result
+
+
+def secure_shuffle(sequence):
+    items = list(sequence)
+    for i in range(len(items) - 1, 0, -1):
+        j = secrets.randbelow(i + 1)
+        items[i], items[j] = items[j], items[i]
+    return items
+
+
+def secure_weighted_choice(choices):
+    total_weight = sum(weight for _, weight in choices)
+    if total_weight <= 0:
+        raise ValueError("secure_weighted_choice requires a positive total weight.")
+    pick = secrets.randbelow(total_weight)
+    cumulative = 0
+    for item, weight in choices:
+        cumulative += weight
+        if pick < cumulative:
+            return item
+    return choices[-1][0]
+
+
 def lanzar_juego(apuesta: int) -> dict:
     if apuesta < 2000:
         return {"ganador": False, "probabilidad": 0.0}
-    resultado = random.random() < 0.4
-    return {"ganador": resultado, "probabilidad": 0.4}
+    resultado = secure_bool(0.375)
+    return {"ganador": resultado, "probabilidad": 0.375}

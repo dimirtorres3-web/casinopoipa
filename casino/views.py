@@ -1,5 +1,4 @@
 import json
-import random
 from decimal import Decimal, InvalidOperation
 from django.conf import settings
 from django.contrib import messages
@@ -21,7 +20,15 @@ from .forms import (
     WithdrawalForm,
 )
 from .models import BankAccount, Player, Transaction
-from .utils import generar_jwt
+from .utils import (
+    generar_jwt,
+    secure_choice,
+    secure_sample,
+    secure_shuffle,
+    secure_weighted_choice,
+    secure_randint,
+    secure_bool,
+)
 
 
 def is_admin(user):
@@ -211,6 +218,10 @@ GAME_MULTIPLIERS = {
     "ruleta": 2.3,
 }
 
+SLOT_WIN_PROBABILITY = 0.375
+SLOT_BONUS_TRIGGER_PROBABILITY = 0.05
+ROULETTE_PAYOUT_BASE = Decimal("35.25")
+
 SLOT_TEMPLATES = [
     {"id": "aurora", "name": "Aurora Glow", "theme": "Brillo nocturno", "symbol": "✨"},
     {"id": "golden", "name": "Golden Rush", "theme": "Oro premium", "symbol": "💰"},
@@ -283,21 +294,21 @@ def draw_slot_reels(win=False, bonus=False):
     if bonus:
         return [BONUS_SYMBOL, BONUS_SYMBOL, BONUS_SYMBOL]
     if win:
-        symbol = random.choice(SLOT_SYMBOLS)
+        symbol = secure_choice(SLOT_SYMBOLS)
         return [symbol, symbol, symbol]
-    return random.sample(SLOT_SYMBOLS + ["⭐", "🍊"], 3)
+    return secure_sample(SLOT_SYMBOLS + ["⭐", "🍊"], 3)
 
 
 def deal_cards(count=2):
     ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
     suits = ["♠", "♥", "♦", "♣"]
     deck = [f"{rank}{suit}" for rank in ranks for suit in suits]
-    random.shuffle(deck)
+    deck = secure_shuffle(deck)
     return [deck.pop() for _ in range(count)]
 
 
 def pick_roulette_result():
-    return random.choice(ROULETTE_SLOTS)
+    return secure_choice(ROULETTE_SLOTS)
 
 
 def get_slots_bonus_state(request):
@@ -314,8 +325,7 @@ def clear_slots_bonus_state(request):
 
 
 def select_slot_bonus_percentage():
-    options, weights = zip(*SLOT_BONUS_DISTRIBUTION)
-    return random.choices(options, weights=weights, k=1)[0]
+    return secure_weighted_choice(SLOT_BONUS_DISTRIBUTION)
 
 
 def is_jackpot_eligible(player):
@@ -359,6 +369,10 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
 
     if game == "tragamonedas":
         bonus_state = get_slots_bonus_state(request)
+        if player.free_spins > 0 and not bonus_spin:
+            player.free_spins -= 1
+            bonus_spin = True
+
         if bonus_spin:
             if not bonus_state or bonus_state.get("remaining", 0) <= 0:
                 clear_slots_bonus_state(request)
@@ -371,7 +385,7 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
                 wager = Decimal(bonus_state.get("wager", apuesta))
                 jackpot_hit = False
                 percentage = 0
-                if is_jackpot_eligible(player) and random.random() < JACKPOT_PROBABILITY:
+                if is_jackpot_eligible(player) and secure_bool(JACKPOT_PROBABILITY):
                     jackpot_hit = True
                     percentage = JACKPOT_EXTRA_PERCENTAGE
                 else:
@@ -408,7 +422,7 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
                     )
 
                 set_slots_bonus_state(request, bonus_state)
-                player.save(update_fields=["slot_play_count"])
+                player.save(update_fields=["slot_play_count", "free_spins"])
                 return build_response_payload(
                     player,
                     game=game,
@@ -431,28 +445,19 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
 
         with db_transaction.atomic():
             player.slot_play_count += 1
-            if player.free_spins > 0 and not bonus_spin:
-                player.free_spins -= 1
-                bonus_spin = True
-            win = random.random() < 0.40
+            win = secure_bool(SLOT_WIN_PROBABILITY)
             payout = 0
             bonus_active = False
             bonus_info = None
             if win:
-                payout = int(apuesta * GAME_MULTIPLIERS[game])
+                payout = int(Decimal(apuesta) * Decimal(GAME_MULTIPLIERS[game]))
                 player.saldo += Decimal(payout)
-                bonus_active = random.random() < 0.05
+                bonus_active = secure_bool(SLOT_BONUS_TRIGGER_PROBABILITY)
                 if bonus_active:
-                    player.free_spins += random.randint(1, 2)
+                    free_spins = secure_randint(1, 5)
+                    player.free_spins += free_spins
                     bonus_info = {
-                        "free_spins": player.free_spins,
-                        "accumulated_percentage": 0,
-                        "bonus_wager": int(apuesta),
-                    }
-                if bonus_active:
-                    free_spins = random.randint(1, 5)
-                    bonus_info = {
-                        "free_spins": free_spins,
+                        "free_spins": int(player.free_spins),
                         "accumulated_percentage": 0,
                         "bonus_wager": int(apuesta),
                     }
@@ -510,15 +515,11 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
         if len(cleaned_numbers) > 3:
             return JsonResponse({"success": False, "error": "Puedes apostar hasta 3 números en la ruleta."})
 
-        win = random.random() < 0.40
+        result = pick_roulette_result()
+        win = result["number"] in cleaned_numbers
+        payout = 0
         if win:
-            matching_slots = [slot for slot in ROULETTE_SLOTS if slot["number"] in cleaned_numbers]
-            result = random.choice(matching_slots) if matching_slots else pick_roulette_result()
-        else:
-            non_matching_slots = [slot for slot in ROULETTE_SLOTS if slot["number"] not in cleaned_numbers]
-            result = random.choice(non_matching_slots)
-
-        payout = int(apuesta * 36) if win else 0
+            payout = int(Decimal(apuesta) * ROULETTE_PAYOUT_BASE / Decimal(len(cleaned_numbers)))
         if win:
             player.saldo += Decimal(payout)
             message = f"¡Victoria en Ruleta! Salió {result['number']} {result['color']} y ganaste {payout} Gs."
@@ -541,10 +542,10 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
 
     if apuesta > player.saldo:
         return JsonResponse({"success": False, "error": "Saldo insuficiente para esta apuesta."})
-    win = random.random() < 0.40
+    win = secure_bool(0.40)
     payout = 0
     if win:
-        payout = int(apuesta * GAME_MULTIPLIERS[game])
+        payout = int(Decimal(apuesta) * Decimal(GAME_MULTIPLIERS[game]))
         player.saldo += Decimal(payout)
         message = f"¡Victoria en {game.capitalize()}! Ganaste {payout} Gs."
     else:
@@ -772,7 +773,7 @@ def ruleta(request):
 
 @login_required
 def poker(request):
-    return render(request, "casino/tragamonedas.html", {"player": request.user, "game_mode": "poker"})
+    return render(request, "casino/poker.html", {"player": request.user})
 
 @login_required
 def blackjack(request):
