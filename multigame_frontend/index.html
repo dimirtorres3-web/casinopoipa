@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Multigame Demo - Lobby</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="header-search">
+    <input id="search" placeholder="Buscar juegos..." />
+  </div>
+
+  <div class="fin-row">
+    <button id="deposit" class="btn">Depositar</button>
+    <button id="withdraw" class="btn">Retirar</button>
+    <div class="balance big">Saldo Actual: <span id="balance">0</span></div>
+  </div>
+
+  <div class="canvas-area">
+    <h3>Ruleta Europea - Demo</h3>
+    <div>
+      <label>Apuesta: <input id="bet" type="number" value="10" /></label>
+      <label>Número: <input id="number" type="number" value="17" min="0" max="36"/></label>
+      <button id="spin">Girar</button>
+    </div>
+    <div id="result" style="margin-top:12px"></div>
+    <div class="in-game-balance" id="inGameBalance">
+      <div>Saldo: <strong id="cornerBalance">0</strong></div>
+      <button id="quickDeposit" class="btn" style="padding:6px 10px;">Depositar</button>
+    </div>
+  </div>
+
+  <div id="notifications"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -158,16 +158,40 @@ def dashboard(request):
 
     juegos = [
         {
-            "titulo": "Tragamonedas",
-            "icono": "🎰",
+            "titulo": "Five Star",
+            "icono": "⭐",
             "url": reverse("casino:tragamonedas"),
-            "description": "Gira los rodillos y busca la combinación perfecta.",
+            "description": "Frutas premium con rodillos brillantes y modo turbo.",
         },
         {
-            "titulo": "Ruleta",
+            "titulo": "Joker Jackpot",
+            "icono": "🃏",
+            "url": reverse("casino:tragamonedas"),
+            "description": "Jackpots multi-nivel con multiplicadores flotantes.",
+        },
+        {
+            "titulo": "Betty, Boris & Boo",
+            "icono": "🕯️",
+            "url": reverse("casino:tragamonedas"),
+            "description": "Aventura gótica con ambientación de fantasía oscura.",
+        },
+        {
+            "titulo": "777 Strike",
+            "icono": "💎",
+            "url": reverse("casino:tragamonedas"),
+            "description": "Tabla de pagos dinámica y premios en tiempo real.",
+        },
+        {
+            "titulo": "Poker Royale",
+            "icono": "♠️",
+            "url": reverse("casino:poker"),
+            "description": "Modo premium con cartas, ritmo y resultados inmediatos.",
+        },
+        {
+            "titulo": "Roulette Pro",
             "icono": "🎡",
             "url": reverse("casino:ruleta"),
-            "description": "Apuesta al rojo, negro o al número ganador.",
+            "description": "Ruleta vertical interactiva con apuestas múltiples.",
         },
     ]
     return render(request, "casino/player_dashboard.html", {
@@ -731,7 +755,17 @@ def tragamonedas(request):
 def ruleta(request):
     return render(request, "casino/ruleta.html", {"player": request.user})
 
+@login_required
+def poker(request):
+    return render(request, "casino/tragamonedas.html", {"player": request.user, "game_mode": "poker"})
 
+@login_required
+def blackjack(request):
+    return render(request, "casino/tragamonedas.html", {"player": request.user, "game_mode": "blackjack"})
+
+@login_required
+def bingo(request):
+    return render(request, "casino/tragamonedas.html", {"player": request.user, "game_mode": "bingo"})
 
 
 @login_required

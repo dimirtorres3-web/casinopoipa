@@ -93,6 +93,28 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    function playAudioCue(type = 'spin') {
+        if (typeof window.Howl === 'undefined') return;
+        const cues = {
+            spin: ['https://actions.google.com/sounds/api/alarms/ogg'],
+            win: ['https://actions.google.com/sounds/api/sounds/celebration/ogg'],
+            fail: ['https://actions.google.com/sounds/api/sounds/negative/ogg'],
+        };
+        const path = cues[type] && cues[type][0];
+        if (!path) return;
+        const sound = new window.Howl({ src: [path] });
+        sound.play();
+    }
+
+    function showCelebration(message) {
+        if (document.querySelector('.celebration-overlay')) return;
+        const overlay = document.createElement('div');
+        overlay.className = 'celebration-overlay';
+        overlay.innerHTML = `<div class="celebration-overlay__box">${message}</div>`;
+        document.body.appendChild(overlay);
+        setTimeout(() => overlay.remove(), 900);
+    }
+
     let currentSlotBonus = null;
     const slotBonusIndicator = document.getElementById('slots-bonus');
 
@@ -423,6 +445,12 @@ document.addEventListener('DOMContentLoaded', function () {
             slotButton.textContent = 'Apostar';
             showStatus(result.message, result.jackpot_hit ? 'success' : 'warning');
             showResultEffects(result.win, result.jackpot_hit);
+            if (result.win) {
+                playAudioCue('win');
+                showCelebration(result.jackpot_hit ? '¡JACKPOT!' : '¡Ganaste!');
+            } else {
+                playAudioCue('fail');
+            }
         } else if (result.bonus_active) {
             currentSlotBonus = {
                 remaining: result.bonus_spins,
@@ -433,12 +461,19 @@ document.addEventListener('DOMContentLoaded', function () {
             slotButton.textContent = 'Giro Gratis';
             showStatus(result.message, 'warning');
             showResultEffects(true);
+            playAudioCue('spin');
         } else {
             currentSlotBonus = null;
             updateSlotBonusIndicator(null);
             slotButton.textContent = 'Apostar';
             showStatus(result.message, result.win ? 'success' : 'danger');
             showResultEffects(result.win, result.jackpot_hit);
+            if (result.win) {
+                playAudioCue('win');
+                showCelebration(result.jackpot_hit ? '¡JACKPOT!' : '¡Ganaste!');
+            } else {
+                playAudioCue('fail');
+            }
         }
 
         if (result.accumulated_percentage !== undefined) {
@@ -509,6 +544,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         showStatus(outcomeText);
         showResultEffects(result.win);
+        if (result.win) {
+            playAudioCue('win');
+            showCelebration('¡Apuesta ganadora!');
+        } else {
+            playAudioCue('fail');
+        }
         updateBalance(result.new_balance);
     }
 

@@ -4,6 +4,36 @@ from django.urls import reverse
 from .models import Player
 
 
+class PremiumLobbyTests(TestCase):
+    def setUp(self):
+        self.player = Player.objects.create_user(
+            username="player@example.com",
+            email="player@example.com",
+            password="TestPassword123",
+            nombre="Jugador",
+            apellido="Prueba",
+            edad=28,
+            sexo="M",
+            estado_civil="soltero",
+        )
+
+    def test_dashboard_lists_premium_games(self):
+        self.client.force_login(self.player)
+        response = self.client.get(reverse("casino:dashboard"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Five Star")
+        self.assertContains(response, "Joker Jackpot")
+        self.assertContains(response, "Betty, Boris")
+        self.assertContains(response, "777 Strike")
+        self.assertContains(response, "Poker Royale")
+
+    def test_premium_game_routes_are_available(self):
+        self.client.force_login(self.player)
+        for route_name in ["casino:tragamonedas", "casino:ruleta", "casino:poker", "casino:blackjack", "casino:bingo"]:
+            response = self.client.get(reverse(route_name))
+            self.assertEqual(response.status_code, 200)
+
+
 class ClientesPanelTests(TestCase):
     def setUp(self):
         self.admin = Player.objects.create_user(
