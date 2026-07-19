@@ -81,8 +81,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
                 const textIcon = new PIXI.Text(emoji, style);
                 textIcon.anchor.set(0.5);
-                textIcon.x = (columnIndex - 1) * (w * 0.28);
-                textIcon.y = (rowIndex - 1.5) * (h * 0.22);
+                textIcon.x = (columnIndex * (w / 3)) + (w / 6);
+                textIcon.y = (rowIndex * (h / 4)) + (h / 8) + 10;
                 rotor.addChild(textIcon);
             });
         });
