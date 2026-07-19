@@ -9,7 +9,7 @@
                     <span class="brand-mark">🎡</span>
                     <div>
                         <p>Ruleta</p>
-                        <h1>Tapete de Apuesta</h1>
+                        <h1>Roulette Pro</h1>
                     </div>
                 </div>
                 <div class="header-actions">
@@ -20,31 +20,44 @@
                         <p id="free-spins-indicator" style="margin-top:4px; color:#8be28b;">Free spins: {{ player.free_spins }}</p>
                     </div>
                     <button type="button" class="btn-primary" id="quick-deposit-btn">Depositar</button>
-                    <a href="{% url 'casino:dashboard' %}" class="btn-secondary">Volver al Menú Principal</a>
+                    <a href="{% url 'casino:dashboard' %}" class="btn-secondary">Volver</a>
                 </div>
             </header>
             <main class="game-shell glass-panel roulette-shell">
-                <section class="roulette-board">
-                    <div class="roulette-visual-shell">
-                        <canvas id="roulette-canvas" class="roulette-canvas"></canvas>
+                <section class="roulette-premium-board">
+                    <div class="roulette-wheel-card">
+                        <div class="roulette-hotstrip">
+                            <span>Caliente</span>
+                            <strong>17 • 9 • 2</strong>
+                        </div>
+                        <div class="roulette-visual-shell">
+                            <canvas id="roulette-canvas" class="roulette-canvas"></canvas>
+                        </div>
+                        <div class="roulette-history">Apuesta múltiple • 0-36 • rojo/negro</div>
                     </div>
                     <aside class="roulette-panel">
                         <div class="roulette-selection-header">
                             <div>
-                                <p>Apuesta por número</p>
+                                <p>Apuesta múltiple</p>
                                 <strong id="selected-roulette-choice">Ninguno</strong>
                                 <div id="selected-roulette-list" class="roulette-selected-list"></div>
                             </div>
-                            <span class="roulette-hint">Elige hasta 3 números. Se muestran juntos y listos para apostar.</span>
+                            <div class="quick-action-group">
+                                <button type="button" id="roulette-undo-btn" class="control-chip">UNDO</button>
+                                <button type="button" id="roulette-double-btn" class="control-chip">×2</button>
+                            </div>
                         </div>
                         <div class="roulette-grid" id="roulette-grid"></div>
-                        <div class="game-status" id="game-status">Apuesta mínima 2.000 Gs.</div>
-                        <div class="game-actions">
-                            <input id="ruleta-apuesta" type="number" min="2000" value="2000" class="form-input" />
-                            <button type="button" id="ruleta-bet-button" class="btn-primary">Apostar</button>
+                        <div class="roulette-footer">
+                            <div class="game-status" id="game-status">Apuesta mínima 2.000 Gs.</div>
+                            <div class="game-actions">
+                                <input id="ruleta-apuesta" type="number" min="2000" value="2000" class="form-input" />
+                                <button type="button" id="ruleta-bet-button" class="btn-primary">Apostar</button>
+                            </div>
                         </div>
                     </aside>
                 </section>
+            </main>
         </div>
     </div>
 {% endblock %}

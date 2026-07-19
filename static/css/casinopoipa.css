@@ -491,30 +491,104 @@ textarea {
         50% { transform: translateX(-50%) scale(1.03); }
     }
 
-    .slots-stage,
-    .roulette-board,
-    .table-board,
-    .bingo-board {
+    .premium-slot-shell {
         display: grid;
         gap: 24px;
+        padding: 8px;
     }
 
-    .slots-board {
-        display: flex;
-        justify-content: center;
-        gap: 18px;
+    .slot-hero-panel {
         padding: 24px;
-        background: rgba(255, 255, 255, 0.04);
-        border-radius: 30px;
+        border-radius: 32px;
+        background:
+            radial-gradient(circle at top left, rgba(255, 183, 77, 0.16), transparent 38%),
+            linear-gradient(135deg, rgba(24, 20, 35, 0.98), rgba(8, 9, 17, 1));
+        border: 1px solid rgba(255, 183, 77, 0.24);
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.25);
+    }
+
+    .slot-hero-title h2 {
+        margin: 8px 0 0;
+        font-size: 1.7rem;
+        color: #fff6e2;
+    }
+
+    .slot-kicker {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255, 183, 77, 0.14);
+        color: #ffd9a8;
+        font-size: 0.78rem;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+    }
+
+    .jackpot-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 18px;
+    }
+
+    .jackpot-pill {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 112px;
+        padding: 12px 14px;
+        border-radius: 18px;
+        background: linear-gradient(135deg, rgba(255, 183, 77, 0.18), rgba(255, 126, 34, 0.12));
+        border: 1px solid rgba(255, 183, 77, 0.22);
+        color: #f7efe0;
+    }
+
+    .jackpot-pill span {
+        font-size: 0.78rem;
+        color: #ffd9a8;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+    }
+
+    .jackpot-pill strong {
+        font-size: 1rem;
+        color: #fff;
+    }
+
+    .slot-machine-stage {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    .slot-reel-board {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        padding: 24px;
+        border-radius: 34px;
+        background: linear-gradient(135deg, rgba(15, 15, 18, 0.96), rgba(24, 18, 28, 0.94));
+        border: 1px solid rgba(255, 183, 77, 0.18);
+        box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.02), 0 24px 70px rgba(0, 0, 0, 0.2);
+    }
+
+    .slot-reel-card {
+        position: relative;
+        padding: 12px;
+        border-radius: 28px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+        border: 1px solid rgba(255, 183, 77, 0.16);
+        box-shadow: inset 0 0 20px rgba(255, 183, 77, 0.08);
     }
 
     .slot-canvas {
-        width: 140px;
-        height: 220px;
-        border-radius: 24px;
-        background: rgba(15, 15, 18, 0.95);
-        border: 1px solid rgba(255, 126, 34, 0.18);
-        box-shadow: inset 0 0 16px rgba(255, 255, 255, 0.04);
+        width: 100%;
+        height: 280px;
+        border-radius: 22px;
+        background: radial-gradient(circle at top, rgba(255, 183, 77, 0.25), transparent 30%), linear-gradient(180deg, rgba(30, 18, 33, 0.96), rgba(10, 10, 16, 1));
+        border: 2px solid rgba(255, 183, 77, 0.2);
+        box-shadow: inset 0 0 28px rgba(255, 255, 255, 0.04), 0 16px 42px rgba(0, 0, 0, 0.22);
         display: block;
     }
 
@@ -522,33 +596,242 @@ textarea {
         filter: blur(2px);
     }
 
-    @keyframes reel-spin {
-        0% { transform: translateY(0); }
-        100% { transform: translateY(-50px); }
+    .slot-side-panel {
+        display: grid;
+        gap: 16px;
     }
 
-    .slots-footer {
+    .paytable-card,
+    .controls-card {
+        padding: 20px;
+        border-radius: 24px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+        border: 1px solid rgba(255, 183, 77, 0.16);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
+    }
+
+    .paytable-card h3,
+    .controls-card h3 {
+        margin: 0 0 12px;
+        color: #fff5e1;
+        font-size: 1rem;
+    }
+
+    .paytable-card ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 8px;
+        color: #d8d1cc;
+    }
+
+    .paytable-card li {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        gap: 16px;
-        padding: 0 18px 18px;
+        padding: 8px 10px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
     }
 
-    .slots-info {
+    .controls-card {
+        display: grid;
+        gap: 10px;
+    }
+
+    .control-buttons-row {
         display: flex;
-        flex-direction: column;
-        gap: 8px;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .control-chip {
+        border: none;
+        padding: 10px 12px;
+        border-radius: 999px;
+        background: rgba(255, 183, 77, 0.16);
+        color: #ffe8c5;
+        cursor: pointer;
+        font-weight: 700;
+        transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .control-chip:hover,
+    .control-chip.is-active {
+        transform: translateY(-2px);
+        background: rgba(255, 183, 77, 0.26);
+    }
+
+    .control-label {
+        color: #c8c0b3;
+        font-size: 0.9rem;
+    }
+
+    .btn-block {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        color: #f8ebd0;
+        font-weight: 600;
+        text-align: center;
     }
 
     .slot-bonus-indicator {
         display: inline-flex;
         align-items: center;
-        padding: 10px 14px;
+        justify-content: center;
+        padding: 10px 12px;
         border-radius: 999px;
-        background: rgba(211, 84, 0, 0.16);
+        background: rgba(255, 183, 77, 0.16);
         color: #ffd7b3;
         font-weight: 700;
+        border: 1px solid rgba(255, 183, 77, 0.24);
+    }
+
+    .roulette-premium-board {
+        display: grid;
+        grid-template-columns: 1.1fr 0.95fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    .roulette-wheel-card {
+        padding: 22px;
+        border-radius: 32px;
+        background: linear-gradient(135deg, rgba(24, 20, 35, 0.98), rgba(8, 9, 17, 1));
+        border: 1px solid rgba(255, 183, 77, 0.2);
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
+        display: grid;
+        gap: 16px;
+    }
+
+    .roulette-hotstrip {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        border-radius: 999px;
+        background: rgba(255, 183, 77, 0.12);
+        color: #ffe8c5;
+    }
+
+    .roulette-history {
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.04);
+        color: #cfc4b5;
+        text-align: center;
+    }
+
+    .roulette-visual-shell {
+        display: grid;
+        place-items: center;
+    }
+
+    .roulette-canvas {
+        width: min(360px, 100%);
+        height: 360px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 20%, rgba(255, 183, 77, 0.20), transparent 24%), linear-gradient(180deg, rgba(30, 18, 33, 0.98), rgba(8, 9, 17, 1));
+        border: 3px solid rgba(255, 183, 77, 0.2);
+        box-shadow: inset 0 0 24px rgba(255, 255, 255, 0.04), 0 20px 50px rgba(0, 0, 0, 0.26);
+    }
+
+    .roulette-canvas.blur {
+        filter: blur(1.8px);
+    }
+
+    .roulette-panel {
+        display: grid;
+        gap: 16px;
+        padding: 20px;
+        border-radius: 28px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+        border: 1px solid rgba(255, 183, 77, 0.16);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
+    }
+
+    .roulette-selection-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: start;
+    }
+
+    .roulette-selection-header p {
+        margin: 0 0 6px;
+        color: #c8c0b3;
+        font-size: 0.9rem;
+    }
+
+    .roulette-selection-header strong {
+        display: block;
+        color: #fff6e2;
+        font-size: 1.2rem;
+    }
+
+    .quick-action-group {
+        display: flex;
+        gap: 8px;
+    }
+
+    .roulette-selected-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .roulette-selected-chip {
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 0.9rem;
+        font-weight: 700;
+        border: 1px solid rgba(255, 183, 77, 0.22);
+        background: rgba(255, 183, 77, 0.12);
+        color: #fde7c6;
+    }
+
+    .roulette-grid {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 8px;
+        padding: 14px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.04);
+    }
+
+    .roulette-tile {
+        min-height: 58px;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 183, 77, 0.16);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.16);
+        color: #fff;
+        font-weight: 700;
+    }
+
+    .roulette-tile:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 28px rgba(0, 0, 0, 0.2);
+    }
+
+    .roulette-footer {
+        display: grid;
+        gap: 12px;
+    }
+
+    .game-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
     }
 
     .poker-shell,

@@ -9,7 +9,7 @@
                     <span class="brand-mark">🎰</span>
                     <div>
                         <p>Tragamonedas</p>
-                        <h1>SLOTS PREMIUM</h1>
+                        <h1>Five Star Deluxe</h1>
                     </div>
                 </div>
                 <div class="header-actions">
@@ -20,29 +20,57 @@
                         <p id="free-spins-indicator" style="margin-top:4px; color:#8be28b;">Free spins: {{ player.free_spins }}</p>
                     </div>
                     <button type="button" class="btn-primary" id="quick-deposit-btn">Depositar</button>
-                    <a href="{% url 'casino:dashboard' %}" class="btn-secondary">Volver al Menú Principal</a>
+                    <a href="{% url 'casino:dashboard' %}" class="btn-secondary">Volver</a>
                 </div>
             </header>
             <main class="game-shell glass-panel">
-                <section class="slots-stage">
-                    <div class="slots-board">
-                        <canvas id="slot-canvas-1" class="slot-canvas"></canvas>
-                        <canvas id="slot-canvas-2" class="slot-canvas"></canvas>
-                        <canvas id="slot-canvas-3" class="slot-canvas"></canvas>
+                <section class="premium-slot-shell">
+                    <div class="slot-hero-panel">
+                        <div class="slot-hero-title">
+                            <span class="slot-kicker">Premium casino</span>
+                            <h2>Máquina de lujo con jackpots y luces neón</h2>
+                        </div>
+                        <div class="jackpot-strip">
+                            <div class="jackpot-pill"><span>JOKER</span><strong>1.240.000</strong></div>
+                            <div class="jackpot-pill"><span>GRAND</span><strong>540.000</strong></div>
+                            <div class="jackpot-pill"><span>MAJOR</span><strong>220.000</strong></div>
+                            <div class="jackpot-pill"><span>MINOR</span><strong>98.000</strong></div>
+                        </div>
                     </div>
-                    <div class="slots-footer">
-                        <div class="slots-info space-y-2">
-                            <span id="slots-status" class="inline-flex rounded-2xl bg-slate-950 px-4 py-2 text-slate-200 shadow-sm transition-all duration-300">
-                                Listo para apostar
-                            </span>
-                            <div id="slots-bonus" class="slot-bonus-indicator hidden inline-flex items-center rounded-2xl border border-amber-400 bg-amber-500/10 px-4 py-2 text-amber-200 transition-all duration-300">
-                                BONO DISPONIBLE
+                    <div class="slot-machine-stage">
+                        <div class="slot-reel-board">
+                            <div class="slot-reel-card">
+                                <canvas id="slot-canvas-1" class="slot-canvas"></canvas>
+                            </div>
+                            <div class="slot-reel-card">
+                                <canvas id="slot-canvas-2" class="slot-canvas"></canvas>
+                            </div>
+                            <div class="slot-reel-card">
+                                <canvas id="slot-canvas-3" class="slot-canvas"></canvas>
                             </div>
                         </div>
-                        <div class="slots-controls">
-                            <input id="slot-apuesta" type="number" min="2000" value="2000" class="form-input" />
-                            <button type="button" id="slot-bet-button" class="btn-primary">Apostar</button>
-                        </div>
+                        <aside class="slot-side-panel">
+                            <div class="paytable-card">
+                                <h3>Tabla de pagos</h3>
+                                <ul>
+                                    <li><span>⭐</span> 3x = 15x</li>
+                                    <li><span>7</span> 3x = 25x</li>
+                                    <li><span>🍒</span> 3x = 10x</li>
+                                    <li><span>🔔</span> 3x = 8x</li>
+                                </ul>
+                            </div>
+                            <div class="controls-card">
+                                <div class="control-buttons-row">
+                                    <button type="button" id="slot-turbo-btn" class="control-chip">⚡ Turbo</button>
+                                    <button type="button" id="slot-auto-btn" class="control-chip">Auto</button>
+                                </div>
+                                <label class="control-label" for="slot-apuesta">Apuesta</label>
+                                <input id="slot-apuesta" type="number" min="2000" value="2000" class="form-input" />
+                                <button type="button" id="slot-bet-button" class="btn-primary btn-block">Girar</button>
+                                <span id="slots-status" class="status-pill">Listo para apostar</span>
+                                <div id="slots-bonus" class="slot-bonus-indicator hidden">BONO DISPONIBLE</div>
+                            </div>
+                        </aside>
                     </div>
                 </section>
             </main>
