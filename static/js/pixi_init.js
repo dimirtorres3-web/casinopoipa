@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         return app;
     
-        
+
     document.querySelectorAll('.slot-canvas, .roulette-canvas').forEach((el) => createPixiIn(el));
 
     const gamePage = document.querySelector('.game-page');
@@ -1666,4 +1666,17 @@ function initFiveStarScene(container) {
     if (depositBtn) depositBtn.addEventListener('click', () => toggleDepositModal(true));
     if (depositClose) depositClose.addEventListener('click', () => toggleDepositModal(false));
     if (depositConfirm) depositConfirm.addEventListener('click', () => toggleDepositModal(false));
+}
+// --- INYECTOR MANUAL DE LIENZO GRÁFICO PARA EL CONTENEDOR ---
+const slotDisplay = document.querySelector('.slot-canvas') || document.getElementById('joker-root');
+if (slotDisplay) {
+    slotDisplay.style.backgroundColor = '#0d0d18'; // Quita el fondo blanco molesto
+    slotDisplay.style.border = '2px solid #ff8a00';   // Borde naranja premium
+    slotDisplay.style.borderRadius = '16px';
+    slotDisplay.style.minHeight = '320px';
+    
+    // Forzamos al motor a reconstruir los emojis adentro del recuadro
+    if (typeof rebuild === 'function') {
+        rebuild();
+    }
 }
