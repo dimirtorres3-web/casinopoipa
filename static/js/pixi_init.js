@@ -1388,6 +1388,9 @@ function initFiveStarScene(container) {
         drawFrame();
     }
 
+    // Exponer para llamadas externas (scripts inline en templates)
+    window.rebuild = rebuild;
+
     function randomReelSymbols() {
         return symbols.sort(() => 0.5 - Math.random()).slice(0, 3);
     }
