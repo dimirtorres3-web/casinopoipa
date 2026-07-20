@@ -82,6 +82,54 @@
                                     <span id="bonus-info" class="status-pill status-pill--soft">Bonos: {{ player.bonus_balance|intcomma }}</span>
                                 </div>
                             </div>
+                            <!-- CONECTOR DIRECTO DEL BOTÓN DE GIRAR CON EL BACKEND DE PYTHON -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Vincula el botón real que encontramos en tu foto
+        const spinButton = document.getElementById('slot-bet-button') || document.querySelector('.btn-spin');
+        
+        if (spinButton) {
+            spinButton.addEventListener('click', function() {
+                console.log("Botón presionado: Enviando petición a Python...");
+
+                // LLAMADA REAL A PYTHON (Igual a como lo hace la ruleta)
+                fetch('/casino/spin-slot/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : ''
+                    },
+                    body: JSON.stringify({
+                        game_slug: window.gameSlug || 'frutas-de-fuego-777',
+                        bet: document.getElementById('slot-apuesta') ? document.getElementById('slot-apuesta').value : 2000
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert("Error: " + data.error);
+                        return;
+                    }
+                    
+                    // PYTHON RESPONDE CON ÉXITO: Actualiza el saldo en vivo
+                    if (document.getElementById('balance-value')) {
+                        document.getElementById('balance-value').innerText = data.new_balance;
+                    }
+                    
+                    // OBLIGA AL MOTOR GRÁFICO A DIBUJAR LOS EMOJIS DE ENTRADA Y EN MOVIMIENTO
+                    if (typeof rebuild === 'function') {
+                        rebuild();
+                    }
+                })
+                .catch(err => {
+                    console.error("Error de conexión:", err);
+                    // Respaldo inmediato: si Python tarda, igual refresca las figuras en pantalla
+                    if (typeof rebuild === 'function') { rebuild(); }
+                });
+            });
+        }
+    });
+</script>
                         </aside>
                     </div>
                 </section>
