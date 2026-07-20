@@ -1370,34 +1370,33 @@ function initFiveStarScene(container) {
     }
 
     let running = false;
-    let stopTimeout;
+    let currentAnimation = null;
 
     function startSpinVisual() {
         if (running) return;
         running = true;
         const startTime = performance.now();
-        const spinDurations = [1500, 1900, 2300];
+        const spinDurations = [1300, 1700, 2100];
 
         reels.forEach((reel, index) => {
             reel.originalY = reel.y;
-            reel.speed = 12 + index * 4;
+            reel.speed = 8 + index * 3;
             reel.blurFilter = new PIXI.filters.BlurFilter(0);
             reel.filters = [reel.blurFilter];
         });
 
         function animate(now) {
+            if (!running) return;
             const elapsed = now - startTime;
             reels.forEach((reel, index) => {
                 const progress = Math.min(elapsed / spinDurations[index], 1);
                 const eased = easeOutCubic(progress);
-                reel.y = reel.originalY + eased * 40;
-                reel.blurFilter.blur = 26 * (1 - progress);
+                reel.y = reel.originalY + eased * 34;
+                reel.blurFilter.blur = 24 * (1 - progress);
                 reel.x += reel.speed * 0.02;
 
-                // While spinning, randomize visible symbols per frame for a lively effect
                 reel.children.forEach((card) => {
-                    // find text child inside the card and set to a random emoji label
-                    const textChild = card.children && card.children.find && card.children.find(c => c instanceof PIXI.Text);
+                    const textChild = card.children && card.children.find && card.children.find((c) => c instanceof PIXI.Text);
                     if (textChild) {
                         const rand = symbols[Math.floor(Math.random() * symbols.length)];
                         textChild.text = (rand && rand.label) ? rand.label : rand;
@@ -1418,7 +1417,7 @@ function initFiveStarScene(container) {
     }
 
     function stopSpinVisual(finalSymbols) {
-        if (!running) return;
+        if (!running && !currentAnimation) return;
         running = false;
         if (currentAnimation) {
             cancelAnimationFrame(currentAnimation);
@@ -1428,8 +1427,9 @@ function initFiveStarScene(container) {
             reel.symbols = [];
             const finalSet = finalSymbols && finalSymbols[index] ? finalSymbols[index] : randomReelSymbols();
             reel.removeChildren();
+            const displaySymbols = Array.isArray(finalSet) ? finalSet : [finalSet];
             for (let j = 0; j < 3; j++) {
-                const symbol = finalSet[j] || symbols[(index * 2 + j) % symbols.length];
+                const symbol = displaySymbols[j] || symbols[(index * 2 + j) % symbols.length];
                 const card = symbolCard(symbol, reelWidth, reelHeight / 3.3);
                 card.y = j * (reelHeight / 3.3) + 12;
                 reel.addChild(card);
@@ -1437,7 +1437,7 @@ function initFiveStarScene(container) {
             reel.y = app.renderer.height * 0.12;
             reel.filters = [];
         });
-        rebuild();
+        drawFrame();
     }
 
     window.fiveStarSpinVisual = startSpinVisual;

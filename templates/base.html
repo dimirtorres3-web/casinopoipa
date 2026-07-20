@@ -28,12 +28,22 @@
 <body class="bg-night text-white font-sans min-h-screen">
     {% include 'casino/partials/messages.html' %}
     {% block content %}{% endblock %}
-    <nav class="mobile-nav" aria-label="Navegación inferior">
+    <nav class="mobile-nav" aria-label="Navegación inferior" id="main-nav">
         <a href="/" class="mobile-nav__item">🏠<span>Inicio</span></a>
         <a href="/cajero/" class="mobile-nav__item">💳<span>Casino</span></a>
         <a href="/tragamonedas/" class="mobile-nav__item">🎰<span>Slots</span></a>
         <a href="/ruleta/" class="mobile-nav__item">🎡<span>Ruleta</span></a>
     </nav>
+    <script>
+        // Ocultar nav solo en páginas de juego
+        document.addEventListener('DOMContentLoaded', function() {
+            const gamePages = document.querySelector('.game-page');
+            const nav = document.getElementById('main-nav');
+            if (gamePages && nav) {
+                nav.style.display = 'none';
+            }
+        });
+    </script>
     <script src="/static/js/casinopoipa.js"></script>
     <script src="https://pixijs.download/release/pixi.min.js"></script>
     <script src="/static/js/pixi_init.js"></script>
