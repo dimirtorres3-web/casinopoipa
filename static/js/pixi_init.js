@@ -109,17 +109,18 @@ document.addEventListener('DOMContentLoaded', function () {
         return app;
     }
 
-    document.querySelectorAll('.slot-canvas, .roulette-canvas').forEach((el) => createPixiIn(el));
+    document.querySelectorAll('.roulette-canvas').forEach((el) => createPixiIn(el));
 
     const gamePage = document.querySelector('.game-page');
     if (gamePage) {
-        if (gamePage.dataset.game === 'frutas-de-fuego-777') {
+        const slug = gamePage.dataset.game;
+        if (slug === 'frutas-de-fuego-777' || slug === 'coronas-fortuna') {
             initFiveStarScene(document.getElementById('five-star-reel-stage'));
-        } else if (gamePage.dataset.game === 'poker') {
+        } else if (slug === 'poker') {
             initPokerScene(document.getElementById('poker-pixi-stage'));
-        } else if (gamePage.dataset.game === 'palacio-arlequin') {
+        } else if (slug === 'palacio-arlequin') {
             initJokerJackpotScene(document.getElementById('joker-jackpot-stage'));
-        } else if (gamePage.dataset.game === 'mansion-embrujada') {
+        } else if (slug === 'mansion-embrujada') {
             initBettyBorisBooScene(document.getElementById('betty-boris-boo-stage'));
         }
     }
