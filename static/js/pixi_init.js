@@ -1269,16 +1269,17 @@ function initFiveStarScene(container) {
     app.view.style.height = '100%';
     container.appendChild(app.view);
 
-    const symbols = [
-        { key: 'seven', label: '7', color: 0xff3b3b, accent: 0xffd8d8 },
-        { key: 'coin', label: '★', color: 0xffd23c, accent: 0xfff2a2 },
-        { key: 'watermelon', label: '🍉', color: 0x27c76f, accent: 0x67f9a4 },
-        { key: 'grapes', label: '🍇', color: 0x9d42d1, accent: 0xd48aff },
-        { key: 'plum', label: '🍑', color: 0x8a3cb4, accent: 0xc37ce1 },
-        { key: 'orange', label: '🍊', color: 0xff8d08, accent: 0xffc045 },
-        { key: 'lemon', label: '🍋', color: 0xffe73a, accent: 0xfff27a },
-        { key: 'cherries', label: '🍒', color: 0xe82b44, accent: 0xff7e9b },
-    ];
+    // Symbols: pick a themed emoji set depending on the current game slug
+    const gameSlugLocal = window.gameSlug || (container && container.closest && container.closest('.game-page') && container.closest('.game-page').dataset.game) || 'frutas-de-fuego-777';
+    const emojiSets = {
+        'frutas-de-fuego-777': ['👑7️⃣🔥','🍉','🍋','🍒','🪙⭐','🍇','🍊','🍑','🍓','🍍'],
+        'palacio-arlequin': ['🃏✨','🔔','💎','❤️','🟪','🎭','🎲','🎴','🔱','🪄'],
+        'mansion-embrujada': ['👻💖','☎️👑','🕯️🔱','💚💎','👻💙','📖🔮','💜💎','👻💚','🦴','🕸️'],
+        'coronas-fortuna': ['👑A️⃣','👑K️⃣','👑Q️⃣','👑J️⃣','🍒','🍋','🍊','🍉','⭐','🎖️'],
+    };
+    const defaultSet = ['🍒','7','🍋','🔔','🍉','⭐','🍊','🍑'];
+    const raw = emojiSets[gameSlugLocal] || defaultSet;
+    const symbols = raw.map((s, idx) => ({ key: `sym_${idx}`, label: s, color: 0x222222, accent: 0x666666 }));
 
     const reelCount = 3;
     const reels = [];
@@ -1329,7 +1330,7 @@ function initFiveStarScene(container) {
         container.addChild(badge);
 
         const icon = new PIXI.Text(s.label || '', {
-            fontFamily: 'Inter, sans-serif',
+            fontFamily: 'Inter, "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
             fontSize: Math.round(height * 0.55),
             fontWeight: '900',
             fill: '#ffffff',
