@@ -653,33 +653,71 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (slotButton) {
         slotButton.addEventListener('click', function () {
-            const storedWager = currentSlotBonus && currentSlotBonus.remaining > 0 ? currentSlotBonus.wager : Number(document.getElementById('slot-apuesta').value || 0);
+            const apuestaInput = document.getElementById('slot-apuesta');
+            const storedWager = currentSlotBonus && currentSlotBonus.remaining > 0 ? currentSlotBonus.wager : Number(apuestaInput?.value || 0);
             const isBonusSpin = currentSlotBonus && currentSlotBonus.remaining > 0;
             if (!isBonusSpin && storedWager < 2000) {
                 showStatus('La apuesta mínima es de 2.000 Gs.', 'warning');
                 return;
             }
-            // show total bet before sending
-            const totalBet = apuesta * selectedRouletteChoices.length;
+
             const betTotalEl = document.getElementById('bet-total');
-            if (betTotalEl) betTotalEl.textContent = `Apuesta total: Gs. ${new Intl.NumberFormat('es-PY').format(totalBet)}`;
+            if (betTotalEl) betTotalEl.textContent = `Apuesta: Gs. ${new Intl.NumberFormat('es-PY').format(storedWager)}`;
+
             const currentBalance = Number(document.getElementById('balance-value')?.textContent?.replace(/[^0-9]/g, '') || 0);
             if (storedWager > currentBalance) {
                 showInsufficientFunds();
                 return;
             }
+
             showStatus(isBonusSpin ? 'Ejecutando giro gratis...' : 'GIRANDO...', 'success');
-            if (slotCanvases.length) {
+
+            // Start visual spin: prefer PIXI scene if present, otherwise canvas fallback
+            if (typeof window.fiveStarSpinVisual === 'function') {
+                try { window.fiveStarSpinVisual(); } catch (e) { console.warn('fiveStarSpinVisual failed', e); }
+            } else if (slotCanvases.length) {
                 slotCanvases.forEach(setupCanvas);
                 startSlotSpin();
             }
+
+            // Play spin audio cue
+            playAudioCue('spin');
+
             fetchPlay('tragamonedas', storedWager, isBonusSpin).then((result) => {
                 if (!result.success) {
                     showStatus(result.error, 'danger');
+                    // stop visual blur
                     slotCanvases.forEach((canvas) => canvas.classList.remove('blur'));
                     return;
                 }
-                setTimeout(() => handleSlotResult(result), 2100);
+
+                // Convert backend flat reels (['🍒','7','🍉']) into per-reel 3-slot arrays for PIXI visual
+                const backendReels = result.reels || [];
+                const nested = [[], [], []];
+                for (let i = 0; i < 3; i++) {
+                    const center = backendReels[i] || slotSymbols[i % slotSymbols.length] || '⭐';
+                    // pick neighbor symbols for top/bottom
+                    const top = slotSymbols[(i * 2 + 1) % slotSymbols.length] || center;
+                    const bottom = slotSymbols[(i * 3 + 2) % slotSymbols.length] || center;
+                    nested[i] = [top, center, bottom];
+                }
+
+                // Stop the PIXI visual with final symbols if available
+                if (typeof window.fiveStarStopVisual === 'function') {
+                    try { window.fiveStarStopVisual(nested); } catch (e) { console.warn('fiveStarStopVisual failed', e); }
+                } else {
+                    // fallback to canvas-based display
+                    stopSlotSpin(backendReels);
+                }
+
+                // Let the visual finish then process result effects
+                setTimeout(() => {
+                    handleSlotResult(result);
+                }, 800);
+            }).catch((err) => {
+                console.error('Play request failed', err);
+                showStatus('Error de red al ejecutar la jugada.', 'danger');
+                slotCanvases.forEach((canvas) => canvas.classList.remove('blur'));
             });
         });
     }

@@ -312,27 +312,27 @@
     <script src="/static/js/pixi_init.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Captura el identificador del juego directamente del HTML
             const gamePageElement = document.querySelector('.game-page');
-            if (gamePageElement) {
-                const currentSlug = gamePageElement.dataset.game;
-                window.gameSlug = currentSlug;
-                
-                // Busca el recuadro blanco del centro para inyectar PixiJS
-                const canvasTarget = document.querySelector('.slot-canvas') || document.getElementById('joker-root');
-                if (canvasTarget && typeof initFiveStarsScene === 'function') {
-                    // Fuerza el inicio limpio del lienzo
-                    canvasTarget.innerHTML = '';
-                    if (currentSlug.includes('frutas') || currentSlug.includes('five-star')) {
-                        initFiveStarsScene(canvasTarget);
-                    } else if (currentSlug.includes('arlequin') || currentSlug.includes('joker')) {
-                        initJokerJackpotScene(canvasTarget);
-                    } else if (currentSlug.includes('mansion') || currentSlug.includes('betty')) {
-                        initBettyBorisBooScene(canvasTarget);
-                    } else if (currentSlug.includes('coronas')) {
-                        initFiveStarsScene(canvasTarget); // Respaldo modular
-                    }
-                }
+            if (!gamePageElement) return;
+            const currentSlug = gamePageElement.dataset.game;
+            window.gameSlug = currentSlug;
+
+            // Map slug -> container id and init function
+            const mapping = {
+                'frutas-de-fuego-777': { id: 'five-star-reel-stage', fn: window.initFiveStarScene || initFiveStarScene },
+                'palacio-arlequin': { id: 'joker-jackpot-stage', fn: window.initJokerJackpotScene || initJokerJackpotScene },
+                'mansion-embrujada': { id: 'betty-boris-boo-stage', fn: window.initBettyBorisBooScene || initBettyBorisBooScene },
+                'coronas-fortuna': { id: 'five-star-reel-stage', fn: window.initFiveStarScene || initFiveStarScene },
+            };
+
+            const key = Object.keys(mapping).find((k) => currentSlug && currentSlug.includes(k.split('-')[0])) || currentSlug;
+            const entry = mapping[currentSlug] || mapping[key] || mapping['frutas-de-fuego-777'];
+            const container = document.getElementById(entry.id);
+            if (!container) return;
+            try {
+                if (typeof entry.fn === 'function') entry.fn(container);
+            } catch (e) {
+                console.warn('Failed to init PIXI scene', e);
             }
         });
     </script>

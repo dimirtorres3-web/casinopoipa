@@ -1302,6 +1302,8 @@ function initFiveStarScene(container) {
 
     function symbolCard(symbol, width, height) {
         const container = new PIXI.Container();
+        const s = (typeof symbol === 'string') ? { label: symbol, color: 0x333333, accent: 0x666666 } : symbol;
+
         const bg = new PIXI.Graphics();
         bg.beginFill(0x12131c);
         bg.drawRoundedRect(0, 0, width, height, 22);
@@ -1319,14 +1321,14 @@ function initFiveStarScene(container) {
         container.addChild(shine);
 
         const badge = new PIXI.Graphics();
-        badge.beginFill(symbol.color, 1);
+        badge.beginFill(s.color || 0x222222, 1);
         badge.drawRoundedRect(0, 0, width * 0.78, height * 0.78, 18);
         badge.endFill();
         badge.x = (width - badge.width) / 2;
         badge.y = (height - badge.height) / 2;
         container.addChild(badge);
 
-        const icon = new PIXI.Text(symbol.label, {
+        const icon = new PIXI.Text(s.label || '', {
             fontFamily: 'Inter, sans-serif',
             fontSize: Math.round(height * 0.55),
             fontWeight: '900',
@@ -1340,7 +1342,7 @@ function initFiveStarScene(container) {
         container.addChild(icon);
 
         const glow = new PIXI.Graphics();
-        glow.beginFill(symbol.accent, 0.12);
+        glow.beginFill(s.accent || 0x666666, 0.12);
         glow.drawEllipse(width / 2, height / 2, width * 0.56, height * 0.35);
         glow.endFill();
         container.addChildAt(glow, 0);
