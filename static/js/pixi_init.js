@@ -1337,8 +1337,14 @@ function initFiveStarScene(container) {
         }
     }
 
+    let frame = null;
     function drawFrame() {
-        const frame = new PIXI.Graphics();
+        if (frame) {
+            app.stage.removeChild(frame);
+            frame.destroy({ children: true });
+            frame = null;
+        }
+        frame = new PIXI.Graphics();
         frame.lineStyle(8, 0xffb23c, 0.75);
         frame.beginFill(0x12131c, 0.0);
         frame.drawRoundedRect(padding - 12, app.renderer.height * 0.12 - 12, reelCount * reelWidth + (reelCount - 1) * 16 + 24, reelHeight + 24, 30);
@@ -1347,7 +1353,7 @@ function initFiveStarScene(container) {
     }
 
     function rebuild() {
-        app.stage.removeChildren();
+        reels.forEach((reel) => reel.removeChildren());
         layoutReels();
         drawFrame();
     }
