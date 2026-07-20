@@ -5,16 +5,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function createPixiIn(container) {
-        // container is an Element
         if (!container) return null;
 
-        // find game slug from closest .game-page or data attribute
         const gamePage = container.closest('.game-page');
         const gameSlug = (gamePage && gamePage.dataset && gamePage.dataset.game) || 'frutas-de-fuego-777';
 
-        // Clear and prepare
         container.innerHTML = '';
-
         const app = new PIXI.Application({
             antialias: true,
             backgroundAlpha: 0,
@@ -25,126 +21,93 @@ document.addEventListener('DOMContentLoaded', function () {
         app.view.style.height = '100%';
         container.appendChild(app.view);
 
-        const rotor = new PIXI.Container();
-        app.stage.addChild(rotor);
+        const stage = new PIXI.Container();
+        app.stage.addChild(stage);
 
-       function rebuild() {
-    rotor.removeChildren();
-    const w = app.renderer.width;
-    const h = app.renderer.height;
-    rotor.x = w / 2;
-    rotor.y = h / 2;
+        const colorPalette = {
+            'frutas-de-fuego-777': { bg: 0x3d1a1f, accent: 0xffd700 },
+            'palacio-arlequin': { bg: 0x0c0810, accent: 0xbf55ec },
+            'mansion-embrujada': { bg: 0x141018, accent: 0x2ecc71 },
+            'coronas-fortuna': { bg: 0x081c14, accent: 0xff4d4d },
+            'ruleta-imperial': { bg: 0x071a11, accent: 0xffa500 },
+        };
 
-    // --- 1. MATRICES DE EMOJIS PARA TODOS LOS JUEGOS (INCLUYE RULETA) ---
-    let symbols = [];
-    
-    if (!gameSlug || gameSlug.includes('frutas') || gameSlug.includes('777')) {
-        symbols = [
-            ["👑7️⃣🔥", "🍉", "🍋", "🍒"],
-            ["🪙⭐", "🍒", "🍇", "🍊"],
-            ["👑7️⃣🔥", "🍇", "🍉", "🪙⭐"]
-        ];
-    } else if (gameSlug.includes('arlequin') || gameSlug.includes('palacio')) {
-        symbols = [
-            ["🃏✨", "🔔", "💎", "❤️"],
-            ["🟪", "🔔", "🃏✨", "💎"],
-            ["🃏✨", "❤️", "🟪", "🔔"]
-        ];
-    } else if (gameSlug.includes('mansion') || gameSlug.includes('embrujada')) {
-        symbols = [
-            ["👻💖", "☎️👑", "🕯️🔱", "💚💎"],
-            ["👻💙", "📖🔮", "💜💎", "☎️👑"],
-            ["👻💚", "🕯️🔱", "📖🔮", "👻💖"]
-        ];
-    } else if (gameSlug.includes('coronas') || gameSlug.includes('fortuna')) {
-        symbols = [
-            ["👑A️⃣", "👑K️⃣", "🍋", "🍒"],
-            ["👑Q️⃣", "👑J️⃣", "🍒", "👑A️⃣"],
-            ["👑K️⃣", "👑A️⃣", "👑Q️⃣", "🍋"]
-        ];
-    } else if (gameSlug.includes('ruleta') || gameSlug.includes('imperial')) {
-        // --- AQUÍ ESTÁ TU RULETA IMPERIAL ---
-        symbols = [
-            ["🔄🎡", "🔴1️⃣", "⚫2️⃣", "🟢0️⃣"],
-            ["🎰 fichas", "🔴3️⃣", "⚫4️⃣", "🔴5️⃣"],
-            ["🔄 de giro", "⚫6️⃣", "🔴7️⃣", "⚫8️⃣"]
-        ];
-    }
+        const symbolsBySlug = {
+            'frutas-de-fuego-777': ['👑7️⃣🔥', '🍉', '🍋', '🍒', '🪙⭐', '🍇', '🍊', '🍑'],
+            'palacio-arlequin': ['🃏✨', '🔔', '💎', '❤️', '🟪', '🎭', '🎲', '🎴'],
+            'mansion-embrujada': ['👻💖', '☎️👑', '🕯️🔱', '💚💎', '👻💙', '📖🔮', '💜💎', '👻💚'],
+            'coronas-fortuna': ['👑A️⃣', '👑K️⃣', '👑Q️⃣', '👑J️⃣', '🍒', '🍋', '🍊', '🍉'],
+            'ruleta-imperial': ['🔄🎡', '🔴1️⃣', '⚫2️⃣', '🟢0️⃣', '🎰', '🔴3️⃣', '⚫4️⃣', '🔴5️⃣'],
+        };
 
-    // --- 2. RENDERIZADOR UNIVERSAL DE FIGURAS ---
-    if (symbols.length > 0) {
-        symbols.forEach((column, columnIndex) => {
-            column.forEach((emoji, rowIndex) => {
-                const style = new PIXI.TextStyle({
-                    fontSize: 52,
-                    fontFamily: ['Segoe UI Emoji', 'Apple Color Emoji', 'Arial', 'sans-serif']
+        function rebuild() {
+            stage.removeChildren();
+            const w = app.renderer.width;
+            const h = app.renderer.height;
+            stage.x = w / 2;
+            stage.y = h / 2;
+
+            const palette = colorPalette[gameSlug] || { bg: 0x0a0a0f, accent: 0xffffff };
+            const symbolList = symbolsBySlug[gameSlug] || symbolsBySlug['frutas-de-fuego-777'];
+
+            app.renderer.backgroundColor = palette.bg;
+
+            const bg = new PIXI.Graphics();
+            bg.beginFill(palette.bg, 1);
+            bg.drawRoundedRect(-w / 2, -h / 2, w, h, 24);
+            bg.endFill();
+            stage.addChild(bg);
+
+            const cols = 4;
+            const rows = 2;
+            const cellW = Math.min(140, w * 0.18);
+            const cellH = Math.min(110, h * 0.18);
+            const gapX = 18;
+            const gapY = 16;
+            const startX = -((cols - 1) * (cellW + gapX)) / 2;
+            const startY = -((rows - 1) * (cellH + gapY)) / 2;
+
+            symbolList.forEach((emoji, index) => {
+                const col = index % cols;
+                const row = Math.floor(index / cols);
+                const card = new PIXI.Graphics();
+                card.beginFill(0x11131c, 0.94);
+                card.drawRoundedRect(0, 0, cellW, cellH, 20);
+                card.endFill();
+                card.lineStyle(2, palette.accent, 0.2);
+                card.drawRoundedRect(0, 0, cellW, cellH, 20);
+                card.x = startX + col * (cellW + gapX) - cellW / 2;
+                card.y = startY + row * (cellH + gapY) - cellH / 2;
+                stage.addChild(card);
+
+                const text = new PIXI.Text(emoji, {
+                    fontFamily: ['Segoe UI Emoji', 'Apple Color Emoji', 'Arial', 'sans-serif'],
+                    fontSize: Math.round(cellH * 0.6),
+                    fill: '#ffffff',
+                    align: 'center',
+                    dropShadow: true,
+                    dropShadowColor: '#000000',
+                    dropShadowBlur: 8,
+                    dropShadowDistance: 4,
                 });
-                const textIcon = new PIXI.Text(emoji, style);
-                textIcon.anchor.set(0.5);
-                textIcon.x = (columnIndex * (w / 3)) + (w / 6);
-                textIcon.y = (rowIndex * (h / 4)) + (h / 8) + 10;
-                rotor.addChild(textIcon);
+                text.anchor.set(0.5);
+                text.x = card.x + cellW / 2;
+                text.y = card.y + cellH / 2;
+                stage.addChild(text);
             });
-        });
-    }
-
-    // --- 3. PALETA DE COLORES DE FONDO (LÍNEA 117 DE TU FOTO) ---
-    const palette = {
-        'frutas-de-fuego-777': { bg: 0x3d1a1f, accent: 0xffd700 },
-        'palacio-arlequin': { bg: 0x0c0810, accent: 0xbf55ec },
-        'mansion-embrujada': { bg: 0x141018, accent: 0x2ecc71 },
-        'coronas-fortuna': { bg: 0x081c14, accent: 0xff4d4d },
-        'ruleta-imperial': { bg: 0x071a11, accent: 0xffa500 }
-    };
-
-    const currentPalette = palette[gameSlug] || { bg: 0x0a0a0f, accent: 0xffffff };
-    
-    // Pinta el fondo del juego correspondiente
-    if (app.renderer.background) {
-        app.renderer.background.color = currentPalette.bg;
-    } else {
-        app.renderer.backgroundColor = currentPalette.bg;
-    }
-
-    // Dibuja el fondo interno del Canvas usando el color de la paleta
-    const bg = new PIXI.Graphics();
-    bg.beginFill(currentPalette.bg, 0.9);
-    bg.drawRoundedRect(-w / 2 + 8, -h / 2 + 8, w - 16, h - 16, 16);
-    bg.endFill();
-    rotor.addChild(bg);
-}
-
-            for (let i = 0; i < 12; i++) {
-                const mark = new PIXI.Graphics();
-                mark.beginFill(palette.marks);
-                mark.drawRoundedRect(-6, -radius, 12, 28, 6);
-                mark.endFill();
-                const ang = (i / 12) * Math.PI * 2;
-                mark.x = Math.cos(ang) * radius;
-                mark.y = Math.sin(ang) * radius;
-                mark.rotation = ang + Math.PI / 2;
-                rotor.addChild(mark);
-            }
-
-            const center = new PIXI.Graphics();
-            center.beginFill(0xffffff, 0.98);
-            center.drawCircle(0, 0, Math.max(6, Math.floor(radius * 0.08)));
-            center.endFill();
-            rotor.addChild(center);
         }
 
         rebuild();
 
         app.ticker.add((delta) => {
-            rotor.rotation += 0.008 * delta;
+            stage.rotation += 0.008 * delta;
         });
 
-        window.addEventListener('resize', () => {
-            rebuild();
-        });
+        window.addEventListener('resize', rebuild);
+        window.rebuild = rebuild;
 
         return app;
-    
+    }
 
     document.querySelectorAll('.slot-canvas, .roulette-canvas').forEach((el) => createPixiIn(el));
 
