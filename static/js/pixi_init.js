@@ -1331,7 +1331,7 @@ function initFiveStarScene(container) {
 
         const icon = new PIXI.Text(s.label || '', {
             fontFamily: 'Inter, "Segoe UI Emoji", "Apple Color Emoji", sans-serif',
-            fontSize: Math.round(height * 0.55),
+            fontSize: Math.round(height * 0.50),
             fontWeight: '900',
             fill: '#ffffff',
             stroke: '#000000',
@@ -1420,6 +1420,17 @@ function initFiveStarScene(container) {
                 reel.y = reel.originalY + eased * 40;
                 reel.blurFilter.blur = 26 * (1 - progress);
                 reel.x += reel.speed * 0.02;
+
+                // While spinning, randomize visible symbols per frame for a lively effect
+                reel.children.forEach((card) => {
+                    // find text child inside the card and set to a random emoji label
+                    const textChild = card.children && card.children.find && card.children.find(c => c instanceof PIXI.Text);
+                    if (textChild) {
+                        const rand = symbols[Math.floor(Math.random() * symbols.length)];
+                        textChild.text = (rand && rand.label) ? rand.label : rand;
+                    }
+                });
+
                 if (reel.x > padding + index * (reelWidth + 16) + 8) {
                     reel.x = padding + index * (reelWidth + 16) - 8;
                 }
