@@ -260,4 +260,32 @@
             </main>
         </div>
     </div>
+    <!-- CONECTOR MANUAL OBLIGATORIO PARA QUE REACCIONE EL MOTOR GRÁFICO -->
+    <script src="/static/js/pixi_init.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Captura el identificador del juego directamente del HTML
+            const gamePageElement = document.querySelector('.game-page');
+            if (gamePageElement) {
+                const currentSlug = gamePageElement.dataset.game;
+                window.gameSlug = currentSlug;
+                
+                // Busca el recuadro blanco del centro para inyectar PixiJS
+                const canvasTarget = document.querySelector('.slot-canvas') || document.getElementById('joker-root');
+                if (canvasTarget && typeof initFiveStarsScene === 'function') {
+                    // Fuerza el inicio limpio del lienzo
+                    canvasTarget.innerHTML = '';
+                    if (currentSlug.includes('frutas') || currentSlug.includes('five-star')) {
+                        initFiveStarsScene(canvasTarget);
+                    } else if (currentSlug.includes('arlequin') || currentSlug.includes('joker')) {
+                        initJokerJackpotScene(canvasTarget);
+                    } else if (currentSlug.includes('mansion') || currentSlug.includes('betty')) {
+                        initBettyBorisBooScene(canvasTarget);
+                    } else if (currentSlug.includes('coronas')) {
+                        initFiveStarsScene(canvasTarget); // Respaldo modular
+                    }
+                }
+            }
+        });
+    </script>
 {% endblock %}
