@@ -169,42 +169,35 @@ def dashboard(request):
             "icono": "🔥",
             "slug": "frutas-de-fuego-777",
             "url": reverse("casino:tragamonedas_slug", kwargs={"slug": "frutas-de-fuego-777"}),
-            "cover": "/static/img/games/frutas-de-fuego-777.svg",
+            "cover": "/static/img/games/777-strike.svg",
         },
         {
             "titulo": "EL PALACIO DEL ARLEQUÍN",
             "icono": "🃏",
             "slug": "palacio-arlequin",
             "url": reverse("casino:tragamonedas_slug", kwargs={"slug": "palacio-arlequin"}),
-            "cover": "/static/img/games/palacio-arlequin.svg",
+            "cover": "/static/img/games/joker-jackpot.svg",
         },
         {
             "titulo": "MANSIÓN EMBRUJADA",
             "icono": "👻",
             "slug": "mansion-embrujada",
             "url": reverse("casino:tragamonedas_slug", kwargs={"slug": "mansion-embrujada"}),
-            "cover": "/static/img/games/mansion-embrujada.svg",
+            "cover": "/static/img/games/betty-boris-boo.svg",
         },
         {
             "titulo": "CORONAS DE LA FORTUNA",
             "icono": "👑",
             "slug": "coronas-fortuna",
             "url": reverse("casino:tragamonedas_slug", kwargs={"slug": "coronas-fortuna"}),
-            "cover": "/static/img/games/coronas-fortuna.svg",
-        },
-        {
-            "titulo": "Poker Royale",
-            "icono": "♠️",
-            "slug": "poker",
-            "url": reverse("casino:poker"),
-            "cover": "/static/img/games/poker.svg",
+            "cover": "/static/img/games/five-star.svg",
         },
         {
             "titulo": "RULETA IMPERIAL",
             "icono": "🎡",
             "slug": "ruleta-imperial",
             "url": reverse("casino:ruleta"),
-            "cover": "/static/img/games/ruleta-imperial.svg",
+            "cover": "/static/img/games/ruleta.svg",
         },
     ]
     return render(request, "casino/player_dashboard.html", {
@@ -499,7 +492,7 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
         elif not isinstance(selected_numbers, list):
             return JsonResponse({"success": False, "error": "Formato de apuesta para la ruleta inválido."})
 
-        cleaned_numbers = []
+        validated_numbers = []
         for number in selected_numbers:
             try:
                 number = int(number)
@@ -507,25 +500,31 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
                 return JsonResponse({"success": False, "error": "Selecciona números válidos para la ruleta."})
             if number < 0 or number > 36:
                 return JsonResponse({"success": False, "error": "Número de ruleta inválido."})
-            if number not in cleaned_numbers:
-                cleaned_numbers.append(number)
+            validated_numbers.append(number)
 
-        if len(cleaned_numbers) == 0:
+        if len(validated_numbers) == 0:
             return JsonResponse({"success": False, "error": "Selecciona al menos un número para la ruleta."})
-        if len(cleaned_numbers) > 3:
+        if len(validated_numbers) > 3:
             return JsonResponse({"success": False, "error": "Puedes apostar hasta 3 números en la ruleta."})
 
+        total_stake = int(apuesta) * len(validated_numbers)
+        if total_stake > player.saldo:
+            return JsonResponse({"success": False, "error": "Saldo insuficiente para esta apuesta."})
+
         result = pick_roulette_result()
-        win = result["number"] in cleaned_numbers
+        hit_count = validated_numbers.count(result["number"])
+        win = hit_count > 0
         payout = 0
         if win:
-            payout = int(Decimal(apuesta) * ROULETTE_PAYOUT_BASE / Decimal(len(cleaned_numbers)))
-        if win:
-            player.saldo += Decimal(payout)
+            gross_win = int(Decimal(apuesta) * ROULETTE_PAYOUT_BASE * hit_count)
+            net_gain = gross_win - total_stake
+            payout = net_gain
+            player.saldo += Decimal(net_gain)
             message = f"¡Victoria en Ruleta! Salió {result['number']} {result['color']} y ganaste {payout} Gs."
         else:
-            player.saldo -= Decimal(apuesta)
-            message = f"Derrota en Ruleta. Salió {result['number']} {result['color']} y perdiste {apuesta} Gs."
+            player.saldo -= Decimal(total_stake)
+            payout = -total_stake
+            message = f"Derrota en Ruleta. Salió {result['number']} {result['color']} y perdiste {total_stake} Gs."
         player.save()
         response = {
             "game": game,
@@ -534,7 +533,7 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
             "message": message,
             "animation": "roulette",
             "roulette": result,
-            "selected_numbers": cleaned_numbers,
+            "selected_numbers": validated_numbers,
             "selected_number": result["number"],
             "selected_color": result["color"],
         }
@@ -771,9 +770,7 @@ def tragamonedas(request, slug=None):
 def ruleta(request):
     return render(request, "casino/ruleta.html", {"player": request.user})
 
-@login_required
-def poker(request):
-    return render(request, "casino/poker.html", {"player": request.user})
+# Poker removed by request; the poker page is disabled and the poker route is no longer available.
 
 @login_required
 def blackjack(request):

@@ -15,7 +15,6 @@ urlpatterns = [
     path("tragamonedas/", views.tragamonedas, name="tragamonedas"),
     path("tragamonedas/<slug:slug>/", views.tragamonedas, name="tragamonedas_slug"),
     path("ruleta/", views.ruleta, name="ruleta"),
-    path("poker/", views.poker, name="poker"),
     path("blackjack/", views.blackjack, name="blackjack"),
     path("bingo/", views.bingo, name="bingo"),
     path("cajero/", views.cashier, name="cajero"),

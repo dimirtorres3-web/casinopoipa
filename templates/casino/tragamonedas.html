@@ -4,25 +4,6 @@
 {% block content %}
     <div class="game-page" data-game="{{ game_slug }}">
         <div class="layout-shell">
-            <header class="topbar fixed-game-header">
-                <div class="brand-hero">
-                    <span class="brand-mark">🎰</span>
-                    <div>
-                        <p>Tragamonedas</p>
-                        <h1>{{ game_meta.title }}</h1>
-                    </div>
-                </div>
-                <div class="header-actions">
-                    <div class="balance-display glass-panel">
-                        <p>Saldo disponible</p>
-                        <h2 id="balance-value">Gs. {{ player.saldo|intcomma }}</h2>
-                        <p id="bonus-balance" style="margin-top:6px; color:#ffd9a8;">Bono: Gs. {{ player.bonus_balance|intcomma }}</p>
-                        <p id="free-spins-indicator" style="margin-top:4px; color:#8be28b;">Free spins: {{ player.free_spins }}</p>
-                    </div>
-                    <button type="button" class="btn-primary" id="quick-deposit-btn">Depositar</button>
-                    <a href="{% url 'casino:dashboard' %}" class="btn-secondary">Volver</a>
-                </div>
-            </header>
             <main class="game-shell glass-panel {% if game_slug == 'palacio-arlequin' %}joker-jackpot-shell{% elif game_slug == 'mansion-embrujada' %}betty-boris-boo-shell{% else %}game-shell--five-star{% endif %}">
                 {% if game_slug == 'palacio-arlequin' %}
                 <section class="joker-jackpot-shell">
@@ -30,16 +11,16 @@
                         <div class="joker-jackpot-title">
                             <span class="joker-mark">🃏</span>
                             <div>
-                                <p>Tragamonedas premium</p>
                                 <h2>Joker Jackpot</h2>
                             </div>
                         </div>
                         <div class="balance-inline balance-inline--corner">
                             <div class="balance-chip balance-chip--compact">
                                 <span>SALDO PYG</span>
-                                <strong id="balance-value">Gs. {{ player.saldo|intcomma }}</strong>
+                                <strong id="balance-value" class="balance-value">Gs. {{ player.saldo|intcomma }}</strong>
                             </div>
                             <button type="button" class="btn-primary btn-small" id="quick-deposit-btn">Depositar</button>
+                            <a href="{% url 'casino:dashboard' %}" class="btn-secondary btn-small">Volver</a>
                         </div>
                     </div>
 
@@ -78,7 +59,7 @@
                                 </div>
                                 <button type="button" id="slot-bet-button" class="btn-primary btn-spin btn-spin--joker">GIRAR</button>
                                 <div class="status-footer">
-                                    <span id="slots-status" class="status-pill">Listo para Joker Spin</span>
+                                    <span id="slots-status" class="status-pill"></span>
                                     <span id="bonus-info" class="status-pill status-pill--soft">Bonos: {{ player.bonus_balance|intcomma }}</span>
                                 </div>
                             </div>
@@ -98,9 +79,10 @@
                         <div class="balance-inline balance-inline--corner">
                             <div class="balance-chip balance-chip--compact">
                                 <span>SALDO PYG</span>
-                                <strong id="balance-value">Gs. {{ player.saldo|intcomma }}</strong>
+                                <strong id="balance-value" class="balance-value">Gs. {{ player.saldo|intcomma }}</strong>
                             </div>
                             <button type="button" class="btn-primary btn-small" id="quick-deposit-btn">Depositar</button>
+                            <a href="{% url 'casino:dashboard' %}" class="btn-secondary btn-small">Volver</a>
                         </div>
                     </div>
 
@@ -139,7 +121,7 @@
                                 </div>
                                 <button type="button" id="slot-bet-button" class="btn-primary btn-spin btn-spin--gothic">GIRAR</button>
                                 <div class="status-footer">
-                                    <span id="slots-status" class="status-pill">Explorando la cripta</span>
+                                    <span id="slots-status" class="status-pill"></span>
                                     <span id="bonus-info" class="status-pill status-pill--soft">Bonos: {{ player.bonus_balance|intcomma }}</span>
                                 </div>
                             </div>
@@ -159,7 +141,7 @@
                         <div class="balance-inline">
                             <div class="balance-chip">
                                 <span>SALDO PYG</span>
-                                <strong id="balance-value">Gs. {{ player.saldo|intcomma }}</strong>
+                                <strong id="balance-value" class="balance-value">Gs. {{ player.saldo|intcomma }}</strong>
                             </div>
                             <button type="button" class="btn-primary btn-small" id="quick-deposit-btn">Depositar</button>
                         </div>
@@ -192,7 +174,7 @@
                                 </div>
                                 <button type="button" id="slot-bet-button" class="btn-primary btn-spin">GIRAR</button>
                                 <div class="status-footer">
-                                    <span id="slots-status" class="status-pill">Listo para girar</span>
+                                    <span id="slots-status" class="status-pill"></span>
                                     <span id="bonus-info" class="status-pill status-pill--soft">Bonos: {{ player.bonus_balance|intcomma }}</span>
                                 </div>
                             </div>
@@ -212,32 +194,4 @@
             </main>
         </div>
     </div>
-    <!-- CONECTOR MANUAL OBLIGATORIO PARA QUE REACCIONE EL MOTOR GRÁFICO -->
-    <script src="/static/js/pixi_init.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const gamePageElement = document.querySelector('.game-page');
-            if (!gamePageElement) return;
-            const currentSlug = gamePageElement.dataset.game;
-            window.gameSlug = currentSlug;
-
-            // Map slug -> container id and init function
-            const mapping = {
-                'frutas-de-fuego-777': { id: 'five-star-reel-stage', fn: window.initFiveStarScene || initFiveStarScene },
-                'palacio-arlequin': { id: 'joker-jackpot-stage', fn: window.initJokerJackpotScene || initJokerJackpotScene },
-                'mansion-embrujada': { id: 'betty-boris-boo-stage', fn: window.initBettyBorisBooScene || initBettyBorisBooScene },
-                'coronas-fortuna': { id: 'five-star-reel-stage', fn: window.initFiveStarScene || initFiveStarScene },
-            };
-
-            const key = Object.keys(mapping).find((k) => currentSlug && currentSlug.includes(k.split('-')[0])) || currentSlug;
-            const entry = mapping[currentSlug] || mapping[key] || mapping['frutas-de-fuego-777'];
-            const container = document.getElementById(entry.id);
-            if (!container) return;
-            try {
-                if (typeof entry.fn === 'function') entry.fn(container);
-            } catch (e) {
-                console.warn('Failed to init PIXI scene', e);
-            }
-        });
-    </script>
 {% endblock %}

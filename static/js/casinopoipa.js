@@ -27,12 +27,25 @@ document.addEventListener('DOMContentLoaded', function () {
         return null;
     }
 
+    function getBalanceValue() {
+        const balanceEl = document.getElementById('balance-value') || document.querySelector('.balance-value');
+        const cornerEl = document.getElementById('corner-balance-value');
+        const text = (balanceEl?.textContent || cornerEl?.textContent || '0').replace(/[^0-9]/g, '');
+        return Number(text || 0);
+    }
+
     function updateBalance(value) {
-        const balanceEl = document.getElementById('balance-value');
+        const balanceEls = Array.from(document.querySelectorAll('.balance-value'));
         const cornerEl = document.getElementById('corner-balance-value');
         const formatted = `Gs. ${new Intl.NumberFormat('es-PY').format(value)}`;
-        if (balanceEl) {
-            balanceEl.textContent = formatted;
+        if (balanceEls.length) {
+            balanceEls.forEach((el) => {
+                el.textContent = formatted;
+            });
+        }
+        const mainBalanceEl = document.getElementById('balance-value');
+        if (mainBalanceEl) {
+            mainBalanceEl.textContent = formatted;
         }
         if (cornerEl) {
             cornerEl.textContent = formatted;
@@ -110,25 +123,59 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function playAudioCue(type = 'spin') {
-        if (typeof window.Howl === 'undefined') return;
-        const cues = {
-            spin: ['https://actions.google.com/sounds/api/alarms/ogg'],
-            win: ['https://actions.google.com/sounds/api/sounds/celebration/ogg'],
-            fail: ['https://actions.google.com/sounds/api/sounds/negative/ogg'],
-        };
-        const path = cues[type] && cues[type][0];
-        if (!path) return;
-        const sound = new window.Howl({ src: [path] });
-        sound.play();
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+
+        const context = window.__casinoAudioContext || new AudioCtx();
+        window.__casinoAudioContext = context;
+
+        if (context.state === 'suspended') {
+            context.resume().catch(() => {});
+        }
+
+        const now = context.currentTime;
+        const master = context.createGain();
+        master.connect(context.destination);
+        master.gain.setValueAtTime(0.001, now);
+        master.gain.exponentialRampToValueAtTime(0.08, now + 0.01);
+
+        if (type === 'spin') {
+            const osc = context.createOscillator();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(880, now);
+            osc.frequency.exponentialRampToValueAtTime(520, now + 0.35);
+            osc.connect(master);
+            osc.start(now);
+            osc.stop(now + 0.35);
+            master.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        } else if (type === 'win') {
+            const osc1 = context.createOscillator();
+            const osc2 = context.createOscillator();
+            osc1.type = 'sine';
+            osc2.type = 'triangle';
+            osc1.frequency.setValueAtTime(523.25, now);
+            osc2.frequency.setValueAtTime(783.99, now);
+            osc1.connect(master);
+            osc2.connect(master);
+            osc1.start(now);
+            osc2.start(now);
+            osc1.stop(now + 0.35);
+            osc2.stop(now + 0.35);
+            master.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        } else if (type === 'fail') {
+            const osc = context.createOscillator();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(220, now);
+            osc.frequency.exponentialRampToValueAtTime(180, now + 0.25);
+            osc.connect(master);
+            osc.start(now);
+            osc.stop(now + 0.25);
+            master.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        }
     }
 
     function showCelebration(message) {
-        if (document.querySelector('.celebration-overlay')) return;
-        const overlay = document.createElement('div');
-        overlay.className = 'celebration-overlay';
-        overlay.innerHTML = `<div class="celebration-overlay__box">${message}</div>`;
-        document.body.appendChild(overlay);
-        setTimeout(() => overlay.remove(), 900);
+        return null;
     }
 
     let currentSlotBonus = null;
@@ -165,26 +212,32 @@ document.addEventListener('DOMContentLoaded', function () {
     const blackjackButton = document.getElementById('blackjack-bet-button');
     const bingoButton = document.getElementById('bingo-bet-button');
     const ruletaButton = document.getElementById('ruleta-bet-button');
+    const ruletaApuestaInput = document.getElementById('ruleta-apuesta');
+    const rouletteUndoBtn = document.getElementById('roulette-undo-btn');
+    const rouletteDoubleBtn = document.getElementById('roulette-double-btn');
     const quickDepositButtons = document.querySelectorAll('#quick-deposit-btn');
     const rouletteCanvas = document.getElementById('roulette-canvas');
     const rouletteGrid = document.getElementById('roulette-grid');
     const selectedRouletteChoiceEl = document.getElementById('selected-roulette-choice');
     const selectedRouletteListEl = document.getElementById('selected-roulette-list');
     let selectedRouletteChoices = [];
-    let slotAnimationFrame = null;
-    let slotSpinning = false;
-    let tableAnimationFrame = null;
-    let bingoAnimationFrame = null;
+    const slotSymbols = ['🍒', '🔔', '7', '🍋', '⭐', '🍉'];
+    const rouletteNumbers = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
+    const rouletteSegmentAngle = (Math.PI * 2) / rouletteNumbers.length;
+    const initialRouletteAngle = -Math.PI / 2 - rouletteSegmentAngle / 2;
     let rouletteAnimationFrame = null;
     let rouletteSpinState = {
-        angle: 0,
+        angle: initialRouletteAngle,
         velocity: 0,
         targetAngle: null,
         highlightNumber: null,
         spinning: false,
+        idleEnabled: false,
     };
-    const slotSymbols = ['🍒', '🔔', '7', '🍋', '⭐', '🍉'];
-    const rouletteNumbers = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
+    let slotAnimationFrame = null;
+    let slotSpinning = false;
+    let tableAnimationFrame = null;
+    let bingoAnimationFrame = null;
     const rouletteSlotColors = {
         0: 'green',
         1: 'red',
@@ -302,6 +355,25 @@ document.addEventListener('DOMContentLoaded', function () {
         if (stroke) ctx.stroke();
     }
 
+    function getRouletteStakeTotal() {
+        const apuesta = Number(ruletaApuestaInput?.value || 0);
+        return apuesta * selectedRouletteChoices.length;
+    }
+
+    function updateRouletteBetTotal() {
+        const betTotalEl = document.getElementById('bet-total');
+        if (!betTotalEl) return;
+        const total = getRouletteStakeTotal();
+        betTotalEl.textContent = `Apuesta total: Gs. ${new Intl.NumberFormat('es-PY').format(total)}`;
+    }
+
+    function updateRouletteSelectionLabel() {
+        if (!selectedRouletteChoiceEl) return;
+        selectedRouletteChoiceEl.textContent = selectedRouletteChoices.length
+            ? `Apuestas: ${selectedRouletteChoices.length}`
+            : 'Ninguno';
+    }
+
     function renderSelectedRouletteChips() {
         if (!selectedRouletteListEl) return;
         selectedRouletteListEl.innerHTML = '';
@@ -312,6 +384,71 @@ document.addEventListener('DOMContentLoaded', function () {
             chip.textContent = value;
             selectedRouletteListEl.appendChild(chip);
         });
+    }
+
+    function updateRouletteSelectionState() {
+        updateRouletteSelectionLabel();
+        updateRouletteBetTotal();
+        document.querySelectorAll('.roulette-tile').forEach((tileEl) => {
+            const tileValue = Number(tileEl.textContent);
+            tileEl.classList.toggle('roulette-tile--selected', selectedRouletteChoices.includes(tileValue));
+        });
+    }
+
+    function resetRouletteSelections() {
+        selectedRouletteChoices = [];
+        renderSelectedRouletteChips();
+        updateRouletteSelectionState();
+    }
+
+    function setRouletteInteractionState(isEnabled) {
+        if (ruletaButton) {
+            ruletaButton.disabled = !isEnabled;
+            ruletaButton.textContent = isEnabled ? 'Apostar' : 'Girando...';
+        }
+        if (ruletaApuestaInput) {
+            ruletaApuestaInput.disabled = !isEnabled;
+        }
+        if (rouletteUndoBtn) {
+            rouletteUndoBtn.disabled = !isEnabled;
+        }
+        if (rouletteDoubleBtn) {
+            rouletteDoubleBtn.disabled = !isEnabled;
+        }
+        document.querySelectorAll('.roulette-tile').forEach((tileEl) => {
+            tileEl.disabled = !isEnabled;
+        });
+    }
+
+    function addRouletteSelection(number) {
+        if (selectedRouletteChoices.length >= 3) {
+            showStatus('Máximo 3 apuestas en ruleta.');
+            return;
+        }
+        selectedRouletteChoices.push(number);
+        updateRouletteSelectionState();
+    }
+
+    function removeLastRouletteSelection() {
+        if (!selectedRouletteChoices.length) {
+            showStatus('No hay apuestas para deshacer.');
+            return;
+        }
+        selectedRouletteChoices.pop();
+        updateRouletteSelectionState();
+    }
+
+    function doubleLastRouletteSelection() {
+        if (!selectedRouletteChoices.length) {
+            showStatus('Selecciona un número antes de duplicar.');
+            return;
+        }
+        if (selectedRouletteChoices.length >= 3) {
+            showStatus('Máximo 3 apuestas en ruleta.');
+            return;
+        }
+        selectedRouletteChoices.push(selectedRouletteChoices[selectedRouletteChoices.length - 1]);
+        updateRouletteSelectionState();
     }
 
     function renderRouletteGrid() {
@@ -325,30 +462,24 @@ document.addEventListener('DOMContentLoaded', function () {
             tile.className = `roulette-tile roulette-tile--${color}`;
             tile.textContent = number;
             tile.addEventListener('click', () => {
-                const index = selectedRouletteChoices.indexOf(number);
-                if (index >= 0) {
-                    selectedRouletteChoices.splice(index, 1);
-                } else if (selectedRouletteChoices.length < 3) {
-                    selectedRouletteChoices.push(number);
-                } else {
-                    showStatus('Máximo 3 números seleccionados.');
-                    return;
-                }
-
-                if (selectedRouletteChoiceEl) {
-                    selectedRouletteChoiceEl.textContent = selectedRouletteChoices.length
-                        ? 'Seleccionado:'
-                        : 'Ninguno';
-                }
-                renderSelectedRouletteChips();
-
-                document.querySelectorAll('.roulette-tile').forEach((tileEl) => {
-                    const tileValue = Number(tileEl.textContent);
-                    tileEl.classList.toggle('roulette-tile--selected', selectedRouletteChoices.includes(tileValue));
-                });
+                addRouletteSelection(number);
             });
             rouletteGrid.appendChild(tile);
         });
+    }
+
+    function normalizeRouletteAngle(angle) {
+        const full = Math.PI * 2;
+        angle = angle % full;
+        if (angle < 0) angle += full;
+        return angle;
+    }
+
+    function getRouletteAngleDelta(target, current) {
+        const full = Math.PI * 2;
+        let delta = normalizeRouletteAngle(target - current);
+        if (delta > Math.PI) delta -= full;
+        return delta;
     }
 
     function drawRouletteWheel(angle, highlightNumber = null) {
@@ -459,23 +590,31 @@ document.addEventListener('DOMContentLoaded', function () {
             drawSlotReel(canvas, symbols[index], false);
         });
     }
+    // no global exposure of fallback spin functions here (restore original state)
 
     function startRouletteSpin() {
         if (!rouletteCanvas) return;
+        if (rouletteAnimationFrame) {
+            cancelAnimationFrame(rouletteAnimationFrame);
+            rouletteAnimationFrame = null;
+        }
         rouletteSpinState.spinning = true;
-        rouletteSpinState.velocity = 0.28;
+        rouletteSpinState.idleEnabled = false;
+        rouletteSpinState.velocity = 0.22;
         rouletteSpinState.targetAngle = null;
+        rouletteSpinState.angle = normalizeRouletteAngle(rouletteSpinState.angle);
         rouletteCanvas.classList.add('blur');
 
         function rotate() {
             if (!rouletteSpinState.spinning) return;
             rouletteSpinState.angle += rouletteSpinState.velocity;
-            rouletteSpinState.velocity *= 0.996;
+            rouletteSpinState.velocity *= 0.994;
 
-            if (rouletteSpinState.targetAngle !== null) {
-                const delta = (rouletteSpinState.targetAngle - rouletteSpinState.angle) % (Math.PI * 2);
-                rouletteSpinState.velocity = Math.max(0.01, Math.abs(delta) * 0.02);
-                if (Math.abs(delta) < 0.03 && rouletteSpinState.velocity < 0.02) {
+                if (rouletteSpinState.targetAngle !== null) {
+                const delta = getRouletteAngleDelta(rouletteSpinState.targetAngle, rouletteSpinState.angle);
+                const speed = Math.max(0.005, Math.abs(delta) * 0.018);
+                rouletteSpinState.velocity = Math.sign(delta) * speed;
+                if (Math.abs(delta) < 0.025 && Math.abs(rouletteSpinState.velocity) < 0.012) {
                     rouletteSpinState.spinning = false;
                     rouletteCanvas.classList.remove('blur');
                     drawRouletteWheel(rouletteSpinState.targetAngle, rouletteSpinState.highlightNumber);
@@ -495,7 +634,7 @@ document.addEventListener('DOMContentLoaded', function () {
         function idle(now) {
             const dt = now - last;
             last = now;
-            if (!rouletteSpinState.spinning && rouletteCanvas) {
+            if (!rouletteSpinState.spinning && rouletteCanvas && rouletteSpinState.idleEnabled) {
                 rouletteSpinState.angle += (dt / 1000) * 0.06; // slow rotation
                 drawRouletteWheel(rouletteSpinState.angle);
             }
@@ -512,14 +651,18 @@ document.addEventListener('DOMContentLoaded', function () {
             rouletteCanvas.classList.remove('blur');
             return;
         }
-        const target = -index * ((Math.PI * 2) / rouletteNumbers.length) + Math.PI / 2;
+        const target = -Math.PI / 2 - index * rouletteSegmentAngle - rouletteSegmentAngle / 2;
         rouletteSpinState.targetAngle = target;
         rouletteSpinState.highlightNumber = Number(result.roulette.number);
+        rouletteSpinState.idleEnabled = false;
     }
 
-    function handleSlotResult(result) {
-        if (!slotCanvases.length) return;
-        stopSlotSpin(result.reels);
+    function handleSlotResult(result, balanceOverride = null) {
+        if (!result) return;
+
+        if (slotCanvases.length) {
+            stopSlotSpin(result.reels);
+        }
 
         if (result.bonus_final) {
             currentSlotBonus = null;
@@ -541,14 +684,14 @@ document.addEventListener('DOMContentLoaded', function () {
             };
             updateSlotBonusIndicator(currentSlotBonus);
             slotButton.textContent = 'Giro Gratis';
-            showStatus(result.message, 'warning');
+            showStatus('', 'warning');
             showResultEffects(true);
             playAudioCue('spin');
         } else {
             currentSlotBonus = null;
             updateSlotBonusIndicator(null);
             slotButton.textContent = 'Apostar';
-            showStatus(result.message, result.win ? 'success' : 'danger');
+            showStatus('', result.win ? 'success' : 'danger');
             showResultEffects(result.win, result.jackpot_hit);
             if (result.win) {
                 playAudioCue('win');
@@ -558,14 +701,16 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        if (result.accumulated_percentage !== undefined) {
-            const status = document.getElementById('slots-status');
-            if (status) {
-                status.textContent = `Acumulado: ${result.accumulated_percentage}%`;
-            }
+        if (balanceOverride !== null && typeof balanceOverride !== 'undefined') {
+            updateBalance(Number(balanceOverride));
+        } else if (typeof result.new_balance !== 'undefined') {
+            updateBalance(Number(result.new_balance));
         }
 
-        updateBalance(result.new_balance);
+        const status = document.getElementById('slots-status');
+        if (status) {
+            status.textContent = '';
+        }
     }
 
     function createCardElement(cardValue) {
@@ -624,15 +769,20 @@ document.addEventListener('DOMContentLoaded', function () {
             outcomeText = `Pierde. Cae ${result.roulette.number}. Apostaste ${selectedNumbers}.`;
         }
 
-        showStatus(outcomeText);
+        showStatus(outcomeText, result.win ? 'success' : 'danger');
         showResultEffects(result.win);
         if (result.win) {
             playAudioCue('win');
             showCelebration('¡Apuesta ganadora!');
         } else {
             playAudioCue('fail');
+            showCelebration('¡Sigue intentando!');
         }
         updateBalance(result.new_balance);
+        setTimeout(() => {
+            resetRouletteSelections();
+            setRouletteInteractionState(true);
+        }, 600);
     }
 
     function handleBingoResult(result) {
@@ -664,60 +814,126 @@ document.addEventListener('DOMContentLoaded', function () {
             const betTotalEl = document.getElementById('bet-total');
             if (betTotalEl) betTotalEl.textContent = `Apuesta: Gs. ${new Intl.NumberFormat('es-PY').format(storedWager)}`;
 
-            const currentBalance = Number(document.getElementById('balance-value')?.textContent?.replace(/[^0-9]/g, '') || 0);
-            if (storedWager > currentBalance) {
+            const currentBalance = getBalanceValue();
+            if (storedWager > currentBalance && !isBonusSpin) {
                 showInsufficientFunds();
                 return;
             }
 
-            showStatus(isBonusSpin ? 'Ejecutando giro gratis...' : 'GIRANDO...', 'success');
+            const projectedBalance = !isBonusSpin ? Math.max(0, currentBalance - storedWager) : currentBalance;
+            if (!isBonusSpin) {
+                updateBalance(projectedBalance);
+            }
 
-            // Start visual spin: prefer PIXI scene if present, otherwise canvas fallback
-            if (typeof window.fiveStarSpinVisual === 'function') {
-                try { window.fiveStarSpinVisual(); } catch (e) { console.warn('fiveStarSpinVisual failed', e); }
+            showStatus(isBonusSpin ? 'Ejecutando giro gratis...' : 'GIRANDO...', 'success');
+            const status = document.getElementById('slots-status');
+            if (status) {
+                status.textContent = isBonusSpin ? 'Giro gratis en curso' : 'Giro en curso';
+            }
+            // Ensure PIXI slot scene is initialized and visual hooks exist. If not, try to init now.
+            try {
+                const gamePageEl = document.querySelector('.game-page');
+                const slug = gamePageEl && gamePageEl.dataset ? gamePageEl.dataset.game : null;
+                if (slug) {
+                    if (slug.includes('frutas') || slug.includes('coronas')) {
+                        if (typeof window.initFiveStarScene === 'function') {
+                            const c = document.getElementById('five-star-reel-stage');
+                            if (c && !c.dataset.pixiInitialized) {
+                                window.initFiveStarScene(c);
+                                c.dataset.pixiInitialized = '1';
+                            }
+                        }
+                    } else if (slug.includes('palacio')) {
+                        if (typeof window.initJokerJackpotScene === 'function') {
+                            const c = document.getElementById('joker-jackpot-stage');
+                            if (c && !c.dataset.pixiInitialized) {
+                                window.initJokerJackpotScene(c);
+                                c.dataset.pixiInitialized = '1';
+                            }
+                        }
+                    } else if (slug.includes('mansion')) {
+                        if (typeof window.initBettyBorisBooScene === 'function') {
+                            const c = document.getElementById('betty-boris-boo-stage');
+                            if (c && !c.dataset.pixiInitialized) {
+                                window.initBettyBorisBooScene(c);
+                                c.dataset.pixiInitialized = '1';
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('pixi init attempt failed', e);
+            }
+
+            const activeVisualSpin = typeof window.currentSlotSpinTrigger === 'function'
+                ? window.currentSlotSpinTrigger
+                : (typeof window.fiveStarSpinVisual === 'function'
+                    ? window.fiveStarSpinVisual
+                    : (typeof window.jokerSpinVisual === 'function'
+                        ? window.jokerSpinVisual
+                        : (typeof window.bettySpinVisual === 'function'
+                            ? window.bettySpinVisual
+                            : null)));
+            if (activeVisualSpin) {
+                try { activeVisualSpin(); } catch (e) { console.warn('activeVisualSpin failed', e); }
             } else if (slotCanvases.length) {
                 slotCanvases.forEach(setupCanvas);
                 startSlotSpin();
+            } else {
+                // last resort: call canvas fallback if exists globally
+                if (typeof window.startSlotSpin === 'function') {
+                    try { window.startSlotSpin(); } catch (e) { console.warn('window.startSlotSpin failed', e); }
+                }
             }
 
-            // Play spin audio cue
             playAudioCue('spin');
 
             fetchPlay('tragamonedas', storedWager, isBonusSpin).then((result) => {
                 if (!result.success) {
+                    updateBalance(currentBalance);
                     showStatus(result.error, 'danger');
-                    // stop visual blur
-                    slotCanvases.forEach((canvas) => canvas.classList.remove('blur'));
+                    if (slotCanvases.length) {
+                        slotCanvases.forEach((canvas) => canvas.classList.remove('blur'));
+                    }
                     return;
                 }
 
-                // Convert backend flat reels (['🍒','7','🍉']) into per-reel 3-slot arrays for PIXI visual
-                const backendReels = result.reels || [];
+                const backendReels = Array.isArray(result.reels) ? result.reels : [];
                 const nested = [[], [], []];
                 for (let i = 0; i < 3; i++) {
                     const center = backendReels[i] || slotSymbols[i % slotSymbols.length] || '⭐';
-                    // pick neighbor symbols for top/bottom
                     const top = slotSymbols[(i * 2 + 1) % slotSymbols.length] || center;
                     const bottom = slotSymbols[(i * 3 + 2) % slotSymbols.length] || center;
                     nested[i] = [top, center, bottom];
                 }
 
-                // Stop the PIXI visual with final symbols if available
-                if (typeof window.fiveStarStopVisual === 'function') {
-                    try { window.fiveStarStopVisual(nested); } catch (e) { console.warn('fiveStarStopVisual failed', e); }
-                } else {
-                    // fallback to canvas-based display
+                const activeVisualStop = typeof window.fiveStarStopVisual === 'function'
+                    ? window.fiveStarStopVisual
+                    : (typeof window.jokerStopVisual === 'function'
+                        ? window.jokerStopVisual
+                        : (typeof window.bettyStopVisual === 'function'
+                            ? window.bettyStopVisual
+                            : null));
+                if (activeVisualStop) {
+                    try { activeVisualStop(nested); } catch (e) { console.warn('slot visual stop failed', e); }
+                } else if (slotCanvases.length) {
                     stopSlotSpin(backendReels);
                 }
 
-                // Let the visual finish then process result effects
-                setTimeout(() => {
-                    handleSlotResult(result);
+                const finalBalance = typeof result.new_balance !== 'undefined'
+                    ? Number(result.new_balance)
+                    : (!isBonusSpin ? projectedBalance : currentBalance);
+
+                window.setTimeout(() => {
+                    handleSlotResult(result, finalBalance);
                 }, 800);
             }).catch((err) => {
                 console.error('Play request failed', err);
+                updateBalance(currentBalance);
                 showStatus('Error de red al ejecutar la jugada.', 'danger');
-                slotCanvases.forEach((canvas) => canvas.classList.remove('blur'));
+                if (slotCanvases.length) {
+                    slotCanvases.forEach((canvas) => canvas.classList.remove('blur'));
+                }
             });
         });
     }
@@ -766,16 +982,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (ruletaButton) {
         ruletaButton.addEventListener('click', function () {
-            const apuesta = Number(document.getElementById('ruleta-apuesta').value || 0);
-            const currentBalance = Number(document.getElementById('balance-value')?.textContent?.replace(/[^0-9]/g, '') || 0);
+            const apuesta = Number(ruletaApuestaInput?.value || 0);
+            const currentBalance = getBalanceValue();
+            const totalStake = apuesta * selectedRouletteChoices.length;
             if (!selectedRouletteChoices.length) {
                 showStatus('Selecciona al menos un número de ruleta antes de apostar.');
                 return;
             }
-            if (apuesta > currentBalance) {
+            if (totalStake > currentBalance) {
                 showInsufficientFunds();
                 return;
             }
+            setRouletteInteractionState(false);
             showStatus('Girando la ruleta...');
             if (rouletteCanvas) {
                 setupCanvas(rouletteCanvas);
@@ -785,9 +1003,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!result.success) {
                     showStatus(result.error);
                     if (rouletteCanvas) rouletteCanvas.classList.remove('blur');
+                    setRouletteInteractionState(true);
                     return;
                 }
                 setTimeout(() => handleRouletteResult(result), 1400);
+            }).catch(() => {
+                if (rouletteCanvas) rouletteCanvas.classList.remove('blur');
+                setRouletteInteractionState(true);
             });
         });
     }
@@ -795,6 +1017,23 @@ document.addEventListener('DOMContentLoaded', function () {
     if (rouletteGrid) {
         renderRouletteGrid();
     }
+
+    if (rouletteUndoBtn) {
+        rouletteUndoBtn.addEventListener('click', removeLastRouletteSelection);
+    }
+    if (rouletteDoubleBtn) {
+        rouletteDoubleBtn.addEventListener('click', doubleLastRouletteSelection);
+    }
+    if (ruletaApuestaInput) {
+        ruletaApuestaInput.addEventListener('input', updateRouletteBetTotal);
+    }
+
+    if (rouletteCanvas) {
+        setupCanvas(rouletteCanvas);
+        drawRouletteWheel(rouletteSpinState.angle);
+    }
+    updateRouletteSelectionState();
+    setRouletteInteractionState(true);
 
     window.addEventListener('resize', function () {
         slotCanvases.forEach((canvas) => setupCanvas(canvas));
