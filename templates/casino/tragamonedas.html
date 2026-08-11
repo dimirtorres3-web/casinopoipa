@@ -33,15 +33,27 @@
                     }
                     .five-star-view { gap: 0 !important; }
                     .five-star-bottom-shell { margin-top: 0 !important; }
-                    .joker-controls-card { margin-top: -100px !important; }
-                    .joker-controls-card, .joker-jackpot-layout .controls-card--five-star { 
-                        margin-top: -180px !important; 
+                    .joker-controls-card { 
+                        margin-top: 0 !important; 
                     }
-
-                    /* Desktop tweaks: slightly shorter scenes and controls placed close below */
-                    @media (min-width:641px) {
-                        #five-star-reel-stage, #joker-jackpot-stage, #betty-boris-boo-stage { height: 220px; }
-                        .controls-below, .joker-jackpot-controls, .betty-boris-boo-controls { margin-top: 1vh; }
+                    .joker-jackpot-layout .controls-card--five-star { 
+                        margin-top: 0 !important; 
+                    }
+                    /* Ajuste exacto para celulares: Todo entra en una sola pantalla sin deslizar */
+                    @media (max-width: 768px) {
+                        #five-star-reel-stage, #joker-jackpot-stage, #betty-boris-boo-stage { 
+                            height: 35vh !important; 
+                            min-height: auto !important; 
+                            width: 100% !important; 
+                        }
+                        .five-star-bottom-shell, .joker-jackpot-controls, .betty-boris-boo-controls { 
+                            margin-top: 0 !important; 
+                            height: auto !important; 
+                        }
+                        .controls-card--five-star, .joker-controls-card, .betty-controls-card { 
+                            padding: 8px !important; 
+                            height: auto !important; 
+                        }
                     }
                 </style>
                 {% if game_slug == 'palacio-arlequin' %}
