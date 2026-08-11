@@ -32,27 +32,32 @@
                         </div>
 
                                     <style>
-                                        /* Make the roulette canvas large and centered on mobile */
-                                        .roulette-wheel-card{display:flex;flex-direction:column;align-items:center;padding:4px 8px}
-                                        .roulette-visual-shell{display:flex;justify-content:center;align-items:center;padding-top:0;padding-bottom:0}
-                                        .roulette-canvas{width:700px;height:700px;max-width:98vw;max-height:98vw;border-radius:999px;display:block}
+                                            /* Forzar a la estructura a abrirse de costado completo */
+                                            body, main, .dashboard-grid, .layout-shell, .game-shell, .glass-panel, .roulette-shell, .roulette-wheel-card {
+                                                width: 100% !important;
+                                                max-width: 100% !important;
+                                                min-width: 100% !important;
+                                                margin: 0 !important;
+                                                padding: 10px !important;
+                                                box-sizing: border-box !important;
+                                            }
 
-                                        /* On small screens make canvas fill the area and square */
-                                        @media (max-width:640px){
-                                            .roulette-wheel-card{padding:4px 6px}
-                                            .roulette-visual-shell{padding-top:0;padding-bottom:0}
-                                            .roulette-canvas{width:calc(100vw - 8px);height:calc(100vw - 8px);max-width:100vw;max-height:100vw}
-                                            .roulette-history{margin-top:6px}
-                                            .color-btn-row{margin-top:2px}
-                                            .bet-row{margin-top:4px}
-                                            /* fix spin button to bottom on mobile and bring it closer */
-                                            .spin-bottom{position:fixed;left:50%;transform:translateX(-50%);bottom:8px;z-index:120;width:92%;max-width:420px;padding:12px;border-radius:28px}
-                                            .bet-row{margin-bottom:16px} /* leave smaller space for fixed button */
-                                        }
+                                            /* Diseñar el juego de costado (En PC queda uno al lado del otro, en Celular uno abajo del otro) */
+                                            .roulette-visual-shell {
+                                                display: flex !important;
+                                                flex-direction: row !important;
+                                                justify-content: space-around !important;
+                                                align-items: center !important;
+                                                width: 100% !important;
+                                                max-width: 100% !important;
+                                                gap: 30px !important;
+                                            }
 
-                                        /* Desktop styles: move spin button inline */
-                                        @media (min-width:641px){
-                                            .spin-bottom{position:static;transform:none;width:auto}
+                                        @media (max-width: 768px) {
+                                            .roulette-visual-shell {
+                                                flex-direction: column !important;
+                                                gap: 15px !important;
+                                            }
                                         }
                                     </style>
                         <div class="roulette-history" id="roulette-history">

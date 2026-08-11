@@ -40,21 +40,34 @@
                         margin-top: 0 !important; 
                     }
                     /* Ajuste exacto para celulares: Todo entra en una sola pantalla sin deslizar */
-                    @media (max-width: 768px) {
-                        #five-star-reel-stage, #joker-jackpot-stage, #betty-boris-boo-stage { 
-                            height: 35vh !important; 
-                            min-height: auto !important; 
-                            width: 100% !important; 
-                        }
-                        .five-star-bottom-shell, .joker-jackpot-controls, .betty-boris-boo-controls { 
-                            margin-top: 0 !important; 
-                            height: auto !important; 
-                        }
-                        .controls-card--five-star, .joker-controls-card, .betty-controls-card { 
-                            padding: 8px !important; 
-                            height: auto !important; 
-                        }
+                @media (max-width: 768px) {
+                    /* Forzar a la pantalla entera del celular a no deslizar */
+                    .game-page, .layout-shell, .game-shell, main {
+                        height: 100vh !important;
+                        max-height: 100vh !important;
+                        overflow: hidden !important;
+                        display: flex !important;
+                        flex-direction: column !important;
+                        justify-content: space-between !important;
+                        box-sizing: border-box !important;
+                        padding: 5px !important;
                     }
+                        /* Reducir los rodillos de todos los juegos para que suban los botones */
+                    #five-star-reel-stage, #joker-jackpot-stage, #betty-boris-boo-stage, .slot-figure-graphic { 
+                        height: 28vh !important; 
+                        min-height: auto !important; 
+                        width: 100% !important; 
+                    }
+                    /* Pegar los controles de forma automática abajo */
+                    .five-star-bottom-shell, .joker-jackpot-controls, .betty-boris-boo-controls { 
+                        margin-top: 0 !important; 
+                        height: auto !important; 
+                    }
+                    .controls-card--five-star, .joker-controls-card, .betty-controls-card { 
+                        padding: 6px !important; 
+                        height: auto !important; 
+                    }
+                }
                 </style>
                 {% if game_slug == 'palacio-arlequin' %}
                 <section class="joker-jackpot-shell">
@@ -114,13 +127,7 @@
                           #joker-jackpot-stage { width:100%; height:auto; min-height:auto; border-radius:18px 18px 0 0; display:block; }
                             .joker-jackpot-controls { padding: 0; margin-top: -120px !important; position: relative; z-index: 99; }
                             .joker-controls-card { width:100% !important; max-width:100% !important; margin:0 !important; padding:18px !important; border-radius:0 0 18px 18px !important; box-sizing:border-box; }
-                            @media (max-width: 640px) {
-                                .joker-jackpot-stage-shell { padding: 0; }
-                                #joker-jackpot-stage { height: 40vh !important; min-height: auto !important; }
-                                .joker-jackpot-controls { margin-top: 0 !important; }
-                                .joker-controls-card { height: 50vh !important; overflow:auto; padding:12px !important; }
-                            }
-                                 
+
                         </style>
                             <div class="joker-jackpot-stage-shell" style="width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                             <div id="joker-jackpot-stage" class="joker-jackpot-pixi-stage slot-canvas" aria-label="Escena de Joker Jackpot"></div>
@@ -190,11 +197,7 @@
                             #betty-boris-boo-stage { width:100%; height:180px; min-height:160px; }
                             .betty-boris-boo-controls { width:100%; }
                             .betty-controls-card { width:100%; max-width:720px; margin:0 auto; box-sizing:border-box; }
-                            @media (min-width:641px) {
-                                /* slightly taller scene on larger screens */
-                                #betty-boris-boo-stage { height:220px; }
-                                .betty-controls-card { max-width:820px; }
-                            }
+                            
                         </style>
                         <div class="betty-boris-boo-stage-shell" style="width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                             <div id="betty-boris-boo-stage" class="betty-boris-boo-pixi-stage slot-canvas" aria-label="Escena de Betty Boris Boo"></div>
@@ -266,50 +269,8 @@
                                     .slot-figure-graphic { height: auto !important; }
                                     .five-star-bottom-shell { height: auto !important; }
                                     /* Mobile tightening for slots: remove gaps and make controls full-width under the machine */
-                                    @media (max-width:640px) {
-                                        .five-star-view { padding-bottom: 0 !important; gap: 0 !important; }
-                                        .slot-visual-row { margin-bottom: 0 !important; margin-top: 0 !important; }
-
-                                        /* Figure: occupy top half of viewport */
-                                        .slot-figure-graphic {
-                                            height: auto !important;
-                                            margin-bottom: 0 !important;
-                                            transform: none !important;
-                                            background-size: cover !important;
-                                            background-position: center center !important;
-                                        }
-
-                                        /* Bottom shell: controls occupy bottom half and allow scroll inside if content overflows */
-                                        .five-star-bottom-shell {
-                                            padding: 0 !important;
-                                            margin-top: -8px !important;
-                                            height: auto !important;
-                                            min-height: 0 !important;
-                                            overflow: auto !important;
-                                            box-sizing: border-box;
-                                        }
-
-                                        /* Ensure no vertical translate on small screens */
-                                        .five-star-bottom-shell { transform: none !important; }
-
-                                        .five-star-bottom-shell .controls-card--five-star {
-                                            width: 100% !important;
-                                            box-sizing: border-box;
-                                            padding: 12px 16px 16px !important;
-                                            height: 100% !important;
-                                            display: flex !important;
-                                            flex-direction: column !important;
-                                            justify-content: center !important;
-                                        }
-
-                                        /* keep smaller canvas sizing for internal pixi stage if used */
-                                        .slot-visual-row .slot-visual-canvas { height: auto !important; }
-                                    }
-
-                                    /* Desktop: bottom shell visible and full-width */
-                                    @media (min-width:641px) {
-                                    .five-star-bottom-shell { display:block; margin-top: -32px; transition: margin-top 280ms ease; }
-                                    }
+                                    
+                                    
                                 </style>
 
                                 <div class="five-star-bottom-shell" style="margin-top:0;">
