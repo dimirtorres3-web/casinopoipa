@@ -26,41 +26,118 @@
             <main class="game-shell glass-panel roulette-shell">
                 <section class="roulette-premium-board">
                     <div class="roulette-wheel-card">
-                        <div class="roulette-hotstrip">
-                            <span>Caliente</span>
-                            <strong>17 • 9 • 2</strong>
-                        </div>
+                        <!-- removed hotstrip as requested -->
                         <div class="roulette-visual-shell">
                             <canvas id="roulette-canvas" class="roulette-canvas"></canvas>
                         </div>
-                        <div class="roulette-history">Apuesta múltiple • 0-36 • rojo/negro</div>
-                    </div>
-                    <aside class="roulette-panel">
-                        <div class="roulette-selection-header">
-                            <div>
-                                <p>Apuesta múltiple</p>
-                                <strong id="selected-roulette-choice">Ninguno</strong>
-                                <div id="selected-roulette-list" class="roulette-selected-list"></div>
-                            </div>
-                            <div class="quick-action-group">
-                                <button type="button" id="roulette-undo-btn" class="control-chip">UNDO</button>
-                                <button type="button" id="roulette-double-btn" class="control-chip">×2</button>
+
+                                    <style>
+                                        /* Make the roulette canvas large and centered on mobile */
+                                        .roulette-wheel-card{display:flex;flex-direction:column;align-items:center;padding:4px 8px}
+                                        .roulette-visual-shell{display:flex;justify-content:center;align-items:center;padding-top:0;padding-bottom:0}
+                                        .roulette-canvas{width:700px;height:700px;max-width:98vw;max-height:98vw;border-radius:999px;display:block}
+
+                                        /* On small screens make canvas fill the area and square */
+                                        @media (max-width:640px){
+                                            .roulette-wheel-card{padding:4px 6px}
+                                            .roulette-visual-shell{padding-top:0;padding-bottom:0}
+                                            .roulette-canvas{width:calc(100vw - 8px);height:calc(100vw - 8px);max-width:100vw;max-height:100vw}
+                                            .roulette-history{margin-top:6px}
+                                            .color-btn-row{margin-top:2px}
+                                            .bet-row{margin-top:4px}
+                                            /* fix spin button to bottom on mobile and bring it closer */
+                                            .spin-bottom{position:fixed;left:50%;transform:translateX(-50%);bottom:8px;z-index:120;width:92%;max-width:420px;padding:12px;border-radius:28px}
+                                            .bet-row{margin-bottom:16px} /* leave smaller space for fixed button */
+                                        }
+
+                                        /* Desktop styles: move spin button inline */
+                                        @media (min-width:641px){
+                                            .spin-bottom{position:static;transform:none;width:auto}
+                                        }
+                                    </style>
+                        <div class="roulette-history" id="roulette-history">
+                            <div id="selected-roulette-choice">Ninguna apuesta</div>
+                            <div id="bet-total" style="margin-top:6px;color:#d9d9d9;">Apuesta total: Gs. 0</div>
+                            <!-- debug panel to show landed number/color and payout for visibility -->
+                            <div id="roulette-debug" style="margin-top:6px;color:#ffd27a;font-size:13px;line-height:1.2;display:none;">
+                                <div id="roulette-debug-landed"></div>
+                                <div id="roulette-debug-choices"></div>
+                                <div id="roulette-debug-payout"></div>
                             </div>
                         </div>
-                        <div class="roulette-grid" id="roulette-grid"></div>
-                        <div class="roulette-footer">
-                            <div>
-                                <div class="game-status" id="game-status">Apuesta mínima 2.000 Gs.</div>
-                                <div id="bet-total" class="badge" style="margin-top:8px; display:inline-block;">Apuesta total: Gs. 0</div>
+
+                        <!-- Color choices under the wheel (dots, no text) -->
+                        <!-- Color choice buttons above the spin button (Rojo, Verde, Negro) -->
+                        <!-- Removed previous dots and replaced with clearer buttons that sit above the spin button -->
+
+                        <div class="roulette-controls-wrapper">
+                            <div class="color-btn-row" style="display:flex;gap:8px;justify-content:center;margin-top:4px;">
+                                <button type="button" class="roulette-color-button" data-color="red" aria-label="Rojo"></button>
+                                <button type="button" class="roulette-color-button" data-color="green" aria-label="Verde"></button>
+                                <button type="button" class="roulette-color-button" data-color="black" aria-label="Negro"></button>
                             </div>
-                            <div class="game-actions">
-                                <input id="ruleta-apuesta" type="number" min="2000" value="2000" class="form-input" />
-                                <button type="button" id="ruleta-bet-button" class="btn-primary">Apostar</button>
+
+                            <div class="bet-row" style="display:flex;flex-direction:column;align-items:center;justify-content:center;margin-top:4px;gap:6px;">
+                                <input id="ruleta-apuesta" type="number" min="2000" value="2000" class="form-input" style="width:220px;padding:10px;border-radius:8px;border:none;background:#111;color:#fff;" />
+                                <div style="display:flex;gap:8px;align-items:center;">
+                                    <button type="button" id="roulette-double-btn" class="btn-secondary">Duplicar apuesta</button>
+                                    <!-- keep placeholder for undo if needed -->
+                                    <button type="button" id="roulette-undo-btn" class="btn-ghost">Deshacer</button>
+                                </div>
+                            </div>
+                            <div style="display:flex;justify-content:center;margin-top:8px;">
+                                <button type="button" id="ruleta-bet-button-bottom" class="btn-primary spin-bottom" data-label="Girar" aria-label="Girar">Girar</button>
                             </div>
                         </div>
-                    </aside>
+
+                        <style>
+                            /* Placeholder/visual for roulette canvas so something is visible even if JS hasn't drawn yet */
+                            .roulette-canvas{background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.02), transparent 10%),
+                                linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.9));
+                                box-shadow: inset 0 8px 24px rgba(0,0,0,0.6);}
+
+                            .roulette-color-button{width:56px;height:40px;border-radius:10px;border:none;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,0.5)}
+                            .roulette-color-button[data-color="red"]{background:linear-gradient(180deg,#ff6b6b,#c0392b)}
+                            .roulette-color-button[data-color="green"]{background:linear-gradient(180deg,#51cf66,#2f9e4f)}
+                            .roulette-color-button[data-color="black"]{background:linear-gradient(180deg,#333,#111);color:#fff}
+                            .roulette-color-button.active{outline:3px solid #ffd27a}
+
+                            @media (max-width:640px){
+                                .roulette-color-button{width:64px;height:44px;border-radius:12px}
+                            }
+                        </style>
                 </section>
             </main>
         </div>
     </div>
+
+    <script>
+        // Connect bottom spin button to the main ruleta bet button when available
+        document.addEventListener('DOMContentLoaded', function(){
+            const bottom = document.getElementById('ruleta-bet-button-bottom');
+            const main = document.getElementById('ruleta-bet-button');
+            if(bottom){
+                bottom.addEventListener('click', function(){
+                    if(main){ main.click(); return; }
+                    const ev = new Event('ruleta-bottom-spin');
+                    document.dispatchEvent(ev);
+                });
+            }
+
+            // Bind color buttons to roulette choice handler
+            document.querySelectorAll('.roulette-color-button').forEach((btn) => {
+                btn.addEventListener('click', function(){
+                    const c = this.dataset.color;
+                    if(window.addRouletteChoice){ window.addRouletteChoice(c); }
+                    else {
+                        const ev = new CustomEvent('roulette-color-select', { detail: { color: c } });
+                        document.dispatchEvent(ev);
+                    }
+                    // toggle active visual state
+                    this.classList.toggle('active');
+                });
+            });
+        });
+    </script>
+
 {% endblock %}

@@ -79,3 +79,42 @@ function fireworks(){
   document.body.appendChild(n);
   setTimeout(()=>n.remove(),1600);
 }
+
+/* --- Fullscreen toggle logic --- */
+(function(){
+  const btn = document.getElementById('fullscreenToggle');
+  if(!btn) return;
+
+  function isFullscreen(){
+    return document.fullscreenElement != null;
+  }
+
+  function updateButton(){
+    btn.textContent = isFullscreen() ? '⤢' : '⤢'; // keep simple icon; could swap to '×' for exit
+  }
+
+  btn.addEventListener('click', async function(){
+    try{
+      if(!isFullscreen()){
+        if(document.documentElement.requestFullscreen){
+          await document.documentElement.requestFullscreen();
+        } else if(document.documentElement.webkitRequestFullscreen){
+          await document.documentElement.webkitRequestFullscreen();
+        }
+      } else {
+        if(document.exitFullscreen){
+          await document.exitFullscreen();
+        } else if(document.webkitExitFullscreen){
+          await document.webkitExitFullscreen();
+        }
+      }
+    }catch(e){
+      console.warn('Fullscreen toggle failed', e);
+    }
+    updateButton();
+  });
+
+  document.addEventListener('fullscreenchange', updateButton);
+  document.addEventListener('webkitfullscreenchange', updateButton);
+})();
+

@@ -30,7 +30,8 @@ document.addEventListener('DOMContentLoaded', function () {
     function getBalanceValue() {
         const balanceEl = document.getElementById('balance-value') || document.querySelector('.balance-value');
         const cornerEl = document.getElementById('corner-balance-value');
-        const text = (balanceEl?.textContent || cornerEl?.textContent || '0').replace(/[^0-9]/g, '');
+        const headerEl = document.getElementById('header-balance');
+        const text = (balanceEl?.textContent || cornerEl?.textContent || headerEl?.textContent || '0').replace(/[^0-9]/g, '');
         return Number(text || 0);
     }
 
@@ -44,8 +45,12 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
         const mainBalanceEl = document.getElementById('balance-value');
+        const headerBalanceEl = document.getElementById('header-balance');
         if (mainBalanceEl) {
             mainBalanceEl.textContent = formatted;
+        }
+        if (headerBalanceEl) {
+            headerBalanceEl.textContent = formatted;
         }
         if (cornerEl) {
             cornerEl.textContent = formatted;
@@ -221,23 +226,25 @@ document.addEventListener('DOMContentLoaded', function () {
     const selectedRouletteChoiceEl = document.getElementById('selected-roulette-choice');
     const selectedRouletteListEl = document.getElementById('selected-roulette-list');
     let selectedRouletteChoices = [];
-    const slotSymbols = ['🍒', '🔔', '7', '🍋', '⭐', '🍉'];
-    const rouletteNumbers = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
-    const rouletteSegmentAngle = (Math.PI * 2) / rouletteNumbers.length;
-    const initialRouletteAngle = -Math.PI / 2 - rouletteSegmentAngle / 2;
+    let slotAnimationFrame = null;
+    let slotSpinning = false;
+    let tableAnimationFrame = null;
+    let bingoAnimationFrame = null;
     let rouletteAnimationFrame = null;
     let rouletteSpinState = {
-        angle: initialRouletteAngle,
+            angle: 0, // will be set to initialRouletteAngle below after it's calculated
         velocity: 0,
         targetAngle: null,
         highlightNumber: null,
         spinning: false,
         idleEnabled: false,
     };
-    let slotAnimationFrame = null;
-    let slotSpinning = false;
-    let tableAnimationFrame = null;
-    let bingoAnimationFrame = null;
+    const slotSymbols = ['🍒', '🔔', '7', '🍋', '⭐', '🍉'];
+    const rouletteNumbers = [0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8, 23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12, 35, 3, 26];
+    const rouletteSegmentAngle = (Math.PI * 2) / rouletteNumbers.length;
+    const initialRouletteAngle = -Math.PI / 2 - rouletteSegmentAngle / 2;
+        // ensure rouletteSpinState picks up the calculated initial angle
+        try { if (typeof rouletteSpinState !== 'undefined') rouletteSpinState.angle = initialRouletteAngle; } catch(e) {}
     const rouletteSlotColors = {
         0: 'green',
         1: 'red',
@@ -357,7 +364,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function getRouletteStakeTotal() {
         const apuesta = Number(ruletaApuestaInput?.value || 0);
-        return apuesta * selectedRouletteChoices.length;
+        // Single-stake per spin: the stake is the value entered, independent of number of selections
+        return apuesta;
     }
 
     function updateRouletteBetTotal() {
@@ -369,9 +377,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateRouletteSelectionLabel() {
         if (!selectedRouletteChoiceEl) return;
-        selectedRouletteChoiceEl.textContent = selectedRouletteChoices.length
-            ? `Apuestas: ${selectedRouletteChoices.length}`
-            : 'Ninguno';
+        if (!selectedRouletteChoices.length) {
+            selectedRouletteChoiceEl.textContent = 'Ninguna apuesta';
+            return;
+        }
+        // If there's a color-only selection, show the color explicitly
+        const colorChoice = selectedRouletteChoices.find((v) => typeof v === 'string');
+        if (colorChoice) {
+            const displayColor = String(colorChoice).charAt(0).toUpperCase() + String(colorChoice).slice(1);
+            selectedRouletteChoiceEl.textContent = `Apuesta por ${displayColor}`;
+            return;
+        }
+        // otherwise show number of selections
+        selectedRouletteChoiceEl.textContent = `Apuestas: ${selectedRouletteChoices.length}`;
     }
 
     function renderSelectedRouletteChips() {
@@ -379,12 +397,31 @@ document.addEventListener('DOMContentLoaded', function () {
         selectedRouletteListEl.innerHTML = '';
         selectedRouletteChoices.forEach((value) => {
             const chip = document.createElement('span');
-            const color = rouletteSlotColors[value] || 'black';
-            chip.className = `roulette-selected-chip roulette-selected-chip--${color}`;
-            chip.textContent = value;
-            selectedRouletteListEl.appendChild(chip);
-        });
-    }
+                let color = 'black';
+                let text = String(value);
+                if (typeof value === 'number') {
+                    color = rouletteSlotColors[value] || 'black';
+                    text = String(value);
+                } else if (typeof value === 'string') {
+                    // color names expected
+                    color = value.replace(/^color:/, '') || value;
+                            // for color bets show a colored dot instead of text
+                            chip.className = `roulette-selected-chip roulette-selected-chip--${color} roulette-selected-chip--dot`;
+                            chip.textContent = '';
+                        } else {
+                            chip.className = `roulette-selected-chip roulette-selected-chip--${color}`;
+                            chip.textContent = text;
+                        }
+                        selectedRouletteListEl.appendChild(chip);
+                    });
+
+            // also update active state of color buttons if present
+            document.querySelectorAll('.roulette-color-button').forEach((b) => {
+                const c = b.dataset.color;
+                const norm = normalizeColorName(c);
+                b.classList.toggle('active', selectedRouletteChoices.findIndex((v) => String(v) === String(norm)) >= 0);
+            });
+        }
 
     function updateRouletteSelectionState() {
         updateRouletteSelectionLabel();
@@ -406,6 +443,12 @@ document.addEventListener('DOMContentLoaded', function () {
             ruletaButton.disabled = !isEnabled;
             ruletaButton.textContent = isEnabled ? 'Apostar' : 'Girando...';
         }
+        // also disable the bottom button if present
+        const ruletaBottomBtn = document.getElementById('ruleta-bet-button-bottom');
+        if (ruletaBottomBtn) {
+            ruletaBottomBtn.disabled = !isEnabled;
+            ruletaBottomBtn.textContent = isEnabled ? (ruletaBottomBtn.getAttribute('data-label') || 'Girar') : 'Girando...';
+        }
         if (ruletaApuestaInput) {
             ruletaApuestaInput.disabled = !isEnabled;
         }
@@ -415,19 +458,70 @@ document.addEventListener('DOMContentLoaded', function () {
         if (rouletteDoubleBtn) {
             rouletteDoubleBtn.disabled = !isEnabled;
         }
+
+        // Color buttons: support multiple class names used in different templates
+        const colorSelectors = ['.roulette-color-button', '.roulette-color-dot', '.roulette-color'];
+        colorSelectors.forEach((sel) => {
+            document.querySelectorAll(sel).forEach((btn) => {
+                try {
+                    btn.disabled = !isEnabled;
+                    if (!isEnabled) {
+                        btn.setAttribute('aria-disabled', 'true');
+                        btn.classList.add('disabled');
+                    } else {
+                        btn.removeAttribute('aria-disabled');
+                        btn.classList.remove('disabled');
+                    }
+                } catch (e) {
+                    // ignore
+                }
+            });
+        });
+
+        // tiles (numbers)
         document.querySelectorAll('.roulette-tile').forEach((tileEl) => {
-            tileEl.disabled = !isEnabled;
+            try { tileEl.disabled = !isEnabled; } catch (e) {}
         });
     }
 
-    function addRouletteSelection(number) {
-        if (selectedRouletteChoices.length >= 3) {
-            showStatus('Máximo 3 apuestas en ruleta.');
-            return;
+    function normalizeColorName(val) {
+            if (!val) return val;
+            const s = String(val).toLowerCase();
+            if (s === 'blue' || s === 'azul') return 'green';
+            if (s === 'verde' || s === 'green') return 'green';
+            if (s === 'red' || s === 'rojo') return 'red';
+            if (s === 'black' || s === 'negro') return 'black';
+            return s;
         }
-        selectedRouletteChoices.push(number);
-        updateRouletteSelectionState();
-    }
+
+        window.addRouletteChoice = function(value) {
+            // Prevent selecting while a spin is active (use the button's disabled state as source of truth)
+            try {
+                if (ruletaButton && ruletaButton.disabled) {
+                    showStatus('Espera a que termine el giro.', 'warning');
+                    return;
+                }
+            } catch (e) {}
+
+            // value can be a number (0-36) or a color string like 'red','black','blue','green'
+            // normalize color strings before storing
+            if (typeof value === 'string') {
+                value = normalizeColorName(value);
+            }
+            if (selectedRouletteChoices.length >= 3) {
+                showStatus('Máximo 3 apuestas en ruleta.');
+                return;
+            }
+            // toggle if already selected
+            const exists = selectedRouletteChoices.findIndex((v) => String(v) === String(value));
+            if (exists >= 0) {
+                selectedRouletteChoices.splice(exists, 1);
+                updateRouletteSelectionState();
+                return;
+            }
+            selectedRouletteChoices.push(value);
+            updateRouletteSelectionState();
+            };
 
     function removeLastRouletteSelection() {
         if (!selectedRouletteChoices.length) {
@@ -462,7 +556,7 @@ document.addEventListener('DOMContentLoaded', function () {
             tile.className = `roulette-tile roulette-tile--${color}`;
             tile.textContent = number;
             tile.addEventListener('click', () => {
-                addRouletteSelection(number);
+                        addRouletteChoice(number);
             });
             rouletteGrid.appendChild(tile);
         });
@@ -618,6 +712,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     rouletteSpinState.spinning = false;
                     rouletteCanvas.classList.remove('blur');
                     drawRouletteWheel(rouletteSpinState.targetAngle, rouletteSpinState.highlightNumber);
+                    // Re-enable interactions immediately when the wheel comes to rest visually
+                    try { setRouletteInteractionState(true); } catch (e) { console.warn('setRouletteInteractionState not available', e); }
                     return;
                 }
             }
@@ -762,9 +858,59 @@ document.addEventListener('DOMContentLoaded', function () {
             ? result.selected_numbers.join(', ')
             : result.selected_number || 'sin selección';
 
+        // compute win amount for UI messaging if possible
+        const projected = typeof window._lastProjectedBalance !== 'undefined' ? Number(window._lastProjectedBalance) : null;
+        const newBal = typeof result.new_balance !== 'undefined' ? Number(result.new_balance) : null;
+        let winAmount = null;
+        if (projected !== null && newBal !== null) {
+            winAmount = Math.max(0, newBal - projected);
+        }
+
+        // Debug: compute landed color/number and payout for visibility
+        let landedNum = null;
+        let landedColor = null;
+        let computedPayout = null;
+        try {
+            landedNum = result && result.roulette && typeof result.roulette.number !== 'undefined' ? Number(result.roulette.number) : null;
+            if (landedNum !== null && typeof rouletteSlotColors[landedNum] !== 'undefined') {
+                landedColor = normalizeColorName(rouletteSlotColors[landedNum]);
+            }
+
+            // compute payout same as earlier logic (in case server didn't supply)
+            let payout = 0;
+            selectedRouletteChoices.forEach((choice) => {
+                if (typeof choice === 'string' && landedColor) {
+                    const normalizedChoice = normalizeColorName(choice);
+                    const mult = (normalizedChoice === 'green') ? 35 : 2;
+                    if (normalizedChoice === landedColor) {
+                        payout += (Number(ruletaApuestaInput?.value || 0) || 0) * mult;
+                    }
+                } else if (typeof choice === 'number' && landedNum !== null) {
+                    if (Number(choice) === landedNum) {
+                        payout += (Number(ruletaApuestaInput?.value || 0) || 0) * 36;
+                    }
+                }
+            });
+            computedPayout = payout;
+        } catch (e) {
+            console.warn('debug payout compute failed', e);
+        }
+
+        // show debug panel so you can see landed color, choices and computed payout
+        const debugPanel = document.getElementById('roulette-debug');
+        if (debugPanel) {
+            const landedEl = document.getElementById('roulette-debug-landed');
+            const choicesEl = document.getElementById('roulette-debug-choices');
+            const payoutEl = document.getElementById('roulette-debug-payout');
+            landedEl.textContent = landedNum !== null ? `Cayó: ${landedNum} (${landedColor || 'color desconocido'})` : 'Cayó: -';
+            choicesEl.textContent = `Tus selecciones: ${selectedRouletteChoices.length ? selectedRouletteChoices.join(', ') : 'Ninguna'}`;
+            payoutEl.textContent = `Pago calculado: ${computedPayout ? 'Gs. ' + new Intl.NumberFormat('es-PY').format(computedPayout) : 'Gs. 0'}`;
+            debugPanel.style.display = 'block';
+        }
+
         let outcomeText;
         if (result.win) {
-            outcomeText = `Cae ${result.roulette.number}. Apostaste ${selectedNumbers} y ganaste.`;
+            outcomeText = `Cae ${result.roulette.number}. Apostaste ${selectedNumbers} y ganaste` + (winAmount ? ` Gs. ${new Intl.NumberFormat('es-PY').format(winAmount)}` : '.') ;
         } else {
             outcomeText = `Pierde. Cae ${result.roulette.number}. Apostaste ${selectedNumbers}.`;
         }
@@ -778,7 +924,7 @@ document.addEventListener('DOMContentLoaded', function () {
             playAudioCue('fail');
             showCelebration('¡Sigue intentando!');
         }
-        updateBalance(result.new_balance);
+        if (newBal !== null) updateBalance(newBal);
         setTimeout(() => {
             resetRouletteSelections();
             setRouletteInteractionState(true);
@@ -830,40 +976,6 @@ document.addEventListener('DOMContentLoaded', function () {
             if (status) {
                 status.textContent = isBonusSpin ? 'Giro gratis en curso' : 'Giro en curso';
             }
-            // Ensure PIXI slot scene is initialized and visual hooks exist. If not, try to init now.
-            try {
-                const gamePageEl = document.querySelector('.game-page');
-                const slug = gamePageEl && gamePageEl.dataset ? gamePageEl.dataset.game : null;
-                if (slug) {
-                    if (slug.includes('frutas') || slug.includes('coronas')) {
-                        if (typeof window.initFiveStarScene === 'function') {
-                            const c = document.getElementById('five-star-reel-stage');
-                            if (c && !c.dataset.pixiInitialized) {
-                                window.initFiveStarScene(c);
-                                c.dataset.pixiInitialized = '1';
-                            }
-                        }
-                    } else if (slug.includes('palacio')) {
-                        if (typeof window.initJokerJackpotScene === 'function') {
-                            const c = document.getElementById('joker-jackpot-stage');
-                            if (c && !c.dataset.pixiInitialized) {
-                                window.initJokerJackpotScene(c);
-                                c.dataset.pixiInitialized = '1';
-                            }
-                        }
-                    } else if (slug.includes('mansion')) {
-                        if (typeof window.initBettyBorisBooScene === 'function') {
-                            const c = document.getElementById('betty-boris-boo-stage');
-                            if (c && !c.dataset.pixiInitialized) {
-                                window.initBettyBorisBooScene(c);
-                                c.dataset.pixiInitialized = '1';
-                            }
-                        }
-                    }
-                }
-            } catch (e) {
-                console.warn('pixi init attempt failed', e);
-            }
 
             const activeVisualSpin = typeof window.currentSlotSpinTrigger === 'function'
                 ? window.currentSlotSpinTrigger
@@ -879,11 +991,6 @@ document.addEventListener('DOMContentLoaded', function () {
             } else if (slotCanvases.length) {
                 slotCanvases.forEach(setupCanvas);
                 startSlotSpin();
-            } else {
-                // last resort: call canvas fallback if exists globally
-                if (typeof window.startSlotSpin === 'function') {
-                    try { window.startSlotSpin(); } catch (e) { console.warn('window.startSlotSpin failed', e); }
-                }
             }
 
             playAudioCue('spin');
@@ -980,63 +1087,163 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    if (ruletaButton) {
-        ruletaButton.addEventListener('click', function () {
+    function performRouletteBet() {
             const apuesta = Number(ruletaApuestaInput?.value || 0);
             const currentBalance = getBalanceValue();
-            const totalStake = apuesta * selectedRouletteChoices.length;
+            // Only deduct the single stake value per spin (user choice): do not multiply by number of selections
+            const totalStake = apuesta;
             if (!selectedRouletteChoices.length) {
-                showStatus('Selecciona al menos un número de ruleta antes de apostar.');
+                showStatus('Selecciona al menos un número o color antes de apostar.');
                 return;
             }
             if (totalStake > currentBalance) {
                 showInsufficientFunds();
                 return;
             }
+
+            // Deduct stake immediately (optimistic UI) and restore on error
+            const originalBalance = currentBalance;
+            const projectedBalance = Math.max(0, currentBalance - totalStake);
+            // store for result display
+            window._lastProjectedBalance = projectedBalance;
+            updateBalance(projectedBalance);
+
             setRouletteInteractionState(false);
             showStatus('Girando la ruleta...');
             if (rouletteCanvas) {
                 setupCanvas(rouletteCanvas);
                 startRouletteSpin();
             }
-            fetchPlay('ruleta', apuesta, false, { selected_numbers: selectedRouletteChoices }).then((result) => {
+            // prepare payload: separate numbers and colors
+            const selectedNumbers = selectedRouletteChoices.filter(v => typeof v === 'number');
+            const selectedColors = selectedRouletteChoices.filter(v => typeof v === 'string');
+            const extraPayload = {};
+            if (selectedNumbers.length) extraPayload.selected_numbers = selectedNumbers;
+            if (selectedColors.length) extraPayload.selected_colors = selectedColors;
+
+            fetchPlay('ruleta', apuesta, false, extraPayload).then((result) => {
                 if (!result.success) {
+                    // restore balance on failure
+                    updateBalance(originalBalance);
                     showStatus(result.error);
                     if (rouletteCanvas) rouletteCanvas.classList.remove('blur');
                     setRouletteInteractionState(true);
                     return;
                 }
+
+                // Compute payouts locally based on the landed number/color so color bets are always honored client-side
+                try {
+                    const landedNum = result && result.roulette && typeof result.roulette.number !== 'undefined' ? Number(result.roulette.number) : null;
+                    let landedColor = (landedNum !== null && typeof rouletteSlotColors[landedNum] !== 'undefined') ? rouletteSlotColors[landedNum] : null;
+                    landedColor = normalizeColorName(landedColor);
+                    let payout = 0;
+                    selectedRouletteChoices.forEach((choice) => {
+                        if (typeof choice === 'string' && landedColor) {
+                            const normalizedChoice = normalizeColorName(choice);
+                            // color bet payout: Rojo/Negro = 2x, Verde (azul UI) = 35x
+                            const mult = (normalizedChoice === 'green') ? 35 : 2;
+                            if (normalizedChoice === landedColor) {
+                                payout += apuesta * mult;
+                            }
+                        } else if (typeof choice === 'number' && landedNum !== null) {
+                            // number bet fallback: 36x
+                            if (Number(choice) === landedNum) {
+                                payout += apuesta * 36;
+                            }
+                        }
+                    });
+
+                    if (payout > 0) {
+                        result.win = true; // mark win
+                        result.local_payout = payout;
+                        // prefer server new_balance if it's sensible, otherwise set to projected + payout
+                        if (typeof result.new_balance === 'undefined' || Number(result.new_balance) <= projectedBalance) {
+                            result.new_balance = projectedBalance + payout;
+                        }
+                    } else {
+                        if (typeof result.new_balance === 'undefined') result.new_balance = projectedBalance;
+                    }
+                } catch (e) {
+                    if (typeof result.new_balance === 'undefined') result.new_balance = projectedBalance;
+                }
+
                 setTimeout(() => handleRouletteResult(result), 1400);
             }).catch(() => {
+                // network error: restore balance and UI
+                updateBalance(originalBalance);
                 if (rouletteCanvas) rouletteCanvas.classList.remove('blur');
                 setRouletteInteractionState(true);
+                showStatus('Error de red al ejecutar la jugada.', 'danger');
             });
-        });
-    }
+        }
+
+        // attach to existing main button if present
+        if (ruletaButton) {
+            ruletaButton.addEventListener('click', performRouletteBet);
+        }
+        // attach to bottom button (always present in the new layout)
+        const ruletaBottomBtn = document.getElementById('ruleta-bet-button-bottom');
+        if (ruletaBottomBtn) {
+            ruletaBottomBtn.addEventListener('click', performRouletteBet);
+        }
+        // also allow event-driven trigger
+        document.addEventListener('ruleta-bottom-spin', performRouletteBet);
+
+        // bind double and undo UI controls if present
+        if (typeof rouletteDoubleBtn !== 'undefined' && rouletteDoubleBtn) {
+            rouletteDoubleBtn.addEventListener('click', function () {
+                const input = document.getElementById('ruleta-apuesta');
+                if (!input) return;
+                const current = Number(input.value || 0);
+                input.value = String(current * 2);
+                updateRouletteBetTotal();
+            });
+        }
+        if (typeof rouletteUndoBtn !== 'undefined' && rouletteUndoBtn) {
+            rouletteUndoBtn.addEventListener('click', function () {
+                removeLastRouletteSelection();
+            });
+        }
+    
 
     if (rouletteGrid) {
         renderRouletteGrid();
     }
 
-    if (rouletteUndoBtn) {
-        rouletteUndoBtn.addEventListener('click', removeLastRouletteSelection);
-    }
-    if (rouletteDoubleBtn) {
-        rouletteDoubleBtn.addEventListener('click', doubleLastRouletteSelection);
-    }
-    if (ruletaApuestaInput) {
-        ruletaApuestaInput.addEventListener('input', updateRouletteBetTotal);
+        // bind color choice buttons under roulette
+        const rouletteColorContainer = document.querySelector('.roulette-color-choices');
+        if (rouletteColorContainer) {
+            rouletteColorContainer.querySelectorAll('button[data-color]').forEach((btn) => {
+                btn.addEventListener('click', function () {
+                    const color = this.dataset.color;
+                    // If data-optional present and not supported, ignore (UI-only)
+                    if (this.dataset.optional === 'true') {
+                        // optionally hide behavior can be added server-side; for now allow toggle
+                    }
+                    addRouletteChoice(color);
+                });
+            });
     }
 
-    if (rouletteCanvas) {
-        setupCanvas(rouletteCanvas);
-        drawRouletteWheel(rouletteSpinState.angle);
-    }
-    updateRouletteSelectionState();
-    setRouletteInteractionState(true);
+        if (rouletteUndoBtn) {
+            rouletteUndoBtn.addEventListener('click', removeLastRouletteSelection);
+        }
+        if (rouletteDoubleBtn) {
+            rouletteDoubleBtn.addEventListener('click', doubleLastRouletteSelection);
+        }
+        if (ruletaApuestaInput) {
+            ruletaApuestaInput.addEventListener('input', updateRouletteBetTotal);
+        }
 
-    window.addEventListener('resize', function () {
-        slotCanvases.forEach((canvas) => setupCanvas(canvas));
-        if (rouletteCanvas) setupCanvas(rouletteCanvas);
-    });
+        if (rouletteCanvas) {
+            setupCanvas(rouletteCanvas);
+            drawRouletteWheel(rouletteSpinState.angle);
+        }
+        updateRouletteSelectionState();
+        setRouletteInteractionState(true);
+
+        window.addEventListener('resize', function () {
+            slotCanvases.forEach((canvas) => setupCanvas(canvas));
+            if (rouletteCanvas) setupCanvas(rouletteCanvas);
+        });
 });

@@ -262,3 +262,28 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Mini badges placed beside the Five Star title (small, inline) */
+.mini-badges{display:flex;gap:10px;margin-top:6px}
+.mini-badge{display:flex;flex-direction:column;gap:4px;padding:8px 12px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));border:1px solid rgba(255,183,77,0.08);min-width:110px}
+.mini-badge span{font-size:0.7rem;color:#c7c3c6;text-transform:uppercase}
+.mini-badge strong{font-size:0.95rem;color:#fff}
+
+/* Small slot visual canvases (three, side by side) */
+.slot-visual-row{display:flex;gap:6px;justify-content:center;align-items:center;margin-top:0;padding-top:0}
+.slot-visual-canvas{width:120px;height:140px;border-radius:12px;background:linear-gradient(180deg,#0f0f12,#070707);border:1px solid rgba(255,255,255,0.04);box-shadow:inset 0 8px 24px rgba(0,0,0,0.6)}
+.five-star-bottom-shell{padding:0;margin-top:calc(-40cm - 5m)}
+.controls-card--five-star{padding:12px 20px 18px;}
+
+/* Roulette color dots (rely on this file being loaded site-wide) */
+.roulette-color-dot{width:42px;height:42px;border-radius:50%;border:2px solid rgba(255,255,255,0.06);cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,0.5);display:inline-block}
+.roulette-color-dot[data-color="red"]{background:linear-gradient(180deg,#ff6b6b,#c0392b)}
+.roulette-color-dot[data-color="green"]{background:linear-gradient(180deg,#51cf66,#2f9e4f)}
+.roulette-color-dot[data-color="blue"]{background:linear-gradient(180deg,#4dabf7,#0b5f8a)}
+.roulette-color-dot:focus{outline:3px solid rgba(255,183,77,0.25)}
+.roulette-color-dot.active{outline:3px solid #ffd27a}
+
+/* Selected chip dot style */
+.roulette-selected-chip{display:inline-block;padding:6px 8px;border-radius:8px;margin-right:6px;color:#fff;font-weight:700}
+.roulette-selected-chip--dot{width:20px;height:20px;padding:0;border-radius:50%;display:inline-block}
+

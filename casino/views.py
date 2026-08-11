@@ -211,8 +211,8 @@ GAME_MULTIPLIERS = {
     "ruleta": 2.3,
 }
 
-SLOT_WIN_PROBABILITY = 0.375
-SLOT_BONUS_TRIGGER_PROBABILITY = 0.05
+SLOT_WIN_PROBABILITY = 0.25
+SLOT_BONUS_TRIGGER_PROBABILITY = 0.03
 ROULETTE_PAYOUT_BASE = Decimal("35.25")
 
 SLOT_TEMPLATES = [
@@ -478,20 +478,27 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
         )
 
     if game == "ruleta":
-        if apuesta > player.saldo:
-            return JsonResponse({"success": False, "error": "Saldo insuficiente para esta apuesta."})
         if payload is None:
             payload = {}
 
+        # Parse selected numbers and colors (support both)
         selected_numbers = payload.get("selected_numbers", payload.get("selected_number"))
-        if selected_numbers is None:
-            return JsonResponse({"success": False, "error": "Selecciona al menos un número válido para la ruleta."})
+        selected_colors = payload.get("selected_colors", [])
 
+        # normalize inputs to lists
         if isinstance(selected_numbers, (str, int)):
             selected_numbers = [selected_numbers]
+        elif selected_numbers is None:
+            selected_numbers = []
         elif not isinstance(selected_numbers, list):
             return JsonResponse({"success": False, "error": "Formato de apuesta para la ruleta inválido."})
 
+        if isinstance(selected_colors, (str, int)):
+            selected_colors = [selected_colors]
+        elif not isinstance(selected_colors, list):
+            selected_colors = []
+
+        # Validate numbers
         validated_numbers = []
         for number in selected_numbers:
             try:
@@ -502,40 +509,88 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
                 return JsonResponse({"success": False, "error": "Número de ruleta inválido."})
             validated_numbers.append(number)
 
-        if len(validated_numbers) == 0:
-            return JsonResponse({"success": False, "error": "Selecciona al menos un número para la ruleta."})
-        if len(validated_numbers) > 3:
-            return JsonResponse({"success": False, "error": "Puedes apostar hasta 3 números en la ruleta."})
+        # Normalize color names (support 'azul','verde','green','rojo','negro')
+        def normalize_color_name(val):
+            if not val:
+                return None
+            s = str(val).strip().lower()
+            if s in ("blue", "azul"):
+                return "green"
+            if s in ("verde", "green"):
+                return "green"
+            if s in ("red", "rojo"):
+                return "red"
+            if s in ("black", "negro"):
+                return "black"
+            return s
 
-        total_stake = int(apuesta) * len(validated_numbers)
+        validated_colors = []
+        for c in selected_colors:
+            nc = normalize_color_name(c)
+            if nc:
+                validated_colors.append(nc)
+
+        # Require at least one selection (number or color)
+        if not validated_numbers and not validated_colors:
+            return JsonResponse({"success": False, "error": "Selecciona al menos un número o color para la ruleta."})
+
+        # Single-stake policy: one apuesta per spin regardless of how many selections
+        total_stake = int(apuesta)
+        if total_stake <= 0:
+            return JsonResponse({"success": False, "error": "La apuesta debe ser mayor que cero."})
         if total_stake > player.saldo:
             return JsonResponse({"success": False, "error": "Saldo insuficiente para esta apuesta."})
 
+        # Pick result
         result = pick_roulette_result()
-        hit_count = validated_numbers.count(result["number"])
-        win = hit_count > 0
-        payout = 0
-        if win:
-            gross_win = int(Decimal(apuesta) * ROULETTE_PAYOUT_BASE * hit_count)
-            net_gain = gross_win - total_stake
-            payout = net_gain
-            player.saldo += Decimal(net_gain)
-            message = f"¡Victoria en Ruleta! Salió {result['number']} {result['color']} y ganaste {payout} Gs."
+
+        # Determine payouts
+        payout_net = 0  # net gain to add to player's saldo (excludes stake)
+        landed_num = result["number"]
+        landed_color = result.get("color")
+        # normalize landed color
+        landed_color = normalize_color_name(landed_color)
+
+        # For number bets: if any selected number matches landed number, pay number multiplier (36x gross)
+        if validated_numbers:
+            if landed_num in validated_numbers:
+                # gross win for number: apuesta * 36
+                gross = int(Decimal(apuesta) * Decimal(36))
+                net = gross - total_stake
+                payout_net += net
+
+        # For color bets: pay per matching color
+        for col in validated_colors:
+            if col == landed_color:
+                mult = 35 if col == 'green' else 2
+                gross = int(Decimal(apuesta) * Decimal(mult))
+                net = gross - total_stake
+                payout_net += net
+
+        # Apply result to player balance
+        if payout_net > 0:
+            player.saldo += Decimal(payout_net)
+            win = True
+            message = f"¡Victoria en Ruleta! Salió {landed_num} ({landed_color}) y ganaste Gs. {int(payout_net)}"
         else:
+            # no payout -> player loses the stake
             player.saldo -= Decimal(total_stake)
-            payout = -total_stake
-            message = f"Derrota en Ruleta. Salió {result['number']} {result['color']} y perdiste {total_stake} Gs."
+            win = False
+            message = f"Derrota en Ruleta. Salió {landed_num} ({landed_color}) y perdiste Gs. {total_stake}"
+
         player.save()
+
         response = {
             "game": game,
             "win": win,
-            "payout": payout,
+            "payout": int(payout_net) if payout_net > 0 else -int(total_stake),
             "message": message,
             "animation": "roulette",
             "roulette": result,
             "selected_numbers": validated_numbers,
+            "selected_colors": validated_colors,
             "selected_number": result["number"],
-            "selected_color": result["color"],
+            "selected_color": result.get("color"),
         }
         return build_response_payload(player, **response)
 

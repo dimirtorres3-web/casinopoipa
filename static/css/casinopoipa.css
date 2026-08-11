@@ -535,12 +535,36 @@ textarea {
         text-transform: uppercase;
     }
 
+    /* Jackpot strip - make boards uniform and touching edge-to-edge */
     .jackpot-strip {
         display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
+        flex-wrap: nowrap;
+        gap: 0; /* no spacing between boards */
         margin-top: 18px;
     }
+
+    .jackpot-strip .jackpot-board {
+        flex: 1 1 0;
+        margin: 0; /* remove external margins */
+        padding: 12px 10px; /* keep inner padding for content */
+        height: 84px; /* uniform height - adjust if needed */
+        min-width: 0; /* allow shrinking */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0; /* remove inner rounding so they sit flush */
+        box-shadow: none;
+        border-left: 1px solid rgba(255,255,255,0.02); /* subtle separators if desired */
+        background: linear-gradient(135deg, rgba(255,183,77,0.06), rgba(255,126,34,0.03));
+    }
+
+    /* Make the first and last keep rounded corners on the outer edges */
+    .jackpot-strip .jackpot-board:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
+    .jackpot-strip .jackpot-board:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
+
+    .jackpot-strip .jackpot-board span { margin: 0; }
+    .jackpot-strip .jackpot-board strong { margin: 0; }
 
     .jackpot-pill {
         display: flex;
@@ -696,24 +720,73 @@ textarea {
         align-items: start;
     }
 
+    /* Slot reel board - make three cards fill the whole pink-bordered container and touch edges */
     .slot-reel-board {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 16px;
-        padding: 24px;
+        display: flex; /* use flexbox for equal distribution */
+        flex-direction: row;
+        gap: 0; /* no gaps between reel cards */
+        padding: 0; /* remove inner padding so cards reach edges */
+        width: 100%; /* ensure the board fills its parent container */
+        align-items: stretch;
         border-radius: 34px;
         background: linear-gradient(135deg, rgba(15, 15, 18, 0.96), rgba(24, 18, 28, 0.94));
         border: 1px solid rgba(255, 183, 77, 0.18);
         box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.02), 0 24px 70px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+    }
+
+    /* Ensure the reel board lines up horizontally with the top stage that contains the figure.
+       The top stage (stage-shell) commonly uses 28px horizontal padding; match that inner width
+       so the left/right edges align precisely. If different containers have different padding,
+       this targets common stage shells (joker/betty) to keep the reel aligned under the stage. */
+    .joker-jackpot-stage-shell > .slot-reel-board,
+    .betty-boris-boo-stage-shell > .slot-reel-board,
+    .joker-jackpot-shell .slot-reel-board,
+    .betty-boris-boo-shell .slot-reel-board {
+        box-sizing: border-box;
+        width: 100%; /* fill full width of the stage shell */
+        margin: 0; /* remove lateral gaps so board touches stage edges */
+        padding: 0; /* ensure no inner padding adds space */
+    }
+
+    /* Fallback: ensure any slot-reel-board inside a generic stage aligns similarly */
+    .joker-jackpot-stage-shell .slot-reel-board, .betty-boris-boo-stage-shell .slot-reel-board {
+        max-width: 100%;
     }
 
     .slot-reel-card {
         position: relative;
-        padding: 12px;
-        border-radius: 28px;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-        border: 1px solid rgba(255, 183, 77, 0.16);
-        box-shadow: inset 0 0 20px rgba(255, 183, 77, 0.08);
+        padding: 0; /* remove padding so content reaches edges */
+        border-radius: 0; /* square edges so cards touch border */
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+        border: none; /* rely on parent border */
+        box-shadow: none;
+        flex: 1; /* equal width and stretch to fill */
+        min-width: 0; /* allow shrinking without overflow issues */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 0;
+    }
+
+    /* Ensure inner canvas or fallback visuals fill the card */
+    .slot-reel-card .slot-canvas,
+    .slot-reel-card > canvas,
+    .slot-reel-card > img,
+    .slot-reel-card > .reel-placeholder {
+        width: 100%;
+        height: 100%;
+        display: block;
+        border-radius: 0;
+    }
+
+    /* If there was an inner white square element, center its content */
+    .slot-reel-card .reel-inner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
     }
 
     .slot-canvas {
@@ -728,6 +801,27 @@ textarea {
 
     .slot-canvas.blur {
         filter: blur(2px);
+    }
+
+    /* Ensure decorative figure fills the available visual area without huge absolute offsets */
+    .slot-visual-row .slot-figure-graphic {
+        width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+        max-width: none;
+        display: block;
+    }
+
+    /* Keep mobile behavior predictable: no overflow and natural flow on small screens */
+    @media (max-width:640px) {
+        .slot-visual-row .slot-figure-graphic {
+            width: 100% !important;
+            margin: 0 !important;
+            transform: none !important;
+            height: 40vh !important;
+            background-size: cover !important;
+            background-position: center center !important;
+        }
     }
 
     .slot-side-panel {
@@ -1258,11 +1352,53 @@ textarea {
         border: 1px solid rgba(166, 74, 255, 0.22);
     }
 
+    /* Joker jackpot topbar specific styling to match provided example: contiguous equal boards */
     .joker-jackpot-topbar {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 16px;
+        display: flex !important;
+        flex-direction: row;
+        gap: 0 !important; /* no spacing between boards */
+        width: 100%;
         margin-top: 12px;
+        align-items: stretch;
+        justify-content: stretch;
+        padding: 0;
+    }
+
+    .joker-jackpot-topbar .jackpot-board {
+        flex: 1 1 0 !important; /* equal width */
+        margin: 0 !important;
+        padding: 10px 14px !important; /* reduced inner padding to keep numbers fully visible */
+        height: 86px !important;
+        min-width: 0;
+        display: flex !important;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0 !important; /* flush edges */
+        box-shadow: none !important;
+        border: none !important;
+        background: linear-gradient(180deg, rgba(33,17,38,0.95), rgba(18,8,26,0.96));
+        color: #ffdfe9;
+        position: relative;
+        overflow: visible;
+    }
+
+    .joker-jackpot-topbar .jackpot-board:first-child { border-top-left-radius: 12px !important; border-bottom-left-radius: 12px !important; }
+    .joker-jackpot-topbar .jackpot-board:last-child { border-top-right-radius: 12px !important; border-bottom-right-radius: 12px !important; }
+
+    .joker-jackpot-topbar .jackpot-board span { margin: 0; font-size: 0.78rem; color: #f1d6ff; letter-spacing: 0.18em; }
+    .joker-jackpot-topbar .jackpot-board strong { margin: 0; font-size: 1.25rem; color: #ffffff; white-space: nowrap; overflow: visible; text-overflow: clip; }
+
+    /* subtle inner divider using ::after but very faint so pieces read as one bar */
+    .joker-jackpot-topbar .jackpot-board + .jackpot-board::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 12px;
+        bottom: 12px;
+        width: 1px;
+        background: rgba(255, 255, 255, 0.03);
+        pointer-events: none;
     }
 
     .jackpot-board {
