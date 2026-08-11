@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Health Check | Casinopoipa{% endblock %}
+{% block content %}
+    <main class="auth-shell">
+        <section class="auth-panel glass-panel">
+            <div class="brand-top">
+                <div class="brand-mark">🔒</div>
+                <div>
+                    <h1>Estado del servidor</h1>
+                    <p>Verificación interna con requests.</p>
+                </div>
+            </div>
+            <div class="field-group">
+                <p>Conexión de servicio interno:</p>
+                <strong>{{ status|yesno:"Activo,Inactivo" }}</strong>
+            </div>
+            <a href="{% url 'casino:dashboard' %}" class="btn-primary">Volver al dashboard</a>
+        </section>
+    </main>
+{% endblock %}

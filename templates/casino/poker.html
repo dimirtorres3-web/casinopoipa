@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Poker Royale | Casinopoipa{% endblock %}
+{% block content %}
+<div class="game-page" data-game="poker">
+    <div class="layout-shell">
+        <header class="topbar fixed-game-header">
+            <div class="brand-hero">
+                <span class="brand-mark">♠️</span>
+                <div>
+                    <p>Juego de Póker</p>
+                    <h1>Poker Royale</h1>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="balance-display glass-panel">
+                    <p>Saldo disponible</p>
+                    <h2 id="balance-value">Gs. {{ player.saldo|intcomma }}</h2>
+                </div>
+                <button type="button" class="btn-primary btn-small" id="quick-deposit-btn">Depositar</button>
+                <a href="{% url 'casino:dashboard' %}" class="btn-secondary">Volver</a>
+            </div>
+        </header>
+
+        <main class="game-shell glass-panel poker-shell">
+            <section class="poker-table-shell">
+                <div class="poker-table-grid">
+                    <div class="poker-table-board">
+                        <div class="poker-table-overlay"></div>
+                        <div id="poker-pixi-stage" class="poker-pixi-stage" aria-label="Escena de Póker Royale"></div>
+                        <div class="poker-caption">Mesa premium estilo casino real</div>
+                    </div>
+                    <aside class="poker-side-panel">
+                        <div class="poker-info-card">
+                            <h3>Niños de oro</h3>
+                            <p>Cartas de alta gama con ilustraciones reales, filigrana y relieve.</p>
+                        </div>
+                        <div class="poker-controls-card">
+                            <div class="poker-control-row">
+                                <label for="poker-bet-amount">Apuesta</label>
+                                <input id="poker-bet-amount" type="number" min="5000" value="5000" class="form-input" />
+                            </div>
+                            <div class="poker-actions-row">
+                                <button type="button" id="poker-deal-btn" class="btn-primary btn-block">Repartir</button>
+                            </div>
+                            <div class="poker-status-row">
+                                <span id="poker-status" class="status-pill">Preparado para repartir</span>
+                                <span class="status-pill status-pill--soft">Mesa verde texturizada</span>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="quick-deposit-modal" class="modal hidden" aria-hidden="true">
+        <div class="modal-panel">
+            <button type="button" class="modal-close" id="deposit-modal-close">×</button>
+            <h3>Recarga rápida</h3>
+            <p>Agrega saldo sin salir de la mesa.</p>
+            <input id="deposit-amount" type="number" min="10000" value="10000" class="form-input" />
+            <button type="button" id="deposit-confirm-btn" class="btn-primary btn-block">Confirmar depósito</button>
+        </div>
+    </div>
+</div>
+{% endblock %}

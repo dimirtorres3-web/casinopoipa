@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Panel Administrador | Casinopoipa{% endblock %}
+{% block content %}
+    <div class="dashboard-page">
+        <div class="layout-shell">
+            <header class="topbar">
+                <div class="brand-hero">
+                    <span class="brand-mark">🛡️</span>
+                    <div>
+                        <p>Panel del Administrador</p>
+                        <h1>Gestión centralizada</h1>
+                    </div>
+                </div>
+                <a href="{% url 'casino:dashboard' %}" class="btn-ghost">Volver al Dashboard</a>
+            </header>
+
+            <main class="admin-shell glass-panel">
+                <div class="admin-hero">
+                    <div>
+                        <h2>Control total</h2>
+                        <p>Desde aquí ves quién es administrador, quién recargó, cuánto retiró y el estado de cada transacción.</p>
+                    </div>
+                    <div class="admin-links">
+                        <a href="{% url 'casino:add_admin' %}" class="btn-secondary">Promover nuevo admin</a>
+                    </div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span>Usuarios registrados</span>
+                        <h3>{{ total_users }}</h3>
+                    </div>
+                    <div class="metric-card">
+                        <span>Transacciones totales</span>
+                        <h3>{{ total_transactions }}</h3>
+                    </div>
+                    <div class="metric-card">
+                        <span>Transacciones pendientes</span>
+                        <h3>{{ pending_transactions }}</h3>
+                    </div>
+                    <div class="metric-card">
+                        <span>Saldo total del casino</span>
+                        <h3>Gs. {{ total_balance|intcomma }}</h3>
+                    </div>
+                </div>
+
+                <section class="player-list" style="margin-top: 24px;">
+                    <h3>Resumen de jugadores</h3>
+                    <div class="players-grid">
+                        {% for entry in jugadores_data %}
+                        <article class="player-card">
+                            <div class="player-card-header">
+                                <div>
+                                    <h4>{{ entry.player.username }}</h4>
+                                    <p>{{ entry.player.email }}</p>
+                                </div>
+                                <span class="status-chip {% if entry.is_admin %}status-active{% else %}status-secondary{% endif %}">{{ entry.is_admin|yesno:"Administrador,Jugador" }}</span>
+                            </div>
+                            <p><strong>Saldo:</strong> Gs. {{ entry.player.saldo|intcomma }}</p>
+                            <p><strong>Total recargado:</strong> Gs. {{ entry.total_recarga|intcomma }}</p>
+                            <p><strong>Total retirado:</strong> Gs. {{ entry.total_retiro|intcomma }}</p>
+                            <p><strong>Recarga pendiente:</strong> Gs. {{ entry.recarga_pendiente|intcomma }}</p>
+                            <p><strong>Retiro pendiente:</strong> Gs. {{ entry.retiro_pendiente|intcomma }}</p>
+                            <div class="actions-row" style="margin-top: 12px;">
+                                {% if not entry.is_admin %}
+                                    <form method="post" action="{% url 'casino:promote_to_admin' entry.player.id %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-secondary small">Promover admin</button>
+                                    </form>
+                                {% endif %}
+                                <form method="post" action="{% url 'casino:delete_player' entry.player.id %}" style="display:inline; margin-left: 8px;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-danger small">Eliminar jugador</button>
+                                </form>
+                            </div>
+                        </article>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section class="transactions-list" style="margin-top: 24px;">
+                    <h3>Transacciones recientes</h3>
+                    {% if transacciones %}
+                        {% for transaccion in transacciones %}
+                        <article class="transaction-card">
+                            <div class="transaction-header">
+                                <div>
+                                    <p class="meta"><strong>{{ transaccion.player.username }}</strong> • {{ transaccion.tipo|title }} • Gs. {{ transaccion.monto|intcomma }}</p>
+                                    <p>{{ transaccion.creado_en }}</p>
+                                </div>
+                                <div>
+                                    <span class="status-chip {% if transaccion.estado == 'aprobado' %}status-active{% elif transaccion.estado == 'pendiente' %}status-warning{% else %}status-secondary{% endif %}">{{ transaccion.estado|title }}</span>
+                                    <span class="status-chip {% if transaccion.status == 'pagado' %}status-active{% else %}status-warning{% endif %}">{{ transaccion.status|title }}</span>
+                                </div>
+                            </div>
+                            <p><strong>Banco:</strong> {{ transaccion.banco }}</p>
+                            <p><strong>Cuenta:</strong> {{ transaccion.tipo_cuenta }}</p>
+                            <p><strong>Titular:</strong> {{ transaccion.titular }}</p>
+                            <p><strong>Cédula:</strong> {{ transaccion.cedula }}</p>
+                            <p><strong>Teléfono:</strong> {{ transaccion.telefono }}</p>
+                            {% if transaccion.comprobante %}
+                                <img src="{{ transaccion.comprobante.url }}" alt="Comprobante" class="receipt-image" />
+                            {% endif %}
+                            <div class="actions-row" style="margin-top: 12px;">
+                                {% if transaccion.tipo == 'recarga' and transaccion.estado == 'pendiente' %}
+                                    <form method="post" action="{% url 'casino:approve_transaction' transaccion.id %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-primary small">Aprobar carga</button>
+                                    </form>
+                                    <form method="post" action="{% url 'casino:refund_transaction' transaccion.id %}" style="display:inline; margin-left: 8px;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-secondary small">Reembolsar</button>
+                                    </form>
+                                {% elif transaccion.tipo == 'retiro' and transaccion.status == 'pendiente' %}
+                                    <form method="post" action="{% url 'casino:mark_transaction_paid' transaccion.id %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn-primary small">Marcar pagado</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </article>
+                        {% endfor %}
+                    {% else %}
+                        <p class="empty-state">No hay transacciones registradas todavía.</p>
+                    {% endif %}
+                </section>
+            </main>
+        </div>
+    </div>
+{% endblock %}

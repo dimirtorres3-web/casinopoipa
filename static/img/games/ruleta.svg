@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+  <defs>
+    <radialGradient id="wheelGlow" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#3a1b0f" stop-opacity="0.2"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="400" rx="32" fill="#100d12"/>
+  <circle cx="300" cy="200" r="148" fill="#1b1a1d" stroke="#d06a0d" stroke-width="16"/>
+  <circle cx="300" cy="200" r="120" fill="url(#wheelGlow)"/>
+  <g stroke="#f7d799" stroke-width="12">
+    <line x1="300" y1="60" x2="300" y2="100"/>
+    <line x1="300" y1="340" x2="300" y2="300"/>
+    <line x1="148" y1="200" x2="188" y2="200"/>
+    <line x1="452" y1="200" x2="412" y2="200"/>
+  </g>
+  <text x="320" y="240" fill="#fff" font-family="Inter, sans-serif" font-size="90" font-weight="800">0</text>
+  <text x="80" y="350" fill="#fff" font-family="Inter, sans-serif" font-size="40" font-weight="700">Roulette</text>
+</svg>
