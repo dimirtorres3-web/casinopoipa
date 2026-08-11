@@ -113,8 +113,6 @@ def login_view(request):
                 password = form.cleaned_data["password"]
 
                 user = authenticate(request, username=identity, password=password)
-                if user is None:
-                    user = authenticate(request, username=identity, password=password)
 
                 if user is not None:
                     login(request, user)
@@ -977,3 +975,4 @@ def refund_transaction(request, transaction_id):
             pass
     messages.warning(request, "Transacción reembolsada y cancelada.")
     return redirect("casino:admin_panel")
+

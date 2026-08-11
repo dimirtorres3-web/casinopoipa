@@ -34,7 +34,7 @@
                                     <style>
                                             /* Forzar a la estructura a abrirse de costado completo */
                                             body, main, .dashboard-grid, .layout-shell, .game-shell, .glass-panel, .roulette-shell, .roulette-wheel-card {
-                                                width: 100% !important;
+                                                width: 10px !important;
                                                 max-width: 100% !important;
                                                 min-width: 100% !important;
                                                 margin: 0 !important;
@@ -65,7 +65,7 @@
                                             /* Arreglar el círculo de la ruleta para que no se deforme ni se haga óvalo */
                                             .roulette-canvas {
                                                 width: 100% !important;
-                                                max-width: 320px !important; /* Tamaño perfecto para pantallas de celular */
+                                                max-width: auto !important; /* Tamaño perfecto para pantallas de celular */
                                                 height: auto !important;
                                                 aspect-ratio: 1 / 1 !important; /* Fuerza a que sea un círculo perfecto */
                                             }
@@ -141,7 +141,7 @@
         </div>
     </div>
 
-    <script>
+     <script>
         // Connect bottom spin button to the main ruleta bet button when available
         document.addEventListener('DOMContentLoaded', function(){
             const bottom = document.getElementById('ruleta-bet-button-bottom');

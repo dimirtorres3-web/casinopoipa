@@ -358,6 +358,111 @@ textarea {
     width: 56px;
     height: 56px;
     border-radius: 18px;
+
+/* Mobile-responsive fixes for game pages (slots & roulette). These rules are intentionally specific
+   and use !important to override inline styles in templates where necessary. They keep the
+   desktop layout unchanged while tightening spacing and stacking controls cleanly on small screens. */
+
+@media (max-width: 768px) {
+    /* Avoid forcing full-viewport height to prevent big empty gaps; allow scrolling while keeping
+       controls near the machine. */
+    .game-page, .layout-shell, .game-shell, main {
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        display: block !important;
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+
+    /* Reel / canvas sizing: make the visible stage a reasonable fraction of the viewport */
+    .slot-canvas, #five-star-reel-stage, #joker-jackpot-stage, #betty-boris-boo-stage {
+        height: 30vh !important;
+        min-height: 120px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Decorative figure smaller so it doesn't push content down */
+    .slot-visual-row .slot-figure-graphic {
+        height: 14vh !important;
+        min-height: 80px !important;
+        margin-bottom: 0 !important;
+        transform: none !important;
+    }
+
+    /* Controls: force full-width inputs and compact spacing */
+    .controls-card--five-star, .joker-controls-card, .betty-controls-card, .controls-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 10px !important;
+        margin: 0 !important;
+        border-radius: 12px !important;
+        box-sizing: border-box !important;
+    }
+
+    .controls-top-row, .joker-control-row, .betty-control-row {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 6px !important;
+    }
+
+    .controls-top-row input.form-input, .joker-control-row input.form-input, .betty-control-row input.form-input {
+        width: 100% !important;
+    }
+
+    .control-buttons-row, .joker-modes-row, .betty-modes-row, .control-buttons-row--full {
+        display: flex !important;
+        gap: 8px !important;
+        margin-top: 6px !important;
+    }
+
+    .control-chip, .control-chip.control-chip--neon, .control-chip.control-chip--gothic {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+    }
+
+    /* Make spin button take full remaining width, reduce top margin */
+    .controls-bottom-row {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        margin-top: 8px !important;
+    }
+
+    #slot-bet-button, .btn-spin, .spin-bottom {
+        flex: 1 1 auto !important;
+        margin: 0 !important;
+        padding: 12px 14px !important;
+    }
+
+    /* Place bonus pill next to the button without large empty area */
+    .status-footer, #bonus-info {
+        margin: 0 !important;
+    }
+
+    /* Roulette: ensure wheel fits and bottom controls are visible */
+    .roulette-stage, .roulette-canvas, #ruleta-stage, #ruleta-bet-button-bottom {
+        max-width: 100% !important;
+    }
+    #ruleta-apuesta {
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Remove large negative margins used to overlap controls on desktop */
+    .joker-jackpot-controls, .joker-controls-card, .betty-boris-boo-controls {
+        margin-top: 0 !important;
+        position: static !important;
+        z-index: auto !important;
+    }
+
+    /* Reduce padding of big header chips to save vertical space */
+    .balance-chip, .balance-chip--compact {
+        padding: 8px 10px !important;
+    }
+}
+
     background: rgba(255, 126, 34, 0.14);
     font-size: 1.6rem;
 }
