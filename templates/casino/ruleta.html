@@ -54,17 +54,42 @@
                                             }
 
                                         @media (max-width: 768px) {
+                                            /* Forzar a poner la ruleta arriba y los controles abajo */
                                             .roulette-visual-shell {
                                                 flex-direction: column !important;
                                                 gap: 15px !important;
+                                                padding: 10px !important;
+                                                width: 100% !important;
+                                            }
+    
+                                            /* Arreglar el círculo de la ruleta para que no se deforme ni se haga óvalo */
+                                            .roulette-canvas {
+                                                width: 100% !important;
+                                                max-width: 320px !important; /* Tamaño perfecto para pantallas de celular */
+                                                height: auto !important;
+                                                aspect-ratio: 1 / 1 !important; /* Fuerza a que sea un círculo perfecto */
+                                            }
+
+                                            /* Ajustar el panel de botones gris abajo */
+                                            .roulette-controls-wrapper {
+                                                width: 100% !important;
+                                                max-width: 100% !important;
+                                                margin: 0 !important;
                                             }
                                         }
+                                            /* Forzar a la tarjeta del juego a estirarse en la computadora */
+                                            .game-shell.glass-panel.roulette-shell, .roulette-wheel-card {
+                                                width: 100% !important;
+                                                max-width: 100% !important;
+                                                min-width: 100% !important;
+                                                margin: 0 !important;
+                                            }
                                     </style>
                         <div class="roulette-history" id="roulette-history">
                             <div id="selected-roulette-choice">Ninguna apuesta</div>
                             <div id="bet-total" style="margin-top:6px;color:#d9d9d9;">Apuesta total: Gs. 0</div>
                             <!-- debug panel to show landed number/color and payout for visibility -->
-                            <div id="roulette-debug" style="margin-top:6px;color:#ffd27a;font-size:13px;line-height:1.2;display:none;">
+                            <div id="roulette-debug" style="margin-top:6px;color:#c6471d;font-size:13px;line-height:1.2;display:none;">
                                 <div id="roulette-debug-landed"></div>
                                 <div id="roulette-debug-choices"></div>
                                 <div id="roulette-debug-payout"></div>
@@ -90,7 +115,7 @@
                                     <button type="button" id="roulette-undo-btn" class="btn-ghost">Deshacer</button>
                                 </div>
                             </div>
-                            <div style="display:flex;justify-content:center;margin-top:8px;">
+                            <div style="display:flex;justify-content:center;margin-top:16px;">
                                 <button type="button" id="ruleta-bet-button-bottom" class="btn-primary spin-bottom" data-label="Girar" aria-label="Girar">Girar</button>
                             </div>
                         </div>
@@ -103,7 +128,7 @@
 
                             .roulette-color-button{width:56px;height:40px;border-radius:10px;border:none;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,0.5)}
                             .roulette-color-button[data-color="red"]{background:linear-gradient(180deg,#ff6b6b,#c0392b)}
-                            .roulette-color-button[data-color="green"]{background:linear-gradient(180deg,#51cf66,#2f9e4f)}
+                            .roulette-color-button[data-color="green"]{background:linear-gradient(180deg,#061963,#080f67)}
                             .roulette-color-button[data-color="black"]{background:linear-gradient(180deg,#333,#111);color:#fff}
                             .roulette-color-button.active{outline:3px solid #ffd27a}
 
@@ -143,6 +168,47 @@
                 });
             });
         });
+        // FORZAR DISEÑO RESPONSIVO DE LA RULETA DE COSTADO COMPLETO Y PARA CELULAR
+function ajustarRuletaResponsiva() {
+    const visualShell = document.querySelector('.roulette-visual-shell');
+    const canvas = document.querySelector('.roulette-canvas') || document.querySelector('canvas');
+    const controls = document.querySelector('.roulette-controls-wrapper');
+    const glassPanel = document.querySelector('.roulette-shell') || document.querySelector('.glass-panel');
+
+    if (window.innerWidth <= 768) {
+        if (visualShell) {
+            visualShell.style.setProperty('display', 'flex', 'important');
+            visualShell.style.setProperty('flex-direction', 'column', 'important');
+            visualShell.style.setProperty('align-items', 'center', 'important');
+            visualShell.style.setProperty('gap', '15px', 'important');
+            visualShell.style.setProperty('width', '100%', 'important');
+        }
+        if (canvas) {
+            canvas.style.setProperty('width', '100%', 'important');
+            canvas.style.setProperty('max-width', '300px', 'important');
+            canvas.style.setProperty('height', '300px', 'important');
+        }
+        if (controls) {
+            controls.style.setProperty('width', '100%', 'important');
+            controls.style.setProperty('max-width', '100%', 'important');
+            controls.style.setProperty('margin', '0', 'important');
+        }
+    } else {
+        if (glassPanel) {
+            glassPanel.style.setProperty('width', '100%', 'important');
+            glassPanel.style.setProperty('max-width', '100%', 'important');
+        }
+        if (visualShell) {
+            visualShell.style.setProperty('display', 'flex', 'important');
+            visualShell.style.setProperty('flex-direction', 'row', 'important');
+            visualShell.style.setProperty('justify-content', 'space-around', 'important');
+            visualShell.style.setProperty('width', '100%', 'important');
+            visualShell.style.setProperty('max-width', '100%', 'important');
+        }
+    }
+}
+ajustarRuletaResponsiva();
+window.addEventListener('resize', ajustarRuletaResponsiva);
     </script>
 
 {% endblock %}
