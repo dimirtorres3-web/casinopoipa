@@ -4,20 +4,18 @@
 {% block content %}
 <div class="dashboard-page">
     <div class="layout-shell">
-        <header class="topbar" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-            <div style="display:flex;align-items:center;gap:12px;">
+        <header class="topbar">
+            <div class="topbar-left">
                 <span class="brand-mark">🎮</span>
-                <!-- Small name bar instead of full 'Panel del jugador' -->
-                <div style="display:flex;flex-direction:column;">
-                    <small style="color:#c7c6cc;font-size:0.85rem;">Usuario</small>
-                    <strong style="font-size:1.05rem">{{ player.nombre }} {{ player.apellido }}</strong>
+                <div class="user-info">
+                    <small>Usuario</small>
+                    <strong>{{ player.nombre }} {{ player.apellido }}</strong>
                 </div>
             </div>
-
-            <div style="display:flex;align-items:center;gap:10px;">
-                <div style="display:flex;flex-direction:column;align-items:flex-end;margin-right:6px;">
-                    <span style="font-size:0.85rem;color:#c7c6cc">Saldo</span>
-                    <strong id="header-balance" style="font-size:1rem">Gs. {{ player.saldo|intcomma }}</strong>
+            <div class="topbar-right">
+                <div class="balance-group">
+                    <span>Saldo</span>
+                    <strong id="header-balance">Gs. {{ player.saldo|intcomma }}</strong>
                 </div>
                 <a href="{% url 'casino:cajero' %}?tab=deposito" class="btn-primary">Depositar</a>
                 <a href="{% url 'casino:cajero' %}?tab=retiro" class="btn-secondary">Retirar</a>
@@ -26,44 +24,144 @@
         </header>
 
         <style>
-            /* Dashboard visual overrides requested: larger, more compact game cards and vertical-first scrolling on mobile */
-            .dashboard-page { padding: 8px; }
-            .topbar .brand-mark { font-size: 1.4rem; }
-            .games-card { padding: 8px; }
+            /* Dashboard visual overrides requested: larger, more compact game cards and responsive layout */
+            .dashboard-page { padding: 12px 10px; }
+            .topbar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 14px;
+                padding: 14px 12px;
+                border-radius: 20px;
+                background: rgba(15, 15, 18, 0.84);
+                border: 1px solid rgba(255,255,255,0.08);
+                margin-bottom: 14px;
+            }
+            .topbar-left {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                min-width: 0;
+            }
+            .brand-mark {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 44px;
+                height: 44px;
+                border-radius: 16px;
+                background: rgba(255, 126, 34, 0.16);
+                font-size: 1.3rem;
+            }
+            .user-info {
+                display: flex;
+                flex-direction: column;
+                min-width: 0;
+            }
+            .user-info small {
+                color: #c7c6cc;
+                font-size: 0.78rem;
+            }
+            .user-info strong {
+                font-size: 1rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 160px;
+            }
+            .topbar-right {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                align-items: center;
+                justify-content: flex-end;
+            }
+            .balance-group {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 2px;
+                min-width: 120px;
+            }
+            .balance-group span {
+                color: #c7c6cc;
+                font-size: 0.78rem;
+            }
+            .balance-group strong {
+                font-size: 1rem;
+            }
+            .btn-primary,
+            .btn-secondary,
+            .btn-ghost {
+                white-space: nowrap;
+            }
+            .games-card { padding: 16px 10px 10px; }
             .games-grid {
                 display: grid;
-                grid-template-columns: repeat(2, minmax(260px, 1fr));
-                gap: 12px;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
                 align-items: start;
                 justify-items: stretch;
             }
             .game-card {
                 min-height: 240px;
-                border-radius: 12px;
+                border-radius: 18px;
                 overflow: hidden;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.14);
+                box-shadow: 0 18px 42px rgba(0,0,0,0.16);
                 display: flex;
                 flex-direction: column;
-                background: rgba(15, 15, 18, 0.9);
+                background: rgba(15, 15, 18, 0.96);
+                border: 1px solid rgba(255,255,255,0.06);
             }
             .game-cover { background-size: cover; background-position: center; height: 150px; }
-            .game-overlay { padding: 12px; display: grid; gap: 10px; }
+            .game-overlay { padding: 14px; display: grid; gap: 10px; }
             .game-title { font-size: 1rem; font-weight: 700; line-height: 1.2; color: #fff; }
             .play-badge { justify-self: start; }
             .game-cover-link { display: grid; height: 100%; }
-            @media (min-width: 1280px) {
-                .games-grid { grid-template-columns: repeat(3, minmax(260px, 1fr)); }
+            .search-bar {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                gap: 10px;
+                margin-bottom: 16px;
+            }
+            .search-bar input { width: 100%; }
+            .category-strip {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin-bottom: 16px;
             }
             @media (max-width: 900px) {
-                .games-grid { grid-template-columns: repeat(2, minmax(240px, 1fr)); }
+                .games-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+                .topbar { padding: 16px 12px; }
             }
             @media (max-width: 680px) {
-                .games-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+                .topbar {
+                    flex-direction: column;
+                    align-items: stretch;
+                }
+                .topbar-left,
+                .topbar-right {
+                    width: 100%;
+                    justify-content: space-between;
+                }
+                .topbar-right {
+                    justify-content: space-between;
+                }
+                .games-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
                 .game-card { min-height: 220px; }
                 .game-cover { height: 140px; }
             }
             @media (max-width: 520px) {
+                .topbar { padding: 16px 14px; }
+                .topbar-left,
+                .topbar-right { flex-wrap: wrap; gap: 8px; }
+                .games-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+                .game-card { min-height: 220px; }
+            }
+            @media (max-width: 420px) {
                 .games-grid { grid-template-columns: 1fr; }
+                .topbar-right { justify-content: stretch; }
             }
         </style>
 
