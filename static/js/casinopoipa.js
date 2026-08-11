@@ -184,6 +184,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     let currentSlotBonus = null;
+    // Guard to prevent concurrent slot spins being triggered (protects against double-clicks / duplicate requests)
+    let slotSpinInProgress = false;
     const slotBonusIndicator = document.getElementById('slots-bonus');
 
     function updateSlotBonusIndicator(state) {
@@ -807,6 +809,17 @@ document.addEventListener('DOMContentLoaded', function () {
         if (status) {
             status.textContent = '';
         }
+
+        // Restore slot interaction state after result processed
+        try {
+            window.slotSpinInProgress = false;
+            slotSpinInProgress = false;
+            if (slotButton) slotButton.disabled = false;
+            const apuestaInput = document.getElementById('slot-apuesta');
+            if (apuestaInput) apuestaInput.disabled = false;
+        } catch (e) {
+            console.warn('Failed to fully restore slot controls state', e);
+        }
     }
 
     function createCardElement(cardValue) {
@@ -952,6 +965,11 @@ document.addEventListener('DOMContentLoaded', function () {
             const apuestaInput = document.getElementById('slot-apuesta');
             const storedWager = currentSlotBonus && currentSlotBonus.remaining > 0 ? currentSlotBonus.wager : Number(apuestaInput?.value || 0);
             const isBonusSpin = currentSlotBonus && currentSlotBonus.remaining > 0;
+            // Prevent double spins: if a spin is already in progress, ignore further clicks
+            if (window.slotSpinInProgress || slotSpinInProgress) {
+                showStatus('Giro ya en curso. Espera a que termine.', 'warning');
+                return;
+            }
             if (!isBonusSpin && storedWager < 2000) {
                 showStatus('La apuesta mínima es de 2.000 Gs.', 'warning');
                 return;
@@ -970,6 +988,12 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!isBonusSpin) {
                 updateBalance(projectedBalance);
             }
+
+            // mark spin as in progress and disable controls to avoid duplicate requests
+            window.slotSpinInProgress = true;
+            slotSpinInProgress = true;
+            try { slotButton.disabled = true; } catch (e) { }
+            try { if (apuestaInput) apuestaInput.disabled = true; } catch (e) { }
 
             showStatus(isBonusSpin ? 'Ejecutando giro gratis...' : 'GIRANDO...', 'success');
             const status = document.getElementById('slots-status');
