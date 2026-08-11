@@ -230,65 +230,46 @@ def login_view(request):
 
 
 
-                # Try Django authentication first (username is set to email on registration)
-                user = authenticate(request, username=identity, password=password)
-
-                if user is None:
-                    try:
-                        player = Player.objects.get(email__iexact=identity)
-                    except Player.DoesNotExist:
-                        player = None
-
-                    if player is not None and user is None:
-                        user = authenticate(request, username=player.username, password=password)
-
-                    if user is None and player is not None and player.check_password(password):
-                        if not player.is_active:
-                            player.is_active = True
-                            player.save(update_fields=["is_active"])
-                        player.backend = settings.AUTHENTICATION_BACKENDS[0] if hasattr(settings, "AUTHENTICATION_BACKENDS") else "django.contrib.auth.backends.ModelBackend"
-                        user = player
-
-                # Fallback: try Player model explicitly (in case custom backend or username mapping differs)
+                user = None
+                player = None
 
                 try:
-
                     player = Player.objects.get(email__iexact=identity)
-
                 except Player.DoesNotExist:
+                    try:
+                        player = Player.objects.get(username__iexact=identity)
+                    except Player.DoesNotExist:
+                        player = None
 
-                    messages.error(request, "Usuario o contraseña incorrectos.")
+                if player is not None:
+                    user = authenticate(request, username=player.username, password=password)
+                    if user is None and player.email:
+                        user = authenticate(request, username=player.email, password=password)
+                    if user is None and player.check_password(password):
+                        user = player
+                        user.backend = (
+                            settings.AUTHENTICATION_BACKENDS[0]
+                            if hasattr(settings, "AUTHENTICATION_BACKENDS") and settings.AUTHENTICATION_BACKENDS
+                            else "django.contrib.auth.backends.ModelBackend"
+                        )
 
+                if user is None:
+                    user = authenticate(request, username=identity, password=password)
+
+                if user is None:
+                    messages.error(request, "Usuario o contrase?a incorrectos.")
                     return render(request, "casino/login.html", {"form": form})
 
+                if not getattr(user, "is_active", True):
+                    user.is_active = True
+                    user.save(update_fields=["is_active"])
 
+                login(request, user)
 
-                if not player.check_password(password):
-
-                    messages.error(request, "Usuario o contraseña incorrectos.")
-
-                    return render(request, "casino/login.html", {"form": form})
-
-
-
-                # If account was inactive, reactivate and log in (keeps current behavior)
-
-                if not player.is_active:
-
-                    player.is_active = True
-
-                    player.save(update_fields=["is_active"])
-
-
-
-                login(request, player)
-
-                token = generar_jwt({"user_id": player.id, "username": player.username})
-
+                token = generar_jwt({"user_id": user.id, "username": user.username})
                 request.session["jwt_token"] = token
 
-                if player.is_staff or player.is_superuser:
-
+                if getattr(user, "is_staff", False) or getattr(user, "is_superuser", False):
                     return redirect("casino:admin_panel")
 
                 return redirect("casino:dashboard")

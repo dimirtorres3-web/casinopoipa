@@ -618,7 +618,15 @@ textarea {
     }
 
     .five-star-bottom-shell {
-        padding-bottom: 70px !important;
+        padding-bottom: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    .slot-figure-graphic {
+        height: clamp(110px, 18vh, 160px) !important;
+        max-height: 160px !important;
+        margin: 0 !important;
+        object-fit: contain !important;
     }
 
     /* Support forcing mobile rules via .force-mobile for visual testing on desktop */

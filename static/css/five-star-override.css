@@ -270,10 +270,11 @@
 .mini-badge strong{font-size:0.95rem;color:#fff}
 
 /* Small slot visual canvases (three, side by side) */
-.slot-visual-row{display:flex;gap:6px;justify-content:center;align-items:center;margin-top:0;padding-top:0}
+.slot-visual-row{display:flex;gap:8px;justify-content:center;align-items:center;margin:0;padding:0;width:100%}
 .slot-visual-canvas{width:120px;height:140px;border-radius:12px;background:linear-gradient(180deg,#0f0f12,#070707);border:1px solid rgba(255,255,255,0.04);box-shadow:inset 0 8px 24px rgba(0,0,0,0.6)}
-.five-star-bottom-shell{padding:0;margin-top:calc(-40cm - 5m)}
-.controls-card--five-star{padding:12px 20px 18px;}
+.five-star-bottom-shell{padding:0;margin-top:0}
+.controls-card--five-star{padding:12px 20px 18px;margin:0;}
+.slot-figure-graphic{max-width:100%;width:100%;height:clamp(120px, 22vh, 180px);margin:0 auto;display:block;object-fit:contain;background-position:center;background-repeat:no-repeat;}
 
 /* Roulette color dots (rely on this file being loaded site-wide) */
 .roulette-color-dot{width:42px;height:42px;border-radius:50%;border:2px solid rgba(255,255,255,0.06);cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,0.5);display:inline-block}
