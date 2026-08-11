@@ -467,10 +467,10 @@ textarea {
     .slot-canvas, .five-star-pixi-stage, .joker-jackpot-pixi-stage, .betty-boris-boo-pixi-stage {
         box-sizing: border-box !important;
         width: 100% !important;
-        /* Prefer a height proportional to width but cap by viewport height */
-        height: min(40vh, calc(100vw * 0.58)) !important;
-        min-height: 110px !important;
-        max-height: 48vh !important;
+        /* Prefer a height proportional to width but cap by viewport height. Increased for better fill on tall phones */
+        height: min(52vh, calc(100vw * 0.72)) !important;
+        min-height: 140px !important;
+        max-height: 72vh !important;
         display: block !important;
         overflow: hidden !important;
     }
@@ -481,17 +481,159 @@ textarea {
         padding-right: 6px !important;
     }
 
+    /* Make controls area sticky to bottom to avoid huge empty space and keep input visible */
+    .controls-bottom-row {
+        position: sticky !important;
+        bottom: 0 !important;
+        margin: 0 !important;
+        padding: 10px 8px !important;
+        background: linear-gradient(180deg, rgba(15,15,18,0), rgba(15,15,18,0.96)) !important;
+        z-index: 60 !important;
+        backdrop-filter: blur(8px) !important;
+    }
+
+    /* Reduce the large rounded pill at the very bottom and make the input full width */
+    .apuesta-input, #slot-apuesta, .game-control-input {
+        width: 100% !important;
+        border-radius: 12px !important;
+        padding: 10px 14px !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+    }
+
+    /* Button tweaks for mobile: ensure visible and aligned with input */
+    #slot-bet-button, .btn-spin, .spin-bottom {
+        width: auto !important;
+        min-width: 110px !important;
+        flex: 0 0 auto !important;
+    }
+
+    /* Use single-column game grid on small screens for full-width cards */
+    .games-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+
+    .game-card {
+        width: 100% !important;
+        height: 160px !important;
+        border-radius: 16px !important;
+    }
+
     /* Prevent the main layout from forcing extra horizontal spacing */
     .game-shell, .layout-shell, .game-page {
         padding-left: 0 !important;
         padding-right: 0 !important;
+        max-width: 100vw !important;
+        width: 100vw !important;
+        min-width: 0 !important;
     }
 
-    /* Hide any accidental horizontal scrollbars */
     html, body {
         overflow-x: hidden !important;
+        max-width: 100vw !important;
+        width: 100vw !important;
+    }
+
+    .game-page, .layout-shell, .game-shell, main {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        box-sizing: border-box !important;
+    }
+
+    .game-page {
+        min-height: 100vh !important;
+    }
+
+    .five-star-layout, .joker-jackpot-layout, .betty-boris-boo-layout,
+    .five-star-view, .joker-jackpot-stage-shell, .betty-boris-boo-stage-shell,
+    .joker-jackpot-controls, .betty-boris-boo-controls {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    #five-star-reel-stage, #joker-jackpot-stage, #betty-boris-boo-stage,
+    .slot-figure-graphic, .controls-card--five-star, .joker-controls-card, .betty-controls-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    #five-star-reel-stage, #joker-jackpot-stage, #betty-boris-boo-stage {
+        height: 32vh !important;
+        min-height: 120px !important;
+        max-height: 42vh !important;
+    }
+
+    .slot-visual-row, .slot-figure-graphic {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .controls-bottom-row {
+        position: sticky !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        background: rgba(15, 15, 18, 0.96) !important;
+        padding: 10px 8px !important;
+        margin: 0 !important;
+        z-index: 70 !important;
+        box-shadow: 0 -8px 24px rgba(0,0,0,0.32) !important;
+    }
+
+    .controls-bottom-row button#slot-bet-button,
+    .controls-bottom-row .btn-spin {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .controls-top-row, .control-buttons-row, .joker-modes-row, .betty-modes-row,
+    .five-star-bottom-shell, .joker-jackpot-controls, .betty-boris-boo-controls {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .game-shell {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+    }
+
+    .five-star-layout {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+
+    .five-star-bottom-shell {
+        padding-bottom: 70px !important;
+    }
+
+    /* Support forcing mobile rules via .force-mobile for visual testing on desktop */
+    .force-mobile .game-page, .force-mobile .layout-shell, .force-mobile .game-shell, .force-mobile main {
+        height: auto !important;
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+    }
+    .force-mobile .slot-canvas, .force-mobile .five-star-pixi-stage, .force-mobile .joker-jackpot-pixi-stage, .force-mobile .betty-boris-boo-pixi-stage {
+        height: min(52vh, calc(100vw * 0.72)) !important;
+        min-height: 140px !important;
+        max-height: 72vh !important;
     }
 }
+
 
 
     background: rgba(255, 126, 34, 0.14);
