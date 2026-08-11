@@ -14,16 +14,25 @@
                 {% csrf_token %}
                 <h2>Ingreso seguro</h2>
                 <p class="form-subtitle">Ingresa con tu correo electrónico y accede a tu cuenta premium.</p>
+                {% if messages %}
+                    <div class="field-error">
+                        {% for message in messages %}
+                            <p>{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
                 {% if form.non_field_errors %}
                     <div class="field-error">{{ form.non_field_errors }}</div>
                 {% endif %}
                 <div class="field-group">
                     <label for="id_email">Correo electrónico</label>
                     {{ form.email }}
+                    {{ form.email.errors }}
                 </div>
                 <div class="field-group">
                     <label for="id_password">Contraseña</label>
                     {{ form.password }}
+                    {{ form.password.errors }}
                 </div>
                 <button class="btn-primary">Entrar</button>
                 <p class="form-note">¿Nuevo aquí? <a href="{% url 'casino:registro' %}">Regístrate</a></p>
