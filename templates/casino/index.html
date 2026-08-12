@@ -39,9 +39,9 @@
             </section>
 
             <section class="hero-card glass-panel games-card">
-                <div class="contenedor-juegos"><div class="games-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; max-width: 100%; box-sizing: border-box; padding: 5px; overflow: hidden;">
+                <div class="contenedor-juegos w-full max-w-full overflow-x-hidden flex flex-col items-center px-4 gap-4"><div class="games-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; max-width: 100%; box-sizing: border-box; padding: 5px; overflow: hidden;">
                     {% for juego in juegos %}
-                    <article class="game-card premium-machine tarjeta-juego game-card--{{ juego.slug }}" style="width: 100% !important; max-width: 100% !important; box-sizing: border-box;">
+                    <article class="game-card premium-machine tarjeta-juego game-card--{{ juego.slug }} w-full max-w-sm rounded-lg bg-gray-900 p-4" style="width: 100% !important; max-width: 100% !important; box-sizing: border-box;">
                         <a class="game-cover-link" href="{{ juego.url }}" aria-label="Jugar {{ juego.titulo }}">
                             <div class="game-cover" style="background-image: url('{{ juego.cover }}')" aria-hidden="true"></div>
                             <div class="game-overlay">

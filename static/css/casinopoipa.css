@@ -523,6 +523,16 @@ textarea {
       overflow-y: auto;        /* Permite el movimiento vertical si hay más juegos */
     }
 
+    /* Hacer responsive el canvas de PIXI */
+    .slot-canvas canvas,
+    .five-star-pixi-stage canvas,
+    .joker-jackpot-pixi-stage canvas,
+    .betty-boris-boo-pixi-stage canvas {
+        max-width: 100% !important;
+        height: auto !important;
+        display: block !important;
+    }
+
     .game-card {
         width: 100% !important;
         height: 160px !important;

@@ -14,11 +14,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const app = new PIXI.Application({
             antialias: true,
             backgroundAlpha: 0,
-            resizeTo: container,
+            resizeTo: window,
             autoDensity: true,
+            resolution: window.devicePixelRatio || 1,
         });
-        app.view.style.width = '100%';
-        app.view.style.height = '100%';
+        app.view.style.maxWidth = '100%';
+        app.view.style.height = 'auto';
+        app.view.style.display = 'block';
+        // Ensure container doesn't force overflow
+        container.style.width = '100%';
+        container.style.boxSizing = 'border-box';
         container.appendChild(app.view);
 
         const stage = new PIXI.Container();
@@ -136,12 +141,15 @@ function initPokerScene(container) {
     const app = new PIXI.Application({
         antialias: true,
         backgroundAlpha: 0,
-        resizeTo: container,
+        resizeTo: window,
         autoDensity: true,
+        resolution: window.devicePixelRatio || 1,
     });
-    app.view.style.width = '100%';
-    app.view.style.height = '100%';
+    app.view.style.maxWidth = '100%';
+    app.view.style.height = 'auto';
     app.view.style.display = 'block';
+    container.style.width = '100%';
+    container.style.boxSizing = 'border-box';
     container.appendChild(app.view);
 
     const width = Math.max(320, app.renderer.width || container.clientWidth || 640);
