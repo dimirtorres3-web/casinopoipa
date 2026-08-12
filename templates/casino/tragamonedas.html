@@ -177,19 +177,28 @@
                             <div id="joker-jackpot-stage" class="joker-jackpot-pixi-stage slot-canvas" aria-label="Escena de Joker Jackpot"></div>
                         </div>
                         <div style="width: 100%; padding: 0; box-sizing: border-box;">
-                            <div class="joker-controls-card" style="width: 100%; max-width: 100%; margin: 0; padding: 12px; box-sizing: border-box;">
-                                <div class="joker-control-row">
+                            <div class="joker-controls-card" style="width: 100%; max-width: 100%; display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 10px; box-sizing: border-box;">
+                               <div class="joker-control-row">
                                     <label for="slot-apuesta">Apuesta</label>
-                                    <input id="slot-apuesta" type="number" min="2000" value="2000" class="form-input" />
+                                    <input id="slot-apuesta" type="number" min="2000" value="2000">
                                 </div>
                                 <div class="joker-modes-row">
                                     <button type="button" id="slot-auto-btn" class="control-chip control-chip--neon">Auto</button>
                                     <button type="button" id="slot-turbo-btn" class="control-chip control-chip--neon">Turbo</button>
                                 </div>
-                                <button type="button" id="slot-bet-button" class="btn-primary btn-spin btn-spin--joker">GIRAR</button>
-                                <div class="status-footer">
+                                <!-- 1. El botón de GIRAR queda primero -->
+                                <button type="button" id="slot-bet-button" class="btn-primary btn-spin btn-spin--joker"></button>
+
+                                <!-- 2. AQUÍ PEGAS LA APUESTA (Queda en el medio) -->
+                                <div class="joker-control-row" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                    <label for="slot-apuesta" style="margin-bottom: 2px;">Apuesta</label>
+                                    <input id="slot-apuesta" type="number" min="2000" value="2000" class="form-input" style="text-align: center; width: 80px; max-width: 80px;">
+                                </div>
+
+                                <!-- 3. Los Bonos y el Estatus quedan al final (a la derecha) -->
+                                <div class="slots-status-footer">
                                     <span id="slots-status" class="status-pill"></span>
-                                    <span id="bonus-info" class="status-pill status-pill--soft">Bonos: {{ player.bonus_balance|intcomma }}</span>
+                                    <span id="bonus-info" class="status-pill status-pill--soft">Bonos: {{ player.bonus }}</span>
                                 </div>
                             </div>
                         </aside>
