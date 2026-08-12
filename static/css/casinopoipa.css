@@ -1,4 +1,4 @@
-:root {
+﻿:root {
     color-scheme: dark;
     font-family: 'Inter', sans-serif;
     background: #0f0f12;
@@ -468,7 +468,7 @@ textarea {
         box-sizing: border-box !important;
         width: 100% !important;
         /* Prefer a height proportional to width but cap by viewport height. Increased for better fill on tall phones */
-        height: min(52vh, calc(100vw * 0.72)) !important;
+        height: min(52vh, calc(100% * 0.72)) !important;
         min-height: 140px !important;
         max-height: 72vh !important;
         display: block !important;
@@ -524,15 +524,15 @@ textarea {
     .game-shell, .layout-shell, .game-page {
         padding-left: 0 !important;
         padding-right: 0 !important;
-        max-width: 100vw !important;
-        width: 100vw !important;
+        max-width: 100% !important;
+        width: 100% !important;
         min-width: 0 !important;
     }
 
     html, body {
         overflow-x: hidden !important;
-        max-width: 100vw !important;
-        width: 100vw !important;
+        max-width: 100% !important;
+        width: 100% !important;
     }
 
     .game-page, .layout-shell, .game-shell, main {
@@ -636,7 +636,7 @@ textarea {
         padding-right: 6px !important;
     }
     .force-mobile .slot-canvas, .force-mobile .five-star-pixi-stage, .force-mobile .joker-jackpot-pixi-stage, .force-mobile .betty-boris-boo-pixi-stage {
-        height: min(52vh, calc(100vw * 0.72)) !important;
+        height: min(52vh, calc(100% * 0.72)) !important;
         min-height: 140px !important;
         max-height: 72vh !important;
     }

@@ -261,6 +261,14 @@
     .controls-top-row {
         grid-template-columns: 1fr;
     }
+    /* Prevent the balance chip and other fixed-min elements from forcing horizontal scroll on small phones */
+    .balance-chip, .btn-small, .mini-badge {
+        min-width: 0 !important;
+        width: auto !important;
+    }
+    .five-star-pixi-stage, .five-star-pixi-stage .slot-canvas {
+        min-height: 300px !important;
+    }
 }
 
 /* Mini badges placed beside the Five Star title (small, inline) */
