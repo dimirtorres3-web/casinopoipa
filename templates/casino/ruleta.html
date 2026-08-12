@@ -13,14 +13,14 @@
                     </div>
                 </div>
                 <div class="header-actions">
-                    <div class="balance-display glass-panel">
-                        <p>Saldo disponible</p>
-                        <h2 id="balance-value" class="balance-value">Gs. {{ player.saldo|intcomma }}</h2>
-                        <p id="bonus-balance" style="margin-top:6px; color:#ffd9a8;">Bono: Gs. {{ player.bonus_balance|intcomma }}</p>
-                        <p id="free-spins-indicator" style="margin-top:4px; color:#8be28b;">Free spins: {{ player.free_spins }}</p>
+                    <div class="game-header-actions">
+                        <div class="balance-chip balance-chip--compact" style="margin-right:8px;">
+                            <span class="sr-only">Saldo</span>
+                            <strong id="corner-balance-value" class="balance-value">Gs. {{ player.saldo|intcomma }}</strong>
+                        </div>
+                        <button type="button" class="btn-primary" id="quick-deposit-btn">Depositar</button>
+                        <a href="{% url 'casino:dashboard' %}" class="btn-secondary">Volver</a>
                     </div>
-                    <button type="button" class="btn-primary" id="quick-deposit-btn">Depositar</button>
-                    <a href="{% url 'casino:dashboard' %}" class="btn-secondary">Volver</a>
                 </div>
             </header>
             <main class="game-shell glass-panel roulette-shell">

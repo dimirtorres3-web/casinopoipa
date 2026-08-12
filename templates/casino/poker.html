@@ -13,12 +13,14 @@
                 </div>
             </div>
             <div class="header-actions">
-                <div class="balance-display glass-panel">
-                    <p>Saldo disponible</p>
-                    <h2 id="balance-value">Gs. {{ player.saldo|intcomma }}</h2>
+                <div class="game-header-actions">
+                    <div class="balance-chip balance-chip--compact" style="margin-right:8px;">
+                        <span class="sr-only">Saldo</span>
+                        <strong id="corner-balance-value" class="balance-value">Gs. {{ player.saldo|intcomma }}</strong>
+                    </div>
+                    <button type="button" class="btn-primary btn-small" id="quick-deposit-btn">Depositar</button>
+                    <a href="{% url 'casino:dashboard' %}" class="btn-secondary">Volver</a>
                 </div>
-                <button type="button" class="btn-primary btn-small" id="quick-deposit-btn">Depositar</button>
-                <a href="{% url 'casino:dashboard' %}" class="btn-secondary">Volver</a>
             </div>
         </header>
 

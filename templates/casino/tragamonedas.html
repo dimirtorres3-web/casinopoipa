@@ -122,19 +122,14 @@
                 <section class="joker-jackpot-shell">
                     <div class="joker-jackpot-header">
                         <div class="joker-jackpot-title">
-                            <span class="joker-mark">🃏</span>
-                            <div>
-                                <h2>Joker Jackpot</h2>
+                                <span class="joker-mark">🃏</span>
+                                <div>
+                                    <h2>Joker Jackpot</h2>
+                                </div>
                             </div>
-                        </div>
-                        <div class="balance-inline balance-inline--corner">
-                            <div class="balance-chip balance-chip--compact">
-                                <span>SALDO PYG</span>
-                                <strong id="balance-value" class="balance-value">Gs. {{ player.saldo|intcomma }}</strong>
+                            <div class="game-header-actions">
+                                <a href="{% url 'casino:dashboard' %}" class="btn-secondary btn-small">Volver</a>
                             </div>
-                            <button type="button" class="btn-primary btn-small" id="quick-deposit-btn">Depositar</button>
-                            <a href="{% url 'casino:dashboard' %}" class="btn-secondary btn-small">Volver</a>
-                        </div>
                     </div>
 
                     <div class="joker-jackpot-topbar">
@@ -210,10 +205,10 @@
                                 <h2>{{ game_meta.title }}</h2>
                             </div>
                         </div>
-                        <div class="balance-inline balance-inline--corner">
-                            <div class="balance-chip balance-chip--compact">
-                                <span>SALDO PYG</span>
-                                <strong id="balance-value" class="balance-value">Gs. {{ player.saldo|intcomma }}</strong>
+                        <div class="game-header-actions">
+                            <div class="balance-chip balance-chip--compact" style="margin-right:8px;">
+                                <span class="sr-only">Saldo</span>
+                                <strong id="corner-balance-value" class="balance-value">Gs. {{ player.saldo|intcomma }}</strong>
                             </div>
                             <button type="button" class="btn-primary btn-small" id="quick-deposit-btn">Depositar</button>
                             <a href="{% url 'casino:dashboard' %}" class="btn-secondary btn-small">Volver</a>
@@ -289,15 +284,13 @@
                             </div>
                         <!-- removed the '8 símbolos oficiales' pill as requested -->
                         </div>
-                        <div class="balance-inline">
-                            <div class="balance-chip">
-                                <span>SALDO PYG</span>
-                                <strong id="balance-value" class="balance-value">Gs. {{ player.saldo|intcomma }}</strong>
+                        <div class="game-header-actions">
+                            <div class="balance-chip balance-chip--compact" style="margin-right:8px;">
+                                <span class="sr-only">Saldo</span>
+                                <strong id="corner-balance-value" class="balance-value">Gs. {{ player.saldo|intcomma }}</strong>
                             </div>
-                            <div style="display:flex;gap:8px;align-items:center;">
-                                <button type="button" class="btn-primary btn-small" id="quick-deposit-btn">Depositar</button>
-                                <a href="{% url 'casino:dashboard' %}" class="btn-secondary btn-small">Volver</a>
-                            </div>
+                            <button type="button" class="btn-primary btn-small" id="quick-deposit-btn">Depositar</button>
+                            <a href="{% url 'casino:dashboard' %}" class="btn-secondary btn-small">Volver</a>
                         </div>
                     </div>
 
