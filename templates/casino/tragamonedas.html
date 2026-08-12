@@ -2,9 +2,9 @@
 {% load humanize %}
 {% block title %}Tragamonedas | Casinopoipa{% endblock %}
 {% block content %}
-    <div class="game-page" data-game="{{ game_slug }}">
-        <div class="layout-shell">
-            <main class="game-shell glass-panel {% if game_slug == 'palacio-arlequin' %}joker-jackpot-shell{% elif game_slug == 'mansion-embrujada' %}betty-boris-boo-shell{% endif %}" style="position: relative;">
+    <div class="game-page w-full max-w-full overflow-x-hidden" data-game="{{ game_slug }}">
+    <div class="layout-shell w-full max-w-full overflow-x-hidden flex flex-col items-center">
+        <main class="game-shell glass-panel games-panel w-full max-w-full overflow-x-hidden flex flex-col items-center px-2">
                 <style>
                     /* Shared alignment for slot scenes and controls (Five Star, Joker Jackpot, Mansion Embrujada) */
                     #five-star-reel-stage, #joker-jackpot-stage, #betty-boris-boo-stage {
