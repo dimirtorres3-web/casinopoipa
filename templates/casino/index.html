@@ -39,10 +39,10 @@
             </section>
 
             <section class="hero-card glass-panel games-card">
-                <div class="w-full max-w-full overflow-x-hidden flex flex-col items-center px-4 gap-6">
+                <div class="w-full max-w-full overflow-x-hidden grid grid-cols-2 gap-2 px-2">
                     {% for juego in juegos %}
-                    <article class="w-full max-w-[320px] box-sizing-border flex flex-col items-center justify-center overflow-hidden rounded-xl">
-                        <a class="w-full aspect-[4/3] block bg-cover bg-center bg-no-repeat relative p-4" href="{% url 'casino:game-card' juego.slug %}" aria-label="Jugar {{ juego.titulo }}">
+                    <article class="w-full overflow-hidden rounded-lg bg-gray-900/50 flex flex-col">
+                        <a class="w-full aspect-[4/3] block bg-cover bg-center bg-no-repeat relative p-2" href="{% url 'casino:game-card' juego.slug %}">
                             <div class="game-cover" style="background-image: url('{{ juego.cover }}')" aria-hidden="true"></div>
                             <div class="game-overlay">
                                 <div class="game-title">{{ juego.titulo }}</div>
