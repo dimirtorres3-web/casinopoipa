@@ -19,20 +19,22 @@ document.addEventListener('DOMContentLoaded', function () {
             autoDensity: true,
             resolution: window.devicePixelRatio || 1,
         });
-        app.view.style.maxWidth = '100%';
-        app.view.style.width = '100%';
+        const esCelular = window.innerWidth <= 768;
+
+        app.view.style.maxWidth = esCelular ? '92vw' : '100%';
+        app.view.style.width = esCelular ? '92vw' : '100%';
         app.view.style.height = 'auto';
         app.view.style.display = 'block';
         app.view.style.margin = '0 auto';
         app.view.style.objectFit = 'contain';
-        // Ensure container doesn't force overflow and centers its child
-        container.style.width = '100%';
+    
+        container.style.width = esCelular ? '92vw' : '100%';
+        container.style.maxWidth = esCelular ? '92vw' : '100%';
         container.style.boxSizing = 'border-box';
         container.style.height = '100%';
         container.style.display = 'flex';
         container.style.justifyContent = 'center';
         container.style.alignItems = 'center';
-        container.appendChild(app.view);
 
         const stage = new PIXI.Container();
         app.stage.addChild(stage);
@@ -153,13 +155,17 @@ function initPokerScene(container) {
         autoDensity: true,
         resolution: window.devicePixelRatio || 1,
     });
-    app.view.style.maxWidth = '100%';
-    app.view.style.width = '100%';
+    const esCelular = window.innerWidth <= 768;
+
+    app.view.style.maxWidth = esCelular ? '92vw' : '100%';
+    app.view.style.width = esCelular ? '92vw' : '100%';
     app.view.style.height = 'auto';
     app.view.style.display = 'block';
     app.view.style.margin = '0 auto';
     app.view.style.objectFit = 'contain';
-    container.style.width = '100%';
+    
+    container.style.width = esCelular ? '92vw' : '100%';
+    container.style.maxWidth = esCelular ? '92vw' : '100%';
     container.style.boxSizing = 'border-box';
     container.style.height = '100%';
     container.style.display = 'flex';
@@ -509,9 +515,16 @@ function initJokerJackpotScene(container) {
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
+    const esCelular = window.innerWidth <= 768;
+
+    canvas.style.maxWidth = esCelular ? '92vw' : '100%';
+    canvas.style.width = esCelular ? '92vw' : '100%';
+    canvas.style.height = 'auto';
     canvas.style.display = 'block';
+    canvas.style.margin = '0 auto';
+    
+    container.style.width = esCelular ? '92vw' : '100%';
+    container.style.maxWidth = esCelular ? '92vw' : '100%';
     container.appendChild(canvas);
 
     const ctx = canvas.getContext('2d');
@@ -743,9 +756,16 @@ function initBettyBorisBooScene(container) {
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
+    const esCelular = window.innerWidth <= 768;
+
+    canvas.style.maxWidth = esCelular ? '92vw' : '100%';
+    canvas.style.width = esCelular ? '92vw' : '100%';
+    canvas.style.height = 'auto';
     canvas.style.display = 'block';
+    canvas.style.margin = '0 auto';
+    
+    container.style.width = esCelular ? '92vw' : '100%';
+    container.style.maxWidth = esCelular ? '92vw' : '100%';
     container.appendChild(canvas);
 
     const ctx = canvas.getContext('2d');
@@ -977,9 +997,16 @@ function initFiveStarScene(container) {
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
+    const esCelular = window.innerWidth <= 768;
+
+    canvas.style.maxWidth = esCelular ? '92vw' : '100%';
+    canvas.style.width = esCelular ? '92vw' : '100%';
+    canvas.style.height = 'auto';
     canvas.style.display = 'block';
+    canvas.style.margin = '0 auto';
+    
+    container.style.width = esCelular ? '92vw' : '100%';
+    container.style.maxWidth = esCelular ? '92vw' : '100%';
     container.appendChild(canvas);
 
     const ctx = canvas.getContext('2d');
