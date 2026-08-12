@@ -495,6 +495,13 @@ textarea {
         padding-right: 6px !important;
     }
 
+    /* Ensure the PIXI/container shells center their canvas horizontally and vertically */
+    .five-star-view, .joker-jackpot-stage-shell, .betty-boris-boo-stage-shell, .slot-stage, .slot-canvas, .five-star-pixi-stage, .joker-jackpot-pixi-stage {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
     /* Make controls area sticky to bottom to avoid huge empty space and keep input visible */
     .controls-bottom-row {
         position: sticky !important;
@@ -682,9 +689,30 @@ textarea {
         max-width: 100% !important;
         min-width: 0 !important;
         overflow-x: hidden !important;
-        overflow-y: auto !important;
+        overflow-y: hidden !important; /* Prevent internal scrolling so we can fit all game UI */
         box-sizing: border-box !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
     }
+
+    /* Full-screen game layout variables */
+    :root { --game-header-height: 72px; --game-controls-height: 110px; }
+
+    /* Game shell becomes a column flex container occupying the viewport */
+    .game-shell { display: flex !important; flex-direction: column !important; height: 100% !important; }
+
+    /* Layout stacks: stage fills available space, controls have fixed height */
+    .five-star-layout, .joker-jackpot-layout, .betty-boris-boo-layout { display: flex !important; flex-direction: column !important; height: 100% !important; }
+    .five-star-view, .joker-jackpot-stage-shell, .betty-boris-boo-stage-shell { flex: 1 1 auto !important; display: flex !important; align-items: center !important; justify-content: center !important; height: calc(100% - var(--game-controls-height)) !important; }
+    .five-star-bottom-shell, .controls-card, .controls-bottom-row, .joker-controls-card, .betty-controls-card { flex: 0 0 var(--game-controls-height) !important; position: relative !important; }
+
+    /* Ensure PIXI canvases fill the stage area and scale to fit */
+    .slot-canvas, .five-star-pixi-stage, .joker-jackpot-pixi-stage, .betty-boris-boo-pixi-stage { width: 100% !important; height: 100% !important; max-height: 100% !important; }
+    .slot-canvas canvas, .five-star-pixi-stage canvas, .joker-jackpot-pixi-stage canvas, .betty-boris-boo-pixi-stage canvas { width: 100% !important; height: 100% !important; object-fit: contain !important; }
+
+    /* Controls should not be fixed now — they live in the layout and are visible without scrolling */
+    .controls-bottom-row { position: relative !important; bottom: auto !important; box-shadow: none !important; }
+
 
     .game-page {
         min-height: 100vh !important;

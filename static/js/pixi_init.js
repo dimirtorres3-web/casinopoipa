@@ -14,16 +14,24 @@ document.addEventListener('DOMContentLoaded', function () {
         const app = new PIXI.Application({
             antialias: true,
             backgroundAlpha: 0,
-            resizeTo: window,
+            // resize to the container so renderer size matches the visible element
+            resizeTo: container,
             autoDensity: true,
             resolution: window.devicePixelRatio || 1,
         });
         app.view.style.maxWidth = '100%';
+        app.view.style.width = '100%';
         app.view.style.height = 'auto';
         app.view.style.display = 'block';
-        // Ensure container doesn't force overflow
+        app.view.style.margin = '0 auto';
+        app.view.style.objectFit = 'contain';
+        // Ensure container doesn't force overflow and centers its child
         container.style.width = '100%';
         container.style.boxSizing = 'border-box';
+        container.style.height = '100%';
+        container.style.display = 'flex';
+        container.style.justifyContent = 'center';
+        container.style.alignItems = 'center';
         container.appendChild(app.view);
 
         const stage = new PIXI.Container();
@@ -141,15 +149,22 @@ function initPokerScene(container) {
     const app = new PIXI.Application({
         antialias: true,
         backgroundAlpha: 0,
-        resizeTo: window,
+        resizeTo: container,
         autoDensity: true,
         resolution: window.devicePixelRatio || 1,
     });
     app.view.style.maxWidth = '100%';
+    app.view.style.width = '100%';
     app.view.style.height = 'auto';
     app.view.style.display = 'block';
+    app.view.style.margin = '0 auto';
+    app.view.style.objectFit = 'contain';
     container.style.width = '100%';
     container.style.boxSizing = 'border-box';
+    container.style.height = '100%';
+    container.style.display = 'flex';
+    container.style.justifyContent = 'center';
+    container.style.alignItems = 'center';
     container.appendChild(app.view);
 
     const width = Math.max(320, app.renderer.width || container.clientWidth || 640);
