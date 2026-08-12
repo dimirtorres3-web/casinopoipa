@@ -27,16 +27,20 @@
             <a href="{% url 'casino:logout' %}" class="btn-ghost">Cerrar sesión</a>
         </header>
         <main class="dashboard-grid">
-            <section class="hero-card glass-panel balance-card">
-                <div class="balance-info">
-                    <p>Saldo disponible</p>
-                    <h2>Gs. {{ saldo_real|intcomma }}</h2>
+            <section class="w-full bg-gray-900/90 rounded-xl p-3 flex flex-row md:flex-col items-center justify-between gap-2 border border-gray-800 my-2 box-border">
+                <div class="flex flex-col justify-center">
+                    <span class="text-gray-400 text-[10px] uppercase tracking-wider font-bold">Saldo disponible</span>
+                    <h2 class="text-white text-base md:text-2xl font-black tracking-tight">Gs. {{ saldo_real|intcomma }}</h2>
                 </div>
-                <div class="balance-meta">
-                    <span>Seguridad en backend</span>
-                    <p class="balance-note">Tu saldo está protegido y cifrado internamente. Aquí solo ves tu balance real.</p>
-                </div>
-            </section>
+                <div class="flex flex-row gap-1.5 items-center">
+                    <a href="{% url 'casino:deposit' %}" class="bg-yellow-500 hover:bg-yellow-600 text-black text-xs font-black px-3 py-2 rounded-lg uppercase tracking-wider text-center transition-colors">
+                        Depositar
+                    </a>
+                    <a href="{% url 'casino:withdraw' %}" class="bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold px-3 py-2 rounded-lg uppercase tracking-wider text-center transition-colors border border-gray-700">
+                        Retirar
+                </a>
+            </div>
+        </section>
 
             <section class="hero-card glass-panel games-card">
                 <div class="w-full max-w-full overflow-x-hidden grid grid-cols-2 gap-2 px-2">
