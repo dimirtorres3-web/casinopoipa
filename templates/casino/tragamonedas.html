@@ -114,11 +114,22 @@
                                             gap: 8px !important;
                                         }
                     #slot-bet-button, .btn-spin {
-                                            width: 100% !important;
-                                            min-width: 0 !important;
-                                            flex: none !important;
+                        width: 100% !important;
+                        min-width: 0 !important;
+                        flex: none !important;
+                    }
+
+                    #five-star-reel-stage canvas, 
+                    #joker-jackpot-stage canvas, 
+                    #betty-boris-boo-stage canvas,
+                    .slot-view canvas {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        height: auto !important;
+                        object-fit: contain !important;
                     }
                 }
+
                 </style>
                 {% if game_slug == 'palacio-arlequin' %}
                 <section class="joker-jackpot-shell">
@@ -154,30 +165,30 @@
                     </div>
 
                     <div class="joker-jackpot-layout" style="padding:0;">
-                        <style>
-                            /* Joker unified box: make the whole block wider and flush to container sides */
-                            .joker-jackpot-layout {
-                                background: linear-gradient(135deg, rgba(5,6,12,0.96), rgba(23,14,28,0.96));
-                                padding: 0;
-                                border-radius: 18px;
-                                box-shadow: 0 6px 20px rgba(0,0,0,0.6);
-                                /* Keep the layout full-width inside its parent without overflow */
-                                width: 100%;
-                                margin-left: 0;
-                                margin-right: 0;
-                                box-sizing: border-box;
-                                overflow: hidden;
-                                gap: 0;
-                            }
-                            .joker-jackpot-stage-shell { padding: 0; }
-                          #joker-jackpot-stage { width:100%; height:auto; min-height:auto; border-radius:18px 18px 0 0; display:block; }
-                            .joker-jackpot-controls { padding: 0; margin-top: -120px !important; position: relative; z-index: 99; }
-                            .joker-controls-card { width:100% !important; max-width:100% !important; margin:0 !important; padding:18px !important; border-radius:0 0 18px 18px !important; box-sizing:border-box; }
-
-                        </style>
-                            <div class="joker-jackpot-stage-shell" style="width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                            <div id="joker-jackpot-stage" class="joker-jackpot-pixi-stage slot-canvas" aria-label="Escena de Joker Jackpot"></div>
-                        </div>
+                    <style>
+                    /* Solo se aplica en pantallas grandes de computadoras */
+                    @media (min-width: 769px) {
+                        .joker-jackpot-layout {
+                            background: linear-gradient(135deg, rgba(5,6,12,0.96), rgba(0,0,0,0.6));
+                            padding: 0;
+                            border-radius: 18px;
+                            box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+                            width: 100%;
+                            margin-left: 0;
+                            margin-right: 0;
+                            box-sizing: border-box;
+                            overflow: hidden;
+                            gap: 0;
+                        }
+                        .joker-jackpot-stage-shell { padding: 0; }
+                        #joker-jackpot-stage { width: 100%; height: auto; min-height: auto; }
+                        .joker-jackpot-controls { padding: 0; margin-top: -120px !important; }
+                        .joker-controls-card { width: 100% !important; max-width: 100% !important; }
+                    }
+                    </style>
+                    <div class="joker-jackpot-stage-shell">
+                        <div id="joker-jackpot-stage" class="joker-jackpot-pixi-stage"></div>
+                    </div>
                         <div style="width: 100%; padding: 0; box-sizing: border-box;">
                             <div class="joker-controls-card" style="width: 100%; max-width: 100%; display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 10px; box-sizing: border-box;">
                                <div class="joker-control-row">
@@ -247,12 +258,13 @@
 
                     <div class="betty-boris-boo-layout">
                         <style>
-                            /* Betty/Boris layout: make scene wider and less tall, stack controls below */
-                            .betty-boris-boo-layout { display:flex; flex-direction:column; gap:12px; }
-                            #betty-boris-boo-stage { width:100%; height:180px; min-height:160px; }
-                            .betty-boris-boo-controls { width:100%; }
-                            .betty-controls-card { width:100%; max-width:720px; margin:0 auto; box-sizing:border-box; }
-                            
+                        /* Solo se aplica en pantallas grandes de computadoras */
+                        @media (min-width: 769px) {
+                            .betty-boris-boo-layout { display: flex; flex-direction: column; gap: 12px; }
+                            #betty-boris-boo-stage { width: 100%; height: 188px; min-height: 160px; }
+                            .betty-boris-boo-controls { width: 100%; }
+                            .betty-controls-card { width: 100%; max-width: 720px; margin: 0 auto; box-sizing: border-box; }
+                        }
                         </style>
                         <div class="betty-boris-boo-stage-shell" style="width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                             <div id="betty-boris-boo-stage" class="betty-boris-boo-pixi-stage slot-canvas" aria-label="Escena de Betty Boris Boo"></div>
@@ -319,11 +331,11 @@
                                 <!-- Controls moved into the bottom full-width panel (replacing the small floating controls card) -->
 
                                 <style>
-                                    .slot-figure-graphic { height: auto !important; }
-                                    .five-star-bottom-shell { height: auto !important; }
-                                    /* Mobile tightening for slots: remove gaps and make controls full-width under the machine */
-                                    
-                                    
+                                .slot-figure-graphic { height: auto !important; }
+                                .five-star-bottom-shell { height: auto !important; width: 100% !important; max-width: 100vw !important; box-sizing: border-box !important; }
+                                @media (max-width: 768px) {
+                                    .five-star-bottom-shell { padding: 4px !important; }
+                                }
                                 </style>
 
                                 <div class="five-star-bottom-shell" style="margin-top:0;">
