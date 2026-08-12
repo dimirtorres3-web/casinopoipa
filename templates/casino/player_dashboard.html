@@ -208,9 +208,9 @@
                     <span class="category-chip">🎁 Bonos activos</span>
                     <span class="category-chip">⚡ Rápido</span>
                 </div>
-                <div class="games-grid">
+                <div class="contenedor-juegos"><div class="games-grid">
                     {% for juego in juegos %}
-                    <article class="game-card premium-machine game-card--{{ juego.slug }}">
+                    <article class="game-card premium-machine tarjeta-juego game-card--{{ juego.slug }}">
                         <a class="game-cover-link" href="{{ juego.url }}" aria-label="Jugar {{ juego.titulo }}">
                             <div class="game-cover" style="background-image: url('{{ juego.cover }}')" aria-hidden="true"></div>
                             <div class="game-overlay">
@@ -220,6 +220,7 @@
                         </a>
                     </article>
                     {% endfor %}
+                </div>
                 </div>
             </section>
         </main>

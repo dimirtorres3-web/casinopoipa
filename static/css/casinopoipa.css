@@ -514,10 +514,26 @@ textarea {
         gap: 12px !important;
     }
 
+    /* Contenedor solicitado por el usuario: asegura que la lista de juegos nunca supere el ancho de la pantalla móvil */
+    .contenedor-juegos {
+      width: 100%;             /* Ocupa exactamente el ancho de la pantalla */
+      max-width: 100vw;        /* Evita que supere el ancho de la ventana */
+      box-sizing: border-box;  /* Incluye rellenos y bordes en el ancho total */
+      overflow-x: hidden;      /* Bloquea por completo el movimiento lateral */
+      overflow-y: auto;        /* Permite el movimiento vertical si hay más juegos */
+    }
+
     .game-card {
         width: 100% !important;
         height: 160px !important;
         border-radius: 16px !important;
+    }
+
+    /* Tarjeta de juego: evitar que sea más ancha que la pantalla del móvil */
+    .tarjeta-juego {
+      max-width: 100%;         /* Impide que la tarjeta sea más grande que el celular */
+      height: auto;            /* Mantiene la proporción de la imagen */
+      box-sizing: border-box !important;
     }
 
     /* Prevent the main layout from forcing extra horizontal spacing */
