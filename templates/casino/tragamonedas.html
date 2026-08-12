@@ -2,42 +2,57 @@
 {% load humanize %}
 {% block title %}Tragamonedas | Casinopoipa{% endblock %}
 {% block content %}
-    <div class="game-page w-full max-w-full overflow-x-hidden" data-game="{{ game_slug }}">
-    <div class="layout-shell w-full max-w-full overflow-x-hidden flex flex-col items-center">
-        <main class="game-shell glass-panel games-panel w-full max-w-full overflow-x-hidden flex flex-col items-center px-2">
+   <div class="game-page w-full max-w-full h-screen h-[100dvh] overflow-hidden fixed inset-0" data-game="{{ game_slug }}">
+    <div class="layout-shell w-full max-w-full h-full flex flex-col justify-between overflow-hidden">
+        <main class="game-shell glass-panel games-panel w-full max-w-full h-full flex flex-col justify-between overflow-hidden px-2 pb-4 box-border">
                 <style>
                     /* Shared alignment for slot scenes and controls (Five Star, Joker Jackpot, Mansion Embrujada) */
-                    #five-star-reel-stage, #joker-jackpot-stage, #betty-boris-boo-stage {
-                        width: 100%;
-                        height: auto;
-                        min-height: 160px;
-                        box-sizing: border-box;
-                        border-radius: 18px;
+                    #five-star-reel-stage, 
+                    #joker-jackpot-stage, 
+                    #betty-boris-boo,
+                    canvas {
+                        width: 100% !important;
+                        height: auto !important;
+                        max-height: 48vh !important;
                         display: block;
+                        margin: 0 auto;
+                        box-sizing: border-box;
                     }
 
                     /* Controls cards alignment */
-                    .controls-card--five-star, .joker-controls-card, .betty-controls-card {
+                    .controls-card--five-star, 
+                    .joker-controls-card, 
+                    .betty-controls-card {
                         width: 100% !important;
                         max-width: 100% !important;
                         box-sizing: border-box;
                         margin: 0 auto;
-                        padding: 12px !important;
+                        padding: 8px !important;
                     }
 
                     /* Container layout: stack scene then controls */
-                    .five-star-layout, .joker-jackpot-layout, .betty-boris-boo-layout {
-                        display: flex;
-                        flex-direction: column;
-                        gap: 0;
+                    .five-star-layout, 
+                    .joker-jackpot-layout, 
+                    .betty-boris-boo-layout {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        justify-content: space-between !important;
+                        height: 100% !important;
+                        width: 100% !important;
+                        gap: 4px !important;
                     }
-                    .five-star-view { gap: 0 !important; }
-                    .five-star-bottom-shell { margin-top: 0 !important; }
-                    .joker-controls-card { 
-                        margin-top: 0 !important; 
+
+                    .five-star-view { 
+                        gap: 0 !important; 
+                        height: auto !important;
+                        width: 100% !important;
                     }
-                    .joker-jackpot-layout .controls-card--five-star { 
-                        margin-top: 0 !important; 
+
+                    .five-star-bottom-shell, 
+                    .joker-controls-card, 
+                    .joker-jackpot-layout .controls-card--five-star {
+                        margin-top: 0 !important;
+                        margin-bottom: 0 !important;
                     }
                     /* Ajuste exacto para celulares: Todo entra en una sola pantalla sin deslizar */
                 @media (max-width: 768px) {
@@ -56,9 +71,9 @@
                         box-sizing: border-box !important;
                         padding: 5px !important;
                     }
-                    #five-star-reel-stage, #joker-jackpot-stage, #betty-boris-boo-stage, .slot-figure-graphic {
-                        height: 30vh !important;
-                        min-height: 110px !important;
+                    #five-star-reel-stage, #joker-jackpot-stage, #betty-boris-boo-stage, .slot-stage {
+                        height: 40vh !important;
+                        min-height: auto !important;
                         width: 100% !important;
                         max-width: 100% !important;
                         box-sizing: border-box !important;
@@ -81,20 +96,25 @@
                         min-width: 0 !important;
                     }
                     .controls-bottom-row {
-                        position: sticky !important;
+                        position: fixed !important;
                         bottom: 0 !important;
                         left: 0 !important;
                         right: 0 !important;
                         width: 100% !important;
+                        height: auto !important;
                         background: rgba(15, 15, 18, 0.96) !important;
-                        padding: 10px 8px !important;
+                        padding: 8px 4px !important;
                         margin: 0 !important;
-                        z-index: 70 !important;
+                        z-index: 9999 !important;
                         box-shadow: 0 -6px 18px rgba(0,0,0,0.28) !important;
+                        display: flex !important;
+                        justify-content: space-around !important;
+                        align-items: center !important;
                     }
                     #slot-bet-button, .btn-spin {
-                        width: 100% !important;
-                        min-width: 0 !important;
+                        width: auto !important;
+                        min-width: auto !important;
+                        flex: 1 !important;
                     }
                 }
                 </style>
