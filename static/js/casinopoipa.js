@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
+    // Development/testing helper: prevent front-end spins from deducting user balance while debugging
+    if (typeof window.NO_DEDUCT_ON_SPIN === 'undefined') window.NO_DEDUCT_ON_SPIN = true;
     const floatButton = document.querySelector('.floating-control');
     const sideMenu = document.querySelector('.side-menu');
     if (floatButton && sideMenu) {
@@ -962,6 +964,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (slotButton) {
         slotButton.addEventListener('click', function () {
+            console.debug('[slots] slotButton clicked', { NO_DEDUCT_ON_SPIN: !!window.NO_DEDUCT_ON_SPIN });
             const apuestaInput = document.getElementById('slot-apuesta');
             const storedWager = currentSlotBonus && currentSlotBonus.remaining > 0 ? currentSlotBonus.wager : Number(apuestaInput?.value || 0);
             const isBonusSpin = currentSlotBonus && currentSlotBonus.remaining > 0;
@@ -985,8 +988,11 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const projectedBalance = !isBonusSpin ? Math.max(0, currentBalance - storedWager) : currentBalance;
-            if (!isBonusSpin) {
+            // Honor development flag to avoid debiting balance while debugging
+            if (!isBonusSpin && !window.NO_DEDUCT_ON_SPIN) {
                 updateBalance(projectedBalance);
+            } else {
+                console.debug('[slots] Skipping balance deduction (NO_DEDUCT_ON_SPIN active)');
             }
 
             // mark spin as in progress and disable controls to avoid duplicate requests
@@ -1021,7 +1027,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             fetchPlay('tragamonedas', storedWager, isBonusSpin).then((result) => {
                 if (!result.success) {
-                    updateBalance(currentBalance);
+                    if (!window.NO_DEDUCT_ON_SPIN) updateBalance(currentBalance);
                     showStatus(result.error, 'danger');
                     if (slotCanvases.length) {
                         slotCanvases.forEach((canvas) => canvas.classList.remove('blur'));
@@ -1060,7 +1066,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }, 800);
             }).catch((err) => {
                 console.error('Play request failed', err);
-                updateBalance(currentBalance);
+                if (!window.NO_DEDUCT_ON_SPIN) updateBalance(currentBalance);
                 showStatus('Error de red al ejecutar la jugada.', 'danger');
                 if (slotCanvases.length) {
                     slotCanvases.forEach((canvas) => canvas.classList.remove('blur'));
@@ -1111,7 +1117,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function performRouletteBet() {
+    function performRouletteBet() { console.debug('[roulette] performRouletteBet triggered');
             const apuesta = Number(ruletaApuestaInput?.value || 0);
             const currentBalance = getBalanceValue();
             // Only deduct the single stake value per spin (user choice): do not multiply by number of selections

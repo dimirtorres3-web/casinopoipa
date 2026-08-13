@@ -36,6 +36,15 @@ document.addEventListener('DOMContentLoaded', function () {
         container.style.justifyContent = 'center';
         container.style.alignItems = 'center';
 
+        // Attach the Pixi view to the DOM and store a reference for future resize events
+        try {
+            container.appendChild(app.view);
+            // store a reference so external listeners (templates) can request resizes
+            container._pixiApp = app;
+        } catch (e) {
+            console.warn('Failed to append Pixi view or store reference', e);
+        }
+
         const stage = new PIXI.Container();
         app.stage.addChild(stage);
 
@@ -127,6 +136,40 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize PIXI only for slot containers (elements intended for PIXI scenes)
     document.querySelectorAll('.slot-canvas, .five-star-pixi-stage, .joker-jackpot-pixi-stage, .betty-boris-boo-pixi-stage').forEach((el) => {
         if (hasPixi) createPixiIn(el);
+    });
+
+    // Listen for template-driven resize requests and apply them to the Pixi apps if present
+    document.addEventListener('slot-resize', function (ev) {
+        try {
+            const detail = ev && ev.detail ? ev.detail : {};
+            const targetId = detail.id;
+            const newHeight = detail.height;
+            let container = null;
+            if (targetId) container = document.getElementById(targetId);
+            if (!container) {
+                // fallback: use any visible slot container
+                container = document.querySelector('.slot-canvas, .five-star-pixi-stage, .joker-jackpot-pixi-stage, .betty-boris-boo-pixi-stage');
+            }
+            if (!container) return;
+            const app = container._pixiApp || null;
+            if (!app) return;
+            // compute width/height to apply
+            const width = container.clientWidth || app.renderer.width || window.innerWidth;
+            const height = (typeof newHeight === 'number' && newHeight > 0) ? newHeight : container.clientHeight || app.renderer.height || window.innerHeight;
+            try {
+                // update view style and force renderer resize
+                app.view.style.height = height + 'px';
+                if (typeof app.renderer.resize === 'function') {
+                    app.renderer.resize(Math.max(320, width), Math.max(200, height));
+                }
+                // if the app exposes a resize helper, call it
+                if (typeof app.onResize === 'function') {
+                    try { app.onResize(width, height); } catch (e) {}
+                }
+            } catch (e) {
+                console.warn('slot-resize handler failed', e);
+            }
+        } catch (e) { /* ignore */ }
     });
 
     const gamePage = document.querySelector('.game-page');
