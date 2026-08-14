@@ -70,43 +70,52 @@
                 .compact-jackpot-bar article span { display: block !important; font-size: 8px !important; color: #777 !important; text-transform: uppercase; }
                 .compact-jackpot-bar article strong { display: block !important; font-size: 10px !important; font-weight: 700 !important; color: #fff !important; }
 
+                /* =========================================================
+                1. BLOQUE EXCLUSIVO PARA EL JUEGO DE LAS CEREZAS Y CORONAS
+                ========================================================= */
                 .compact-stage-shell {
                     flex: 1 1 auto !important;
                     display: flex !important;
                     justify-content: center !important;
                     align-items: center !important;
-                    padding: 10px 20px 20px !important;
+                    padding: 10px 10px 20px !important;
                     box-sizing: border-box !important;
                     overflow: hidden !important;
-                    height: 52px !important;
-                    margin-top: -35px !important;
+                    height: 48vh !important;            /* Altura ideal para pantallas de celular */
+                    margin-top: -50px !important;       /* Sube el juego 1cm para liberar el botón de girar */
                     margin-bottom: 0px !important;
                 }
 
+                /* =========================================================
+                2. BLOQUE EXCLUSIVO PARA JOKER Y MANSIÓN EMBRUJADA
+                ========================================================= */
                 .five-star-view {
                     flex: 1 1 auto !important;
                     display: flex !important;
-                    justify-content: center !important;
-                    /* CORRECCIÓN CENTRAL: Cambiamos a center para que el marco gris no se caiga */
-                    align-items: center !important; 
-                    padding: 10px 10px 20px !important; /* Añadimos un colchón de 30px abajo para empujar las frutas hacia arriba */
+                    justify-content: center !important; /* Centra el juego horizontalmente */
+                    align-items: center !important;     /* Centra el juego verticalmente */
+                    padding: 10px 10px 20px !important;
                     box-sizing: border-box !important;
                     overflow: hidden !important;
-                    height: 48px !important;
-                    width: 100% !important;
-                    margin-top: -10px !important;
-                    margin-bottom: 0px !important; 
+                    width: 100% !important;             /* Evita que el juego se vaya hacia un costado */
+                    height: 48vh !important;            /* Misma altura para unificar todos los juegos */
+                    margin-top: -50px !important;       /* También lo sube 1cm alejándolo del botón */
+                    margin-bottom: 0px !important;
+                    margin-left: auto !important;       /* Corrección de alineación para el celular */
+                    margin-right: auto !important;
                 }
 
+                /* =========================================================
+                3. CONFIGURACIÓN DEL LIENZO INTERNO DEL JUEGO DE LAS CEREZAS
+                ========================================================= */
                 #five-star-reel-stage {
                     width: 100% !important;
-                    height: 52vh !important; 
-                    max-height: 52vh !important;
+                    height: 48vh !important;
+                    max-height: 48vh !important;
                     display: flex !important;
                     justify-content: center !important;
-                    /* Forzamos el centrado vertical estricto de las animaciones */
                     align-items: center !important;
-                    margin-top: -35px !important; /* Mantiene la cercanía con los jackpots arriba */
+                    margin-top: -50px !important;       /* Acompaña la subida del contenedor principal */
                 }
 
                 #five-star-reel-stage canvas {
@@ -114,10 +123,17 @@
                     height: 100% !important;
                     max-width: 100% !important;
                     max-height: 100% !important;
-                    object-fit: fill !important; 
+                    object-fit: fill !important;        /* Estira los gráficos eliminando parches negros */
                     transform: none !important;
-                    /* Truco maestro: sube el render del dibujo para despegar las frutas de los botones */
-                    margin-bottom: 25px !important; 
+                    margin-bottom: 25px !important;
+                }
+
+                /* =========================================================
+                4. FUERZA EL CENTRADO DE LOS LIENZOS PARA QUE NO SE VAYAN DE LADO
+                ========================================================= */
+                .compact-stage-shell canvas, .five-star-view canvas {
+                    margin: 0 auto !important;
+                    display: block !important;
                 }
 
                 /* BOTONERA INFERIOR COMPACTA DE MÁQUINA REAL */
