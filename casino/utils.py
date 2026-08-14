@@ -125,7 +125,8 @@ def secure_weighted_choice(choices):
 
 
 def lanzar_juego(apuesta: int) -> dict:
-    if apuesta < 2000:
+    # allow smaller apuestas for tragamonedas (min 500)
+    if apuesta < 500:
         return {"ganador": False, "probabilidad": 0.0}
     resultado = secure_bool(0.375)
     return {"ganador": resultado, "probabilidad": 0.375}

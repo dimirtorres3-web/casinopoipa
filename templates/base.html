@@ -21,14 +21,42 @@
             },
         };
     </script>
-    <link rel="stylesheet" href="/static/css/casinopoipa.css" />
-    <link rel="stylesheet" href="/static/css/five-star-override.css?v=20260810d" />
+    <link rel="stylesheet" href="/static/css/casinopoipa.css?v=20260814_master" />
+    <link rel="stylesheet" href="/static/css/five-star-override.css?v=20260814_clear" />
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
 </head>
 <body class="bg-night text-white font-sans min-h-screen">
     {% include 'casino/partials/messages.html' %}
     {% block content %}{% endblock %}
     <script src="/static/js/casinopoipa.js?v=20260809b"></script>
+    <script>
+        // Urgent runtime hide: remove any game cards that are roulette so they are not visible between games
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                var selectors = ['.game-card--ruleta-imperial', '.game-card--ruleta', '[data-hidden-for-launch="ruleta"]'];
+                selectors.forEach(function (sel) {
+                    Array.from(document.querySelectorAll(sel)).forEach(function (el) {
+                        // remove the element entirely to avoid leaving empty gaps in the grid
+                        if (el && el.parentNode) el.parentNode.removeChild(el);
+                    });
+                });
+
+                // Fallback: hide cards whose title contains the word 'ruleta' (case-insensitive)
+                Array.from(document.querySelectorAll('.game-card')).forEach(function (card) {
+                    try {
+                        var titleEl = card.querySelector('.game-title') || card.querySelector('.game-cover') || card;
+                        var text = (titleEl && titleEl.textContent) ? titleEl.textContent.trim().toLowerCase() : '';
+                        if (/ruleta/.test(text)) {
+                            if (card && card.parentNode) card.parentNode.removeChild(card);
+                        }
+                    } catch (e) { /* ignore per-card errors */ }
+                });
+            } catch (e) {
+                console.warn('hide-roulette runtime script failed', e);
+            }
+        });
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.4.2/pixi.min.js"></script>
     <script src="/static/js/pixi_init.js?v=20260809c"></script>
     <script src="/static/js/mobile_debug.js?v=20260811a"></script>

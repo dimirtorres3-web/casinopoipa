@@ -21,13 +21,14 @@
             <section class="roulette-premium-board">
                 <div class="roulette-wheel-card">
                 
-                                    <div class="compact-visual-shell" style="position: relative;">
-                    <!-- Esta es la flecha limpia apuntando hacia abajo -->
-                    <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 20px solid #ffffff; z-index: 9999;"></div>
-                    <!-- El lienzo de la ruleta que se había borrado -->
-                    <canvas id="roulette-canvas" class="roulette-canvas"></canvas>
-                </div>
+                                <div class="compact-visual-shell">
+                                    <canvas id="roulette-canvas" class="roulette-canvas"></canvas>
+                                </div>
 
+                                <div class="roulette-history" id="roulette-history">
+                                     <div id="selected-roulette-choice">Ninguna apuesta seleccionada</div>
+                                    <div id="bet-total" style="margin-top:2px;color:#d9d9d9;font-size:11px;">Apuesta total: Gs. 0</div>
+                                </div>
                 <div class="roulette-history" id="roulette-history">
                     <div id="selected-roulette-choice">Ninguna apuesta seleccionada</div>
                     <div id="bet-total" style="margin-top:2px;color:#d9d9d9;font-size:11px;">Apuesta total: Gs. 0</div>

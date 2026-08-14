@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Development/testing helper: prevent front-end spins from deducting user balance while debugging
-    if (typeof window.NO_DEDUCT_ON_SPIN === 'undefined') window.NO_DEDUCT_ON_SPIN = true;
+    // Development/testing helper: when undefined default to false so real spins deduct balance
+    if (typeof window.NO_DEDUCT_ON_SPIN === 'undefined') window.NO_DEDUCT_ON_SPIN = false;
     const floatButton = document.querySelector('.floating-control');
     const sideMenu = document.querySelector('.side-menu');
     if (floatButton && sideMenu) {
@@ -767,7 +767,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (result.bonus_final) {
             currentSlotBonus = null;
             updateSlotBonusIndicator(null);
-            slotButton.textContent = 'Apostar';
+            setAllSlotButtonsText('Apostar');
             showStatus(result.message, result.jackpot_hit ? 'success' : 'warning');
             showResultEffects(result.win, result.jackpot_hit);
             if (result.win) {
@@ -783,14 +783,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 wager: result.bonus_wager || Number(document.getElementById('slot-apuesta').value || 0),
             };
             updateSlotBonusIndicator(currentSlotBonus);
-            slotButton.textContent = 'Giro Gratis';
+            setAllSlotButtonsText('Giro Gratis');
             showStatus('', 'warning');
             showResultEffects(true);
             playAudioCue('spin');
         } else {
             currentSlotBonus = null;
             updateSlotBonusIndicator(null);
-            slotButton.textContent = 'Apostar';
+            setAllSlotButtonsText('Apostar');
             showStatus('', result.win ? 'success' : 'danger');
             showResultEffects(result.win, result.jackpot_hit);
             if (result.win) {
@@ -814,14 +814,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Restore slot interaction state after result processed
         try {
-            window.slotSpinInProgress = false;
-            slotSpinInProgress = false;
-            if (slotButton) slotButton.disabled = false;
-            const apuestaInput = document.getElementById('slot-apuesta');
-            if (apuestaInput) apuestaInput.disabled = false;
+            unlockSlotAfterResult();
         } catch (e) {
             console.warn('Failed to fully restore slot controls state', e);
         }
+    }
+
+    function finalizeSlotSpin(result, currentBalance, projectedBalance, isBonusSpin) {
+        const finalBalance = typeof result.new_balance !== 'undefined'
+            ? Number(result.new_balance)
+            : (!isBonusSpin ? projectedBalance : currentBalance);
+
+        window.setTimeout(() => {
+            handleSlotResult(result, finalBalance);
+            window.setTimeout(() => {
+                unlockSlotAfterResult();
+            }, 200);
+        }, 800);
     }
 
     function createCardElement(cardValue) {
@@ -962,118 +971,163 @@ document.addEventListener('DOMContentLoaded', function () {
         button.addEventListener('click', openQuickDeposit);
     });
 
-    if (slotButton) {
-        slotButton.addEventListener('click', function () {
-            console.debug('[slots] slotButton clicked', { NO_DEDUCT_ON_SPIN: !!window.NO_DEDUCT_ON_SPIN });
-            const apuestaInput = document.getElementById('slot-apuesta');
-            const storedWager = currentSlotBonus && currentSlotBonus.remaining > 0 ? currentSlotBonus.wager : Number(apuestaInput?.value || 0);
-            const isBonusSpin = currentSlotBonus && currentSlotBonus.remaining > 0;
-            // Prevent double spins: if a spin is already in progress, ignore further clicks
-            if (window.slotSpinInProgress || slotSpinInProgress) {
-                showStatus('Giro ya en curso. Espera a que termine.', 'warning');
-                return;
-            }
-            if (!isBonusSpin && storedWager < 2000) {
-                showStatus('La apuesta mínima es de 2.000 Gs.', 'warning');
-                return;
-            }
+    function clearSlotSpinLock() {
+        unlockSlotAfterResult();
+    }
 
-            const betTotalEl = document.getElementById('bet-total');
-            if (betTotalEl) betTotalEl.textContent = `Apuesta: Gs. ${new Intl.NumberFormat('es-PY').format(storedWager)}`;
-
-            const currentBalance = getBalanceValue();
-            if (storedWager > currentBalance && !isBonusSpin) {
-                showInsufficientFunds();
-                return;
-            }
-
-            const projectedBalance = !isBonusSpin ? Math.max(0, currentBalance - storedWager) : currentBalance;
-            // Honor development flag to avoid debiting balance while debugging
-            if (!isBonusSpin && !window.NO_DEDUCT_ON_SPIN) {
-                updateBalance(projectedBalance);
-            } else {
-                console.debug('[slots] Skipping balance deduction (NO_DEDUCT_ON_SPIN active)');
-            }
-
-            // mark spin as in progress and disable controls to avoid duplicate requests
-            window.slotSpinInProgress = true;
-            slotSpinInProgress = true;
-            try { slotButton.disabled = true; } catch (e) { }
-            try { if (apuestaInput) apuestaInput.disabled = true; } catch (e) { }
-
-            showStatus(isBonusSpin ? 'Ejecutando giro gratis...' : 'GIRANDO...', 'success');
-            const status = document.getElementById('slots-status');
-            if (status) {
-                status.textContent = isBonusSpin ? 'Giro gratis en curso' : 'Giro en curso';
-            }
-
-            const activeVisualSpin = typeof window.currentSlotSpinTrigger === 'function'
-                ? window.currentSlotSpinTrigger
-                : (typeof window.fiveStarSpinVisual === 'function'
-                    ? window.fiveStarSpinVisual
-                    : (typeof window.jokerSpinVisual === 'function'
-                        ? window.jokerSpinVisual
-                        : (typeof window.bettySpinVisual === 'function'
-                            ? window.bettySpinVisual
-                            : null)));
-            if (activeVisualSpin) {
-                try { activeVisualSpin(); } catch (e) { console.warn('activeVisualSpin failed', e); }
-            } else if (slotCanvases.length) {
-                slotCanvases.forEach(setupCanvas);
-                startSlotSpin();
-            }
-
-            playAudioCue('spin');
-
-            fetchPlay('tragamonedas', storedWager, isBonusSpin).then((result) => {
-                if (!result.success) {
-                    if (!window.NO_DEDUCT_ON_SPIN) updateBalance(currentBalance);
-                    showStatus(result.error, 'danger');
-                    if (slotCanvases.length) {
-                        slotCanvases.forEach((canvas) => canvas.classList.remove('blur'));
-                    }
-                    return;
+    function bindSlotSpinButtons() {
+        const buttons = Array.from(document.querySelectorAll('#slot-bet-button, .btn-action-spin'));
+        buttons.forEach((button) => {
+            if (button.dataset.slotBound === '1') return;
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                if (typeof window.slotButtonHandler === 'function') {
+                    window.slotButtonHandler(event);
+                } else {
+                    slotButtonHandler(event);
                 }
+            });
+            button.dataset.slotBound = '1';
+        });
+    }
 
-                const backendReels = Array.isArray(result.reels) ? result.reels : [];
-                const nested = [[], [], []];
-                for (let i = 0; i < 3; i++) {
-                    const center = backendReels[i] || slotSymbols[i % slotSymbols.length] || '⭐';
-                    const top = slotSymbols[(i * 2 + 1) % slotSymbols.length] || center;
-                    const bottom = slotSymbols[(i * 3 + 2) % slotSymbols.length] || center;
-                    nested[i] = [top, center, bottom];
-                }
+    function unlockSlotAfterResult() {
+        window.slotSpinInProgress = false;
+        slotSpinInProgress = false;
+        setAllSlotButtonsDisabled(false);
+        const apuestaInput = document.getElementById('slot-apuesta');
+        if (apuestaInput) apuestaInput.disabled = false;
+        document.querySelectorAll('#slot-bet-button, .btn-action-spin').forEach((button) => {
+            button.disabled = false;
+            button.removeAttribute('aria-disabled');
+        });
+    }
 
-                const activeVisualStop = typeof window.fiveStarStopVisual === 'function'
-                    ? window.fiveStarStopVisual
-                    : (typeof window.jokerStopVisual === 'function'
-                        ? window.jokerStopVisual
-                        : (typeof window.bettyStopVisual === 'function'
-                            ? window.bettyStopVisual
-                            : null));
-                if (activeVisualStop) {
-                    try { activeVisualStop(nested); } catch (e) { console.warn('slot visual stop failed', e); }
-                } else if (slotCanvases.length) {
-                    stopSlotSpin(backendReels);
-                }
+    bindSlotSpinButtons();
 
-                const finalBalance = typeof result.new_balance !== 'undefined'
-                    ? Number(result.new_balance)
-                    : (!isBonusSpin ? projectedBalance : currentBalance);
+    try {
+        const observer = new MutationObserver(function () {
+            bindSlotSpinButtons();
+        });
+        observer.observe(document.documentElement || document.body, { childList: true, subtree: true });
+    } catch (e) {
+        console.warn('slot mutation observer failed', e);
+    }
 
-                window.setTimeout(() => {
-                    handleSlotResult(result, finalBalance);
-                }, 800);
-            }).catch((err) => {
-                console.error('Play request failed', err);
+    function slotButtonHandler(ev) {
+        const btnEl = ev && (ev.currentTarget || ev.target);
+        ev && ev.preventDefault && ev.preventDefault();
+
+        try { window.slotButtonHandler = slotButtonHandler; } catch (e) { }
+
+        const apuestaInput = document.getElementById('slot-apuesta');
+        const storedWager = currentSlotBonus && currentSlotBonus.remaining > 0 ? currentSlotBonus.wager : Number(apuestaInput?.value || 0);
+        const isBonusSpin = currentSlotBonus && currentSlotBonus.remaining > 0;
+
+        if (window.slotSpinInProgress || slotSpinInProgress) {
+            showStatus('Giro ya en curso. Espera a que termine.', 'warning');
+            return;
+        }
+        if (!isBonusSpin && storedWager < 500) {
+            showStatus('La apuesta mínima es de 500 Gs.', 'warning');
+            return;
+        }
+
+        const betTotalEl = document.getElementById('bet-total');
+        if (betTotalEl) betTotalEl.textContent = `Apuesta: Gs. ${new Intl.NumberFormat('es-PY').format(storedWager)}`;
+
+        const currentBalance = getBalanceValue();
+        if (storedWager > currentBalance && !isBonusSpin) {
+            showInsufficientFunds();
+            return;
+        }
+
+        const projectedBalance = !isBonusSpin ? Math.max(0, currentBalance - storedWager) : currentBalance;
+        if (!isBonusSpin) {
+            updateBalance(projectedBalance);
+        }
+
+        window.slotSpinInProgress = true;
+        slotSpinInProgress = true;
+        try {
+            document.querySelectorAll('#slot-bet-button, .btn-action-spin').forEach((button) => {
+                button.disabled = true;
+                button.setAttribute('aria-disabled', 'true');
+            });
+        } catch (e) {}
+        try { if (btnEl && btnEl instanceof HTMLElement) btnEl.disabled = true; } catch (e) {}
+        try { if (apuestaInput) apuestaInput.disabled = true; } catch (e) {}
+
+        showStatus(isBonusSpin ? 'Ejecutando giro gratis...' : 'GIRANDO...', 'success');
+        const status = document.getElementById('slots-status');
+        if (status) {
+            status.textContent = isBonusSpin ? 'Giro gratis en curso' : 'Giro en curso';
+        }
+
+        const activeVisualSpin = typeof window.currentSlotSpinTrigger === 'function'
+            ? window.currentSlotSpinTrigger
+            : (typeof window.fiveStarSpinVisual === 'function'
+                ? window.fiveStarSpinVisual
+                : (typeof window.jokerSpinVisual === 'function'
+                    ? window.jokerSpinVisual
+                    : (typeof window.bettySpinVisual === 'function'
+                        ? window.bettySpinVisual
+                        : null)));
+        if (activeVisualSpin) {
+            try { activeVisualSpin(); } catch (e) { }
+        } else if (slotCanvases.length) {
+            slotCanvases.forEach(setupCanvas);
+            startSlotSpin();
+        }
+
+        playAudioCue('spin');
+
+        fetchPlay('tragamonedas', storedWager, isBonusSpin).then((result) => {
+            if (!result.success) {
                 if (!window.NO_DEDUCT_ON_SPIN) updateBalance(currentBalance);
-                showStatus('Error de red al ejecutar la jugada.', 'danger');
+                showStatus(result.error || 'No se pudo ejecutar la jugada.', 'danger');
+                clearSlotSpinLock();
                 if (slotCanvases.length) {
                     slotCanvases.forEach((canvas) => canvas.classList.remove('blur'));
                 }
-            });
+                return;
+            }
+
+            const backendReels = Array.isArray(result.reels) ? result.reels : [];
+            const nested = [[], [], []];
+            for (let i = 0; i < 3; i++) {
+                const center = backendReels[i] || slotSymbols[i % slotSymbols.length] || '⭐';
+                const top = slotSymbols[(i * 2 + 1) % slotSymbols.length] || center;
+                const bottom = slotSymbols[(i * 3 + 2) % slotSymbols.length] || center;
+                nested[i] = [top, center, bottom];
+            }
+
+            const activeVisualStop = typeof window.fiveStarStopVisual === 'function'
+                ? window.fiveStarStopVisual
+                : (typeof window.jokerStopVisual === 'function'
+                    ? window.jokerStopVisual
+                    : (typeof window.bettyStopVisual === 'function'
+                        ? window.bettyStopVisual
+                        : null));
+            if (activeVisualStop) {
+                try { activeVisualStop(nested); } catch (e) { }
+            } else if (slotCanvases.length) {
+                stopSlotSpin(backendReels);
+            }
+
+            finalizeSlotSpin(result, currentBalance, projectedBalance, isBonusSpin);
+        }).catch((err) => {
+            console.error('Play request failed', err);
+            if (!window.NO_DEDUCT_ON_SPIN) updateBalance(currentBalance);
+            showStatus('Error de red al ejecutar la jugada.', 'danger');
+            clearSlotSpinLock();
+            if (slotCanvases.length) {
+                slotCanvases.forEach((canvas) => canvas.classList.remove('blur'));
+            }
         });
     }
+
+    try { window.slotButtonHandler = slotButtonHandler; } catch (e) { }
 
     if (pokerButton) {
         pokerButton.addEventListener('click', function () {
@@ -1276,4 +1330,18 @@ document.addEventListener('DOMContentLoaded', function () {
             slotCanvases.forEach((canvas) => setupCanvas(canvas));
             if (rouletteCanvas) setupCanvas(rouletteCanvas);
         });
+
+        // Fallback event-delegation: ensure any visible spin button triggers the same handler
+        try {
+            document.addEventListener('click', function(e){
+                const t = e.target;
+                if (!t) return;
+                try {
+                    if (t.id === 'slot-bet-button' || t.classList && t.classList.contains('btn-action-spin')) {
+                        slotButtonHandler(e);
+                    }
+                } catch (err) { /* ignore */ }
+            });
+        } catch (err) { console.warn('failed to attach delegated slot click', err); }
+
 });

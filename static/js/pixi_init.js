@@ -23,10 +23,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         app.view.style.maxWidth = esCelular ? '92vw' : '100%';
         app.view.style.width = esCelular ? '92vw' : '100%';
-        app.view.style.height = 'auto';
+        app.view.style.height = esCelular ? '38vh' : '100%';
+        app.view.style.maxHeight = esCelular ? '38vh' : '100%';
         app.view.style.display = 'block';
         app.view.style.margin = '0 auto';
         app.view.style.objectFit = 'contain';
+
     
         container.style.width = esCelular ? '92vw' : '100%';
         container.style.maxWidth = esCelular ? '92vw' : '100%';
@@ -659,6 +661,11 @@ function initJokerJackpotScene(container) {
         const delay = spinConfig.turboMode ? 4000 : 7000;
         spinConfig.autoTimerId = window.setTimeout(() => {
             spinConfig.autoTimerId = null;
+            // Prefer invoking full spin flow (server call + balance deduction) by clicking the slot button.
+            try {
+                const btn = document.getElementById && document.getElementById('slot-bet-button');
+                if (btn) { btn.click(); return; }
+            } catch (e) {}
             triggerSpin();
         }, delay);
     }
@@ -900,6 +907,10 @@ function initBettyBorisBooScene(container) {
         const delay = spinConfig.turboMode ? 4000 : 7000;
         spinConfig.autoTimerId = window.setTimeout(() => {
             spinConfig.autoTimerId = null;
+            try {
+                const btn = document.getElementById && document.getElementById('slot-bet-button');
+                if (btn) { btn.click(); return; }
+            } catch (e) {}
             triggerSpin();
         }, delay);
     }
@@ -1157,6 +1168,10 @@ function initFiveStarScene(container) {
         const delay = spinConfig.turboMode ? 4000 : 7000;
         spinConfig.autoTimerId = window.setTimeout(() => {
             spinConfig.autoTimerId = null;
+            try {
+                const btn = document.getElementById && document.getElementById('slot-bet-button');
+                if (btn) { btn.click(); return; }
+            } catch (e) {}
             triggerSpin();
         }, delay);
     }

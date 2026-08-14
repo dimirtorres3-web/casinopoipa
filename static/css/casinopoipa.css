@@ -189,6 +189,10 @@ textarea {
 }
 
 /* Header actions inside game pages: keep items spaced and readable on small screens */
+
+/* URGENT: hide roulette card visually across the site for immediate launch (keeps markup intact) */
+.game-card--ruleta-imperial { display: none !important; }
+.game-card--ruleta { display: none !important; }
 .game-header-actions {
     display: flex;
     gap: 10px;
@@ -382,18 +386,17 @@ textarea {
     /* Avoid forcing full-viewport height to prevent big empty gaps; allow scrolling while keeping
        controls near the machine. */
     .game-page, .layout-shell, .game-shell, main {
-        height: auto !important;
-        max-height: none !important;
-        overflow: visible !important;
-        display: block !important;
-        padding-left: 8px !important;
-        padding-right: 8px !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        max-height: 100vh !important;
+        max-height: 100dvh !important;
+        overflow: hidden !important;
     }
 
-    /* Reel / canvas sizing: make the visible stage a reasonable fraction of the viewport */
+
+    /* Reel / canvas sizing: Liberamos la altura para que las cerezas suban y se centren */
     .slot-canvas, #five-star-reel-stage, #joker-jackpot-stage, #betty-boris-boo-stage {
-        height: 30vh !important;
-        min-height: 120px !important;
+        height: 44vh !important; /* Subimos a 44vh para que el lienzo respire hacia arriba */
         width: 100% !important;
         box-sizing: border-box !important;
     }

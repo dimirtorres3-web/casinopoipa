@@ -94,7 +94,7 @@ def register(request):
 
 
 
-            is_gift_eligible = Player.objects.count() < 20
+            is_gift_eligible = Player.objects.count() < 50
 
             player = form.save(commit=False)
 
@@ -702,13 +702,31 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
 
     player = request.user
 
-    if apuesta < 2000:
+    # Per-game minimums: tragamonedas (500 Gs), ruleta (2000 Gs), default 2000
+    if game == "tragamonedas":
+        min_bet = 500
+    elif game == "ruleta":
+        min_bet = 2000
+    else:
+        min_bet = 2000
 
-        return JsonResponse({"success": False, "error": "La apuesta mínima es de 2.000 Gs."})
+    if apuesta < min_bet:
+        return JsonResponse({"success": False, "error": f"La apuesta mínima es de {min_bet:,} Gs."})
 
     if game not in GAME_MULTIPLIERS:
-
         return JsonResponse({"success": False, "error": "Juego desconocido."})
+
+    # Adjust odds for players with very high balances to make large wins rarer
+    effective_slot_prob = SLOT_WIN_PROBABILITY
+    effective_jackpot_prob = JACKPOT_PROBABILITY
+    try:
+        user_balance = float(player.saldo)
+    except Exception:
+        user_balance = 0.0
+    # If player has reached or exceeded 200_000 Gs, make wins much rarer
+    if user_balance >= 200000:
+        effective_slot_prob = max(0.01, effective_slot_prob * 0.1)  # reduce chance to 10% of base, min 1%
+        effective_jackpot_prob = max(0.0001, effective_jackpot_prob * 0.05)  # make jackpot extremely rare
 
 
 
@@ -748,7 +766,7 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
 
                 percentage = 0
 
-                if is_jackpot_eligible(player) and secure_bool(JACKPOT_PROBABILITY):
+                if is_jackpot_eligible(player) and secure_bool(effective_jackpot_prob):
 
                     jackpot_hit = True
 
@@ -868,7 +886,7 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
 
             player.slot_play_count += 1
 
-            win = secure_bool(SLOT_WIN_PROBABILITY)
+            win = secure_bool(effective_slot_prob)
 
             payout = 0
 
@@ -1083,6 +1101,7 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
         # Determine payouts
 
         payout_net = 0  # net gain to add to player's saldo (excludes stake)
+        payout_gross = 0  # gross amount awarded on successful bets
 
         landed_num = result["number"]
 
@@ -1100,13 +1119,14 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
 
             if landed_num in validated_numbers:
 
-                # gross win for number: apuesta * 36
+                # Single-number bets keep the full 36x return. Multi-number tickets use a reduced
+                # effective multiplier to preserve the intended house edge while still allowing
+                # a single stake to cover several selections.
+                multiplier = 36 if len(validated_numbers) <= 1 else 32.25
+                gross = int(Decimal(apuesta) * Decimal(multiplier))
 
-                gross = int(Decimal(apuesta) * Decimal(36))
-
-                net = gross - total_stake
-
-                payout_net += net
+                payout_gross += gross
+                payout_net += gross
 
 
 
@@ -1120,9 +1140,8 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
 
                 gross = int(Decimal(apuesta) * Decimal(mult))
 
-                net = gross - total_stake
-
-                payout_net += net
+                payout_gross += gross
+                payout_net += gross
 
 
 
@@ -1158,7 +1177,7 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
 
             "win": win,
 
-            "payout": int(payout_net) if payout_net > 0 else -int(total_stake),
+            "payout": int(payout_gross) if payout_gross > 0 else -int(total_stake),
 
             "message": message,
 
