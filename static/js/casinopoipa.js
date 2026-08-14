@@ -188,6 +188,8 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentSlotBonus = null;
     // Guard to prevent concurrent slot spins being triggered (protects against double-clicks / duplicate requests)
     let slotSpinInProgress = false;
+    window.autoSlotRunning = false;
+    window.autoSpinTimer = null;
     const slotBonusIndicator = document.getElementById('slots-bonus');
 
     function updateSlotBonusIndicator(state) {
@@ -815,6 +817,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Restore slot interaction state after result processed
         try {
             unlockSlotAfterResult();
+            scheduleAutoSlotSpin();
         } catch (e) {
             console.warn('Failed to fully restore slot controls state', e);
         }
@@ -991,6 +994,79 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    function scheduleAutoSlotSpin() {
+        if (!window.autoSlotRunning) return;
+
+        const apuestaInput = document.getElementById('slot-apuesta');
+        const nextWager = Number(apuestaInput?.value || 0);
+        const nextBalance = getBalanceValue();
+
+        if (nextBalance <= 0 || nextBalance < nextWager || nextWager < 500) {
+            window.autoSlotRunning = false;
+            const autoBtn = document.getElementById('slot-auto-btn');
+            if (autoBtn) {
+                autoBtn.classList.remove('is-active');
+                autoBtn.setAttribute('aria-pressed', 'false');
+            }
+            showStatus('Auto detenido: saldo insuficiente.', 'warning');
+            return;
+        }
+
+        if (window.autoSpinTimer) {
+            clearTimeout(window.autoSpinTimer);
+        }
+        window.autoSpinTimer = window.setTimeout(() => {
+            if (window.autoSlotRunning && !window.slotSpinInProgress && !slotSpinInProgress) {
+                const spinButton = document.getElementById('slot-bet-button');
+                if (spinButton) {
+                    spinButton.click();
+                }
+            }
+        }, 250);
+    }
+
+    function bindAutoSlotButton() {
+        const autoBtn = document.getElementById('slot-auto-btn');
+        if (!autoBtn || autoBtn.dataset.autoBound === '1') return;
+
+        autoBtn.addEventListener('click', function () {
+            if (!autoBtn) return;
+            window.autoSlotRunning = !window.autoSlotRunning;
+            autoBtn.classList.toggle('is-active', window.autoSlotRunning);
+            autoBtn.setAttribute('aria-pressed', window.autoSlotRunning ? 'true' : 'false');
+
+            if (window.autoSlotRunning) {
+                const apuestaInput = document.getElementById('slot-apuesta');
+                const wager = Number(apuestaInput?.value || 0);
+                const currentBalance = getBalanceValue();
+                if (wager < 500) {
+                    window.autoSlotRunning = false;
+                    autoBtn.classList.remove('is-active');
+                    autoBtn.setAttribute('aria-pressed', 'false');
+                    showStatus('La apuesta mínima para Auto es de 500 Gs.', 'warning');
+                    return;
+                }
+                if (currentBalance < wager) {
+                    window.autoSlotRunning = false;
+                    autoBtn.classList.remove('is-active');
+                    autoBtn.setAttribute('aria-pressed', 'false');
+                    showInsufficientFunds();
+                    return;
+                }
+                showStatus('Auto activado', 'warning');
+                scheduleAutoSlotSpin();
+            } else {
+                if (window.autoSpinTimer) {
+                    clearTimeout(window.autoSpinTimer);
+                    window.autoSpinTimer = null;
+                }
+                showStatus('Auto detenido', 'default');
+            }
+        });
+
+        autoBtn.dataset.autoBound = '1';
+    }
+
     function unlockSlotAfterResult() {
         window.slotSpinInProgress = false;
         slotSpinInProgress = false;
@@ -1004,10 +1080,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     bindSlotSpinButtons();
+    bindAutoSlotButton();
 
     try {
         const observer = new MutationObserver(function () {
             bindSlotSpinButtons();
+            bindAutoSlotButton();
         });
         observer.observe(document.documentElement || document.body, { childList: true, subtree: true });
     } catch (e) {

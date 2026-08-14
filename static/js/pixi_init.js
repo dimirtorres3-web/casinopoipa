@@ -21,17 +21,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         const esCelular = window.innerWidth <= 768;
 
-        app.view.style.maxWidth = esCelular ? '92vw' : '100%';
-        app.view.style.width = esCelular ? '92vw' : '100%';
-        app.view.style.height = esCelular ? '38vh' : '100%';
-        app.view.style.maxHeight = esCelular ? '38vh' : '100%';
-        app.view.style.display = 'block';
-        app.view.style.margin = '0 auto';
-        app.view.style.objectFit = 'contain';
+                app.view.style.maxWidth = '100%';
+                app.view.style.width = '100%';
+                app.view.style.height = '100%';
+                app.view.style.maxHeight = '100%';
+                app.view.style.display = 'block';
+                app.view.style.margin = '0 auto';
+                app.view.style.objectFit = 'fill';
 
-    
-        container.style.width = esCelular ? '92vw' : '100%';
-        container.style.maxWidth = esCelular ? '92vw' : '100%';
+        container.style.width = '100%';
+        container.style.maxWidth = '100%';
         container.style.boxSizing = 'border-box';
         container.style.height = '100%';
         container.style.display = 'flex';
