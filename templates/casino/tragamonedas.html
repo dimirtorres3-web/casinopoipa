@@ -59,22 +59,22 @@
             .btn-compact-deposit { background: #f59e0b !important; color: #000 !important; font-weight: 700 !important; font-size: 11px !important; padding: 5px 10px !important; border-radius: 4px !important; border: none !important; cursor: pointer !important; text-decoration: none !important; }
             .btn-compact-back { background: #222227 !important; color: #aaa !important; font-weight: 600 !important; font-size: 11px !important; padding: 5px 10px !important; border-radius: 4px !important; border: 1px solid #333 !important; cursor: pointer !important; text-decoration: none !important; }
 
-            /* REJILLA DE JACKPOTS EN UNA FILA (CORREGIDA) */
+            /* REJILLA DE JACKPOTS EN UNA FILA */
             .compact-jackpot-bar {
                 display: grid !important;
                 grid-template-columns: repeat(4, 1fr) !important;
                 gap: 4px !important;
                 padding: 4px 6px !important;
-                margin-top: -10px !important;        /* Junta limpiamente la barra de jackpots hacia la cabecera */
+                margin-top: -10px !important;
                 box-sizing: border-box !important;
             }
             .compact-jackpot-bar article { text-align: center !important; padding: 3px 2px !important; border-radius: 4px !important; background: rgba(255, 255, 255, 0.02) !important; border: 1px solid rgba(255, 255, 255, 0.05) !important; }
             .compact-jackpot-bar article span { display: block !important; font-size: 8px !important; color: #777 !important; text-transform: uppercase; }
             .compact-jackpot-bar article strong { display: block !important; font-size: 10px !important; font-weight: 700 !important; color: #fff !important; }
 
-            /* =========================================================
-            1. BLOQUE EXCLUSIVO PARA EL JUEGO DE LAS CEREZAS Y CORONAS
-            ========================================================= */
+            /* ==========================================================================
+            1. BLOQUE EXCLUSIVO PARA EL JUEGO DE LAS CEREZAS Y CORONAS (MANTENIDO)
+            ========================================================================== */
             .compact-stage-shell {
                 flex: 1 1 auto !important;
                 display: flex !important;
@@ -88,26 +88,26 @@
                 margin-bottom: 0px !important;
             }
 
-            /* =========================================================
-            2. BLOQUE EXCLUSIVO PARA JOKER Y MANSIÓN EMBRUJADA
-            ========================================================= */
-            .five-star-view {
+            /* ==========================================================================
+            2. CORRECCIÓN EXCLUSIVA PARA EL JUEGO DEL JOKER JACKPOT (AGRANDADO DE LADO A LADO)
+            ========================================================================== */
+            .five-star-view, .five-star-view iframe, .five-star-view div {
                 display: flex !important;
                 justify-content: center !important; 
                 align-items: center !important;     
-                width: 100% !important;             
-                max-width: 520px !important;        /* Forzamos el ancho completo idéntico al de las cerezas */
-                height: 52vh !important;            /* Mantiene la altura perfecta y profesional para el celular */
-                margin-top: -50px !important;       /* Lo pega milimétricamente a la barra de Jackpots */
+                width: 100vw !important;            /* Obliga a estirar la máquina de extremo a extremo */
+                max-width: 100% !important;         /* Rompe el cajón angosto que generaba el hueco lateral */
+                height: 52vh !important;            /* Altura ideal que rellena y agranda el cuadro del juego */
+                margin-top: -65px !important;       /* ¡Subido a -65px para pegar el cuadro arriba y matar el hueco negro! */
                 margin-left: auto !important;       
                 margin-right: auto !important;
                 box-sizing: border-box !important;
                 overflow: hidden !important;
             }
 
-            /* =========================================================
-            3. CONFIGURACIÓN DEL LIENZO INTERNO DEL JUEGO DE LAS CEREZAS
-            ========================================================= */
+            /* ==========================================================================
+            3. CONFIGURACIÓN DEL LIENZO INTERNO DEL JUEGO DE LAS CEREZAS (MANTENIDO)
+            ========================================================================== */
             #five-star-reel-stage {
                 width: 100% !important;
                 height: 48vh !important;
@@ -128,24 +128,24 @@
                 margin-bottom: 25px !important;
             }
 
-            /* =========================================================
-            4. FUERZA EL CENTRADO Y ESTIRAMIENTO DE LOS CANVAS (MANDATORIO)
-            ========================================================= */
+            /* ==========================================================================
+            4. FUERZA EL CENTRADO Y ESTIRAMIENTO DE LOS GRÁFICOS (MANTENIDO)
+            ========================================================================== */
             .compact-stage-shell canvas, 
             .five-star-view canvas {
-                width: 100% !important;             /* Obliga al Joker a ensancharse hacia los costados */
-                height: 100% !important;            /* Obliga al Joker a rellenar el alto */
-                object-fit: fill !important;        /* Quita las franjas negras del Joker por completo */
+                width: 100% !important;             
+                height: 100% !important;            
+                object-fit: fill !important;        
                 margin: 0 auto !important;
                 display: block !important;
             }
 
-            /* =========================================================
-            5. BOTONERA INFERIOR COMPACTA DE MÁQUINA REAL
-            ========================================================= */
+            /* ==========================================================================
+            5. BOTONERA INFERIOR COMPACTA DE MÁQUINA REAL (MANTENIDO)
+            ========================================================================== */
             .compact-controls-footer {
                 position: fixed !important;
-                bottom: 45px !important;            /* Mantiene levantada la cajonera a la altura que te gustó */
+                bottom: 45px !important;            
                 left: 0 !important;
                 right: 0 !important;
                 margin: 0 auto !important;
@@ -181,7 +181,7 @@
                 border-radius: 4px !important; font-size: 13px !important; font-weight: 700; color: #f59e0b !important;
             }
 
-            /* BOTÓN DE GIRO ORIGINAL COMO TU DISEÑO */
+            /* BOTÓN DE GIRO ORIGINAL COMO TU DISEÑO (MANTENIDO) */
             .btn-action-spin { 
                 width: 100% !important; height: 42px !important; line-height: 42px !important; 
                 background: linear-gradient(180deg, #f59e0b, #d97706) !important; color: #000 !important; 
