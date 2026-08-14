@@ -36,6 +36,7 @@
                     overflow: hidden !important;
                     background-color: #0b0b0e;
                     box-sizing: border-box !important;
+                    gap: 15px !important;
                 }
 
                 /* CABECERA ULTRA COMPACTA */
@@ -90,19 +91,14 @@
                 2. BLOQUE EXCLUSIVO PARA JOKER Y MANSIÓN EMBRUJADA
                 ========================================================= */
                 .five-star-view {
-                    flex: 1 1 auto !important;
                     display: flex !important;
-                    justify-content: center !important; /* Centra el juego horizontalmente */
-                    align-items: center !important;     /* Centra el juego verticalmente */
-                    padding: 10px 10px 20px !important;
+                    justify-content: center !important; /* Centra el juego de forma horizontal */
+                    align-items: center !important;     /* Centra el juego de forma vertical */
+                    width: 100% !important;             /* Obliga a usar todo el ancho de la pantalla */
+                    height: 48vh !important;            
+                    margin: 0 auto !important;          /* Centrado absoluto estricto en el celular */
                     box-sizing: border-box !important;
                     overflow: hidden !important;
-                    width: 100% !important;             /* Evita que el juego se vaya hacia un costado */
-                    height: 48vh !important;            /* Misma altura para unificar todos los juegos */
-                    margin-top: -50px !important;       /* También lo sube 1cm alejándolo del botón */
-                    margin-bottom: 0px !important;
-                    margin-left: auto !important;       /* Corrección de alineación para el celular */
-                    margin-right: auto !important;
                 }
 
                 /* =========================================================
@@ -139,7 +135,7 @@
                 /* BOTONERA INFERIOR COMPACTA DE MÁQUINA REAL */
                 .compact-controls-footer {
                     position: fixed !important;
-                    bottom: 0 !important;
+                    bottom: 45px !important;
                     left: 0 !important;
                     right: 0 !important;
                     margin: 0 auto !important;
@@ -149,8 +145,8 @@
                     border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
                     display: flex !important;
                     flex-direction: column !important;
-                    gap: 3px !important;
-                    padding: 4px 12px 6px 12px !important;
+                    gap: 2px !important;
+                    padding: 4px 10px 4px 10px !important;
                     box-sizing: border-box !important;
                     z-index: 99999 !important;
                 }
