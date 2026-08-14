@@ -1102,10 +1102,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const storedWager = currentSlotBonus && currentSlotBonus.remaining > 0 ? currentSlotBonus.wager : Number(apuestaInput?.value || 0);
         const isBonusSpin = currentSlotBonus && currentSlotBonus.remaining > 0;
 
-        if (window.slotSpinInProgress || slotSpinInProgress) {
-            showStatus('Giro ya en curso. Espera a que termine.', 'warning');
-            return;
-        }
         if (!isBonusSpin && storedWager < 500) {
             showStatus('La apuesta mínima es de 500 Gs.', 'warning');
             return;
@@ -1127,14 +1123,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         window.slotSpinInProgress = true;
         slotSpinInProgress = true;
-        try {
-            document.querySelectorAll('#slot-bet-button, .btn-action-spin').forEach((button) => {
-                button.disabled = true;
-                button.setAttribute('aria-disabled', 'true');
-            });
-        } catch (e) {}
-        try { if (btnEl && btnEl instanceof HTMLElement) btnEl.disabled = true; } catch (e) {}
-        try { if (apuestaInput) apuestaInput.disabled = true; } catch (e) {}
 
         showStatus(isBonusSpin ? 'Ejecutando giro gratis...' : 'GIRANDO...', 'success');
         const status = document.getElementById('slots-status');
