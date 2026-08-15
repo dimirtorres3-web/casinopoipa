@@ -412,6 +412,27 @@ GAME_MULTIPLIERS = {
 
 }
 
+SLOT_WIN_BONUS_TIERS = (
+   (Decimal("5000"), Decimal("0.08")),
+   (Decimal("20000"), Decimal("0.15")),
+   (Decimal("50000"), Decimal("0.22")),
+   (Decimal("100000"), Decimal("0.35")),
+)
+
+
+def get_slot_win_payout(stake):
+   stake_decimal = Decimal(stake)
+   base_payout = stake_decimal * Decimal(str(GAME_MULTIPLIERS["tragamonedas"]))
+   bonus_percent = Decimal("0.05")
+
+   for threshold, percent in SLOT_WIN_BONUS_TIERS:
+       if stake_decimal >= threshold:
+           bonus_percent = percent
+       else:
+           break
+
+   bonus_payout = stake_decimal * bonus_percent
+   return int(base_payout + bonus_payout)
 
 
 SLOT_WIN_PROBABILITY = 0.25
@@ -896,7 +917,7 @@ def process_game_result(request, game, apuesta, bonus_spin=False, payload=None):
 
             if win:
 
-                payout = int(Decimal(apuesta) * Decimal(GAME_MULTIPLIERS[game]))
+                payout = get_slot_win_payout(apuesta)
 
                 player.saldo += Decimal(payout)
 
