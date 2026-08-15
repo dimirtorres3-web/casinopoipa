@@ -1186,6 +1186,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         window._lastSlotClick = now;
 
+        // Prevent starting a new spin while one is already in progress (avoids duplicate deductions)
+        if (window.slotSpinInProgress || slotSpinInProgress) {
+            showStatus('Giro ya en curso. Espera a que termine.', 'warning');
+            console.debug('[slot] spin rejected because another spin in progress');
+            return;
+        }
+
         const apuestaInput = document.getElementById('slot-apuesta');
         // normalize wager: strip non-digits to avoid formatted values causing multiplication
         let rawWager = currentSlotBonus && currentSlotBonus.remaining > 0 ? currentSlotBonus.wager : (apuestaInput ? String(apuestaInput.value || '') : '0');
