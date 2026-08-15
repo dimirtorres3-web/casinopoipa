@@ -857,14 +857,13 @@ document.addEventListener('DOMContentLoaded', function () {
         if (balanceOverride !== null && typeof balanceOverride !== 'undefined') {
             const displayed = getBalanceValue();
             const target = Number(balanceOverride);
-            // clear pending deductions because server authoritative result arrived
             window._pendingSlotDeductions = 0;
             if (displayed !== target) animateBalanceChange(displayed, target);
             else updateBalance(target);
         } else if (typeof result.new_balance !== 'undefined') {
             const displayed = getBalanceValue();
             const target = Number(result.new_balance);
-            window.pendingSlotDeductions = 0;
+            window._pendingSlotDeductions = 0;
             if (displayed !== target) animateBalanceChange(displayed, target);
             else updateBalance(target);
         }
@@ -874,15 +873,7 @@ document.addEventListener('DOMContentLoaded', function () {
             status.textContent = '';
         }
 
-        // Restore slot interaction state after result processed
         try {
-         // Remove one pending deduction (the spin that just finished)
-        if (typeof window.pendingSlotDeductions !== 'undefined') {
-            const apuestaInput = document.getElementById('slot-apuesta');
-            const lastWager = (currentSlotBonus && currentSlotBonus.remaining > 0) ? currentSlotBonus.wager : Number(apuestaInput?.value || 0);
-            window.pendingSlotDeductions = Math.max(0, window.pendingSlotDeductions - lastWager);
-        }
-
             unlockSlotAfterResult();
             scheduleAutoSlotSpin();
         } catch (e) {
@@ -1216,28 +1207,13 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // establish currentBalance and projectedBalance for use later and for error restoration
         const currentBalance = (typeof window._knownBalance === 'number' ? window._knownBalance : getBalanceValue());
         const projectedBalance = !isBonusSpin ? Math.max(0, currentBalance - storedWager) : currentBalance;
 
-            // establish currentBalance and projectedBalance for use later and for error restoration
-        const currentBalance = (typeof window._knownBalance === 'number' ? window._knownBalance : getBalanceValue());
-        const projectedBalance = !isBonusSpin ? Math.max(0, currentBalance - storedwager) : currentBalance;
-
-        // ACTUALIZACIÓN DEL SALDO GLOBAL EN MEMORIA
         if (!isBonusSpin) {
-            window._knownBalance = projectedBalance;
-        }
-
-        // LÓGICA DE DEDUCCIONES ORIGINAL REPARADA
-        if (!isBonusSpin) {
-            if (typeof window.pendingSlotDeductions === 'undefined') window.pendingSlotDeductions = 0;
-            // Defensive: ensure we only add the exact storedwager once per click
-            window.pendingSlotDeductions += storedwager;
-            console.debug('[slot] pending after add', window.pendingSlotDeductions);
-            
-            // display authoritative known minus pending
-            const displayValue = Math.max(0, (typeof window._knownBalance === 'number' ? window._knownBalance : getBalanceValue()) - window.pendingSlotDeductions);
+            if (typeof window._pendingSlotDeductions === 'undefined') window._pendingSlotDeductions = 0;
+            window._pendingSlotDeductions += storedWager;
+            const displayValue = Math.max(0, currentBalance - window._pendingSlotDeductions);
             updateBalance(displayValue);
         }
 
@@ -1259,8 +1235,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         playAudioCue('spin');
 
-        // CÓDIGO CORREGIDO
-        fetchPlay('tragamonedas', storedwager, isBonusSpin).then((result) => {
+        fetchPlay('tragamonedas', storedWager, isBonusSpin).then((result) => {
             if (!result.success) {
                 if (!window.NO_DEDUCT_ON_SPIN) updateBalance(currentBalance);
                 showStatus(result.error || 'No se pudo ejecutar la jugada.', 'danger');
