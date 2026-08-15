@@ -708,6 +708,22 @@ textarea {
         max-height: 100dvh !important;
     }
 
+    .auth-shell {
+        display: block !important;
+        min-height: 100vh !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        padding: 20px 12px 48px !important;
+    }
+
+    .auth-panel {
+        width: min(520px, 100%) !important;
+        margin: 0 auto !important;
+        padding: 24px 18px 20px !important;
+    }
+
     /* Full-screen game layout variables */
     :root { --game-header-height: 72px; --game-controls-height: 110px; }
 
