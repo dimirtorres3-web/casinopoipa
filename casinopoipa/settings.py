@@ -7,9 +7,15 @@ SECRET_KEY = os.environ.get(
     "CASINOPOIPA_SECRET_KEY",
     os.environ.get("SECRET_KEY", "changeme-securely-please"),
 )
-DEBUG = os.environ.get("DJANGO_DEBUG", "True").lower() in ("true", "1")
-ALLOWED_HOSTS = ['*']
+DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1")
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get("ALLOWED_HOSTS", "*").split(",")
+    if host.strip()
+]
 RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+RAILWAY_PUBLIC_DOMAIN = os.environ.get("RAILWAY_PUBLIC_DOMAIN")
+RAILWAY_HOSTNAME = os.environ.get("RAILWAY_HOSTNAME")
 RAILWAY_PUBLIC_DOMAIN = os.environ.get("RAILWAY_PUBLIC_DOMAIN")
 RAILWAY_HOSTNAME = os.environ.get("RAILWAY_HOSTNAME")
 
@@ -121,17 +127,23 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "no-reply@casinopoipa.
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 CSRF_TRUSTED_ORIGINS = []
+for value in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(","):
+    if value.strip():
+        CSRF_TRUSTED_ORIGINS.append(value.strip())
+
 for host in ALLOWED_HOSTS:
     if host and host not in ["127.0.0.1", "localhost", "*"]:
         CSRF_TRUSTED_ORIGINS.append(f"https://{host}")
-for hostname in (RENDER_EXTERNAL_HOSTNAME, RAILWAY_PUBLIC_DOMAIN, RAILWAY_HOSTNAME):
+
+for hostname in (RENDER_EXTERNAL_HOSTNAME, RAILWAY_PUBLIC_DOMAIN, RAILWAY_HOSTNAME, "web-production-2196be.up.railway.app"):
     if hostname:
         CSRF_TRUSTED_ORIGINS.append(f"https://{hostname}")
-if not any("railway.app" in origin for origin in CSRF_TRUSTED_ORIGINS):
-    CSRF_TRUSTED_ORIGINS.extend([
-        "https://*.up.railway.app",
-        "https://*.railway.app",
-    ])
+
+for pattern in ("https://*.up.railway.app", "https://*.railway.app"):
+    if pattern not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(pattern)
+
+CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(CSRF_TRUSTED_ORIGINS))
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 SECURE_SSL_REDIRECT = not DEBUG
