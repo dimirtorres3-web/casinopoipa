@@ -875,7 +875,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try {
             unlockSlotAfterResult();
-            scheduleAutoSlotSpin();
         } catch (e) {
             console.warn('Failed to fully restore slot controls state', e);
         }
@@ -1053,86 +1052,27 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function scheduleAutoSlotSpin() {
-        if (!window.autoSlotRunning) return;
-
-        const apuestaInput = document.getElementById('slot-apuesta');
-        const nextWager = Number(apuestaInput?.value || 0);
-        const nextBalance = getBalanceValue();
-
-        if (nextBalance <= 0 || nextBalance < nextWager || nextWager < 500) {
-            window.autoSlotRunning = false;
-            const autoBtn = document.getElementById('slot-auto-btn');
-            if (autoBtn) {
-                autoBtn.classList.remove('is-active');
-                autoBtn.setAttribute('aria-pressed', 'false');
-            }
-            showStatus('Auto detenido: saldo insuficiente.', 'warning');
-            return;
-        }
-
+        window.autoSlotRunning = false;
         if (window.autoSpinTimer) {
             clearTimeout(window.autoSpinTimer);
+            window.autoSpinTimer = null;
         }
-        window.autoSpinTimer = window.setTimeout(() => {
-            if (window.autoSlotRunning && !window.slotSpinInProgress && !slotSpinInProgress) {
-                const spinButton = document.getElementById('slot-bet-button');
-                console.debug('[auto] scheduling spin click', { auto: window.autoSlotRunning, slotSpinInProgress: window.slotSpinInProgress });
-                if (spinButton) {
-                    // prefer programmatic handler call to avoid duplicate native click behaviors
-                    try {
-                        if (typeof window.slotButtonHandler === 'function') {
-                            window.slotButtonHandler({ currentTarget: spinButton, preventDefault: () => {} });
-                        } else {
-                            spinButton.click();
-                        }
-                    } catch (e) {
-                        console.debug('[auto] fallback to click due to error', e);
-                        spinButton.click();
-                    }
-                }
-            }
-        }, 400);
+        const autoBtn = document.getElementById('slot-auto-btn');
+        if (autoBtn) {
+            autoBtn.classList.remove('is-active');
+            autoBtn.setAttribute('aria-pressed', 'false');
+        }
+        return;
     }
 
     function bindAutoSlotButton() {
         const autoBtn = document.getElementById('slot-auto-btn');
         if (!autoBtn || autoBtn.dataset.autoBound === '1') return;
 
-        autoBtn.addEventListener('click', function () {
-            if (!autoBtn) return;
-            window.autoSlotRunning = !window.autoSlotRunning;
-            autoBtn.classList.toggle('is-active', window.autoSlotRunning);
-            autoBtn.setAttribute('aria-pressed', window.autoSlotRunning ? 'true' : 'false');
-
-            if (window.autoSlotRunning) {
-                const apuestaInput = document.getElementById('slot-apuesta');
-                const wager = Number(apuestaInput?.value || 0);
-                const currentBalance = getBalanceValue();
-                if (wager < 500) {
-                    window.autoSlotRunning = false;
-                    autoBtn.classList.remove('is-active');
-                    autoBtn.setAttribute('aria-pressed', 'false');
-                    showStatus('La apuesta mínima para Auto es de 500 Gs.', 'warning');
-                    return;
-                }
-                if (currentBalance < wager) {
-                    window.autoSlotRunning = false;
-                    autoBtn.classList.remove('is-active');
-                    autoBtn.setAttribute('aria-pressed', 'false');
-                    showInsufficientFunds();
-                    return;
-                }
-                showStatus('Auto activado', 'warning');
-                scheduleAutoSlotSpin();
-            } else {
-                if (window.autoSpinTimer) {
-                    clearTimeout(window.autoSpinTimer);
-                    window.autoSpinTimer = null;
-                }
-                showStatus('Auto detenido', 'default');
-            }
-        });
-
+        autoBtn.disabled = true;
+        autoBtn.setAttribute('aria-disabled', 'true');
+        autoBtn.classList.remove('is-active');
+        autoBtn.setAttribute('aria-pressed', 'false');
         autoBtn.dataset.autoBound = '1';
     }
 
@@ -1185,14 +1125,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const apuestaInput = document.getElementById('slot-apuesta');
-        // normalize wager: strip non-digits to avoid formatted values causing multiplication
-        let rawWager = currentSlotBonus && currentSlotBonus.remaining > 0 ? currentSlotBonus.wager : (apuestaInput ? String(apuestaInput.value || '') : '0');
-        rawWager = String(rawWager).replace(/[^0-9]/g, '');
-        const storedWager = Number(rawWager || 0);
-        const isBonusSpin = currentSlotBonus && currentSlotBonus.remaining > 0;
-        console.debug('[slot] spin requested', { storedWager, isBonusSpin, knownBalance: window._knownBalance, pending: window._pendingSlotDeductions });
+        const storedWager = Number(String(apuestaInput?.value || '0').replace(/[^0-9]/g, '') || 0);
+        const isBonusSpin = false;
 
-        if (!isBonusSpin && storedWager < 500) {
+        if (storedWager < 500) {
             showStatus('La apuesta mínima es de 500 Gs.', 'warning');
             return;
         }
@@ -1200,22 +1136,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const betTotalEl = document.getElementById('bet-total');
         if (betTotalEl) betTotalEl.textContent = `Apuesta: Gs. ${new Intl.NumberFormat('es-PY').format(storedWager)}`;
 
-        // Use authoritative available balance (known - pending) to check funds so we don't double-deduct
-        const availableBalance = (typeof window._knownBalance === 'number' ? window._knownBalance : getBalanceValue()) - (window._pendingSlotDeductions || 0);
-        if (storedWager > availableBalance && !isBonusSpin) {
+        const currentBalance = getBalanceValue();
+        if (storedWager > currentBalance) {
             showInsufficientFunds();
             return;
         }
 
-        const currentBalance = (typeof window._knownBalance === 'number' ? window._knownBalance : getBalanceValue());
-        const projectedBalance = !isBonusSpin ? Math.max(0, currentBalance - storedWager) : currentBalance;
-
-        if (!isBonusSpin) {
-            if (typeof window._pendingSlotDeductions === 'undefined') window._pendingSlotDeductions = 0;
-            window._pendingSlotDeductions += storedWager;
-            const displayValue = Math.max(0, currentBalance - window._pendingSlotDeductions);
-            updateBalance(displayValue);
-        }
+        const projectedBalance = Math.max(0, currentBalance - storedWager);
+        updateBalance(projectedBalance);
 
         const activeVisualSpin = typeof window.currentSlotSpinTrigger === 'function'
             ? window.currentSlotSpinTrigger
