@@ -55,12 +55,13 @@ WSGI_APPLICATION = "casinopoipa.wsgi.application"
 ASGI_APPLICATION = "casinopoipa.asgi.application"
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
+DB_SSL_REQUIRE = os.environ.get("DB_SSL_REQUIRE", "false").strip().lower() in ("1", "true", "yes", "on")
 if DATABASE_URL:
     DATABASES = {
         "default": dj_database_url.parse(
             DATABASE_URL,
             conn_max_age=600,
-            ssl_require=True,
+            ssl_require=DB_SSL_REQUIRE,
         )
     }
 else:
