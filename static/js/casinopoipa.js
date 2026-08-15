@@ -1,6 +1,15 @@
 document.addEventListener('DOMContentLoaded', function () {
     // Development/testing helper: when undefined default to false so real spins deduct balance
     if (typeof window.NO_DEDUCT_ON_SPIN === 'undefined') window.NO_DEDUCT_ON_SPIN = false;
+    // Track authoritative known balance and any optimistic pending deductions
+    if (typeof window._knownBalance === 'undefined') {
+        const raw = (document.getElementById('balance-value')?.textContent || document.querySelector('.balance-value')?.textContent || '0').replace(/[^0-9]/g, '');
+        window._knownBalance = Number(raw || 0);
+        // store the initial raw string so we can find server-rendered balance nodes that may not have a known selector
+        try { window._initialBalanceRaw = String(raw || '0'); } catch (e) { window._initialBalanceRaw = '0'; }
+    }
+    if (typeof window._pendingSlotDeductions === 'undefined') window._pendingSlotDeductions = 0;
+
     const floatButton = document.querySelector('.floating-control');
     const sideMenu = document.querySelector('.side-menu');
     if (floatButton && sideMenu) {
@@ -30,11 +39,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function getBalanceValue() {
-        const balanceEl = document.getElementById('balance-value') || document.querySelector('.balance-value');
-        const cornerEl = document.getElementById('corner-balance-value');
-        const headerEl = document.getElementById('header-balance');
-        const text = (balanceEl?.textContent || cornerEl?.textContent || headerEl?.textContent || '0').replace(/[^0-9]/g, '');
-        return Number(text || 0);
+        // Prefer internal known balance if available and no pending deductions
+        const domText = (document.getElementById('balance-value')?.textContent || document.querySelector('.balance-value')?.textContent || document.getElementById('corner-balance-value')?.textContent || document.getElementById('header-balance')?.textContent || '0').replace(/[^0-9]/g, '');
+        const domVal = Number(domText || 0);
+        if (typeof window._knownBalance === 'number') {
+            // return authoritative known balance minus any pending optimistic deductions
+            return Math.max(0, window._knownBalance - (window._pendingSlotDeductions || 0));
+        }
+        return domVal;
     }
 
     function updateBalance(value) {
@@ -63,6 +75,39 @@ document.addEventListener('DOMContentLoaded', function () {
         if (cornerEl) {
             cornerEl.textContent = formatted;
         }
+        // Keep authoritative known balance in sync when explicit updates happen
+        try { window._knownBalance = Number(String(value).replace(/[^0-9]/g, '')) || Number(value); } catch (e) { window._knownBalance = Number(value); }
+
+        // Dispatch a custom event other modules can listen to
+        try {
+            const ev = new CustomEvent('casino:balance-changed', { detail: { balance: Number(window._knownBalance) } });
+            window.dispatchEvent(ev);
+        } catch (e) {}
+
+        // As a fallback, replace any text nodes that still show the original server-rendered balance (helps panels that lack an id/class)
+        try {
+            const raw = window._initialBalanceRaw || (String(window._knownBalance) || '0');
+            if (raw && raw.length > 0) {
+                const formattedText = formatted;
+                // limit scan to body children for performance
+                const candidates = Array.from(document.querySelectorAll('body *'));
+                let checks = 0;
+                for (const el of candidates) {
+                    // only check elements without child elements (likely text containers)
+                    if (el.childElementCount === 0) {
+                        const txt = (el.textContent || '').replace(/\s+/g, ' ').trim();
+                        if (txt && txt.indexOf(raw) >= 0 && checks < 300) {
+                            // avoid altering buttons or labels that include the same number by checking for currency marker nearby
+                            if (txt.indexOf('Gs.') >= 0 || txt.match(/\d{1,3}(?:[\s\.,]\d{3})+/)) {
+                                el.textContent = formattedText;
+                            }
+                            checks += 1;
+                        }
+                    }
+                    if (checks >= 300) break;
+                }
+            }
+        } catch (e) {}
     }
 
     function bindGameCardNavigation() {
@@ -812,11 +857,16 @@ document.addEventListener('DOMContentLoaded', function () {
         if (balanceOverride !== null && typeof balanceOverride !== 'undefined') {
             const displayed = getBalanceValue();
             const target = Number(balanceOverride);
+            // clear pending deductions because server authoritative result arrived
+            window._pendingSlotDeductions = 0;
             if (displayed !== target) animateBalanceChange(displayed, target);
+            else updateBalance(target);
         } else if (typeof result.new_balance !== 'undefined') {
             const displayed = getBalanceValue();
             const target = Number(result.new_balance);
+            window._pendingSlotDeductions = 0;
             if (displayed !== target) animateBalanceChange(displayed, target);
+            else updateBalance(target);
         }
 
         const status = document.getElementById('slots-status');
@@ -1136,18 +1186,19 @@ document.addEventListener('DOMContentLoaded', function () {
         const betTotalEl = document.getElementById('bet-total');
         if (betTotalEl) betTotalEl.textContent = `Apuesta: Gs. ${new Intl.NumberFormat('es-PY').format(storedWager)}`;
 
-        const currentBalance = getBalanceValue();
-        if (storedWager > currentBalance && !isBonusSpin) {
+        // Use authoritative available balance (known - pending) to check funds so we don't double-deduct
+        const availableBalance = (typeof window._knownBalance === 'number' ? window._knownBalance : getBalanceValue()) - (window._pendingSlotDeductions || 0);
+        if (storedWager > availableBalance && !isBonusSpin) {
             showInsufficientFunds();
             return;
         }
 
-        const projectedBalance = !isBonusSpin ? Math.max(0, currentBalance - storedWager) : currentBalance;
         if (!isBonusSpin) {
-            // accumulate pending optimistic deductions to avoid visual mismatches
             if (typeof window._pendingSlotDeductions === 'undefined') window._pendingSlotDeductions = 0;
             window._pendingSlotDeductions += storedWager;
-            updateBalance(Math.max(0, currentBalance - window._pendingSlotDeductions));
+            // display authoritative known minus pending
+            const displayValue = Math.max(0, (typeof window._knownBalance === 'number' ? window._knownBalance : getBalanceValue()) - window._pendingSlotDeductions);
+            updateBalance(displayValue);
         }
 
         // mark a logical spin-in-progress but do not visually disable controls
