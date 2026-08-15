@@ -1085,11 +1085,22 @@ document.addEventListener('DOMContentLoaded', function () {
         window.autoSpinTimer = window.setTimeout(() => {
             if (window.autoSlotRunning && !window.slotSpinInProgress && !slotSpinInProgress) {
                 const spinButton = document.getElementById('slot-bet-button');
+                console.debug('[auto] scheduling spin click', { auto: window.autoSlotRunning, slotSpinInProgress: window.slotSpinInProgress });
                 if (spinButton) {
-                    spinButton.click();
+                    // prefer programmatic handler call to avoid duplicate native click behaviors
+                    try {
+                        if (typeof window.slotButtonHandler === 'function') {
+                            window.slotButtonHandler({ currentTarget: spinButton, preventDefault: () => {} });
+                        } else {
+                            spinButton.click();
+                        }
+                    } catch (e) {
+                        console.debug('[auto] fallback to click due to error', e);
+                        spinButton.click();
+                    }
                 }
             }
-        }, 250);
+        }, 400);
     }
 
     function bindAutoSlotButton() {
@@ -1170,13 +1181,18 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!window._lastSlotClick) window._lastSlotClick = 0;
         if (now - window._lastSlotClick < 300) {
             // ignore near-duplicate event
+            console.debug('[slot] ignored duplicate click', now - window._lastSlotClick);
             return;
         }
         window._lastSlotClick = now;
 
         const apuestaInput = document.getElementById('slot-apuesta');
-        const storedWager = currentSlotBonus && currentSlotBonus.remaining > 0 ? currentSlotBonus.wager : Number(apuestaInput?.value || 0);
+        // normalize wager: strip non-digits to avoid formatted values causing multiplication
+        let rawWager = currentSlotBonus && currentSlotBonus.remaining > 0 ? currentSlotBonus.wager : (apuestaInput ? String(apuestaInput.value || '') : '0');
+        rawWager = String(rawWager).replace(/[^0-9]/g, '');
+        const storedWager = Number(rawWager || 0);
         const isBonusSpin = currentSlotBonus && currentSlotBonus.remaining > 0;
+        console.debug('[slot] spin requested', { storedWager, isBonusSpin, knownBalance: window._knownBalance, pending: window._pendingSlotDeductions });
 
         if (!isBonusSpin && storedWager < 500) {
             showStatus('La apuesta mínima es de 500 Gs.', 'warning');
@@ -1195,7 +1211,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!isBonusSpin) {
             if (typeof window._pendingSlotDeductions === 'undefined') window._pendingSlotDeductions = 0;
+            // Defensive: ensure we only add the exact storedWager once per click
             window._pendingSlotDeductions += storedWager;
+            console.debug('[slot] pending after add', window._pendingSlotDeductions);
             // display authoritative known minus pending
             const displayValue = Math.max(0, (typeof window._knownBalance === 'number' ? window._knownBalance : getBalanceValue()) - window._pendingSlotDeductions);
             updateBalance(displayValue);
