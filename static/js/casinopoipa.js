@@ -864,7 +864,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (typeof result.new_balance !== 'undefined') {
             const displayed = getBalanceValue();
             const target = Number(result.new_balance);
-            window._pendingSlotDeductions = 0;
+            window.pendingSlotDeductions = 0;
             if (displayed !== target) animateBalanceChange(displayed, target);
             else updateBalance(target);
         }
@@ -876,12 +876,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Restore slot interaction state after result processed
         try {
-            // Remove one pending deduction (the spin that just finished)
-            if (typeof window._pendingSlotDeductions !== 'undefined') {
-                const apuestaInput = document.getElementById('slot-apuesta');
-                const lastWager = (currentSlotBonus && currentSlotBonus.remaining > 0) ? currentSlotBonus.wager : Number(apuestaInput?.value || 0);
-                window._pendingSlotDeductions = Math.max(0, window._pendingSlotDeductions - lastWager);
-            }
+         // Remove one pending deduction (the spin that just finished)
+        if (typeof window.pendingSlotDeductions !== 'undefined') {
+            const apuestaInput = document.getElementById('slot-apuesta');
+            const lastWager = (currentSlotBonus && currentSlotBonus.remaining > 0) ? currentSlotBonus.wager : Number(apuestaInput?.value || 0);
+            window.pendingSlotDeductions = Math.max(0, window.pendingSlotDeductions - lastWager);
+        }
 
             unlockSlotAfterResult();
             scheduleAutoSlotSpin();
@@ -1216,24 +1216,29 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        // establish currentBalance and projectedBalance for use later and for error restoration
+        const currentBalance = (typeof window._knownBalance === 'number' ? window._knownBalance : getBalanceValue());
+        const projectedBalance = !isBonusSpin ? Math.max(0, currentBalance - storedWager) : currentBalance;
+
+            // establish currentBalance and projectedBalance for use later and for error restoration
+        const currentBalance = (typeof window._knownBalance === 'number' ? window._knownBalance : getBalanceValue());
+        const projectedBalance = !isBonusSpin ? Math.max(0, currentBalance - storedwager) : currentBalance;
+
+        // ACTUALIZACIÓN DEL SALDO GLOBAL EN MEMORIA
         if (!isBonusSpin) {
-            if (typeof window._pendingSlotDeductions === 'undefined') window._pendingSlotDeductions = 0;
-            // Defensive: ensure we only add the exact storedWager once per click
-            window._pendingSlotDeductions += storedWager;
-            console.debug('[slot] pending after add', window._pendingSlotDeductions);
-            // display authoritative known minus pending
-            const displayValue = Math.max(0, (typeof window._knownBalance === 'number' ? window._knownBalance : getBalanceValue()) - window._pendingSlotDeductions);
-            updateBalance(displayValue);
+            window._knownBalance = projectedBalance;
         }
 
-        // mark a logical spin-in-progress but do not visually disable controls
-        window.slotSpinInProgress = true;
-        slotSpinInProgress = true;
-
-        showStatus(isBonusSpin ? 'Ejecutando giro gratis...' : 'GIRANDO...', 'success');
-        const status = document.getElementById('slots-status');
-        if (status) {
-            status.textContent = isBonusSpin ? 'Giro gratis en curso' : 'Giro en curso';
+        // LÓGICA DE DEDUCCIONES ORIGINAL REPARADA
+        if (!isBonusSpin) {
+            if (typeof window.pendingSlotDeductions === 'undefined') window.pendingSlotDeductions = 0;
+            // Defensive: ensure we only add the exact storedwager once per click
+            window.pendingSlotDeductions += storedwager;
+            console.debug('[slot] pending after add', window.pendingSlotDeductions);
+            
+            // display authoritative known minus pending
+            const displayValue = Math.max(0, (typeof window._knownBalance === 'number' ? window._knownBalance : getBalanceValue()) - window.pendingSlotDeductions);
+            updateBalance(displayValue);
         }
 
         const activeVisualSpin = typeof window.currentSlotSpinTrigger === 'function'
@@ -1254,7 +1259,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         playAudioCue('spin');
 
-        fetchPlay('tragamonedas', storedWager, isBonusSpin).then((result) => {
+        // CÓDIGO CORREGIDO
+        fetchPlay('tragamonedas', storedwager, isBonusSpin).then((result) => {
             if (!result.success) {
                 if (!window.NO_DEDUCT_ON_SPIN) updateBalance(currentBalance);
                 showStatus(result.error || 'No se pudo ejecutar la jugada.', 'danger');
