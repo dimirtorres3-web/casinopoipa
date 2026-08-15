@@ -262,6 +262,22 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    function setAllSlotButtonsText(text) {
+        document.querySelectorAll('#slot-bet-button, .btn-action-spin').forEach((button) => {
+            if (!button) return;
+            button.textContent = text;
+        });
+    }
+
+    function setAllSlotButtonsDisabled(disabled) {
+        document.querySelectorAll('#slot-bet-button, .btn-action-spin').forEach((button) => {
+            if (!button) return;
+            button.disabled = !!disabled;
+            button.setAttribute('aria-disabled', String(!!disabled));
+            button.style.pointerEvents = !!disabled ? 'none' : 'auto';
+        });
+    }
+
     const slotCanvasIds = ['slot-canvas-1', 'slot-canvas-2', 'slot-canvas-3'];
     const slotCanvases = slotCanvasIds.map((id) => document.getElementById(id)).filter(Boolean);
     const tableCanvas = document.getElementById('table-canvas');
@@ -1144,6 +1160,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const projectedBalance = Math.max(0, currentBalance - storedWager);
         updateBalance(projectedBalance);
+
+        window.slotSpinInProgress = true;
+        slotSpinInProgress = true;
+        setAllSlotButtonsDisabled(true);
+        const apuestaInputLock = document.getElementById('slot-apuesta');
+        if (apuestaInputLock) apuestaInputLock.disabled = true;
 
         const activeVisualSpin = typeof window.currentSlotSpinTrigger === 'function'
             ? window.currentSlotSpinTrigger
