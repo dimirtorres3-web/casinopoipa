@@ -810,9 +810,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (balanceOverride !== null && typeof balanceOverride !== 'undefined') {
-            updateBalance(Number(balanceOverride));
+            const displayed = getBalanceValue();
+            const target = Number(balanceOverride);
+            if (displayed !== target) animateBalanceChange(displayed, target);
         } else if (typeof result.new_balance !== 'undefined') {
-            updateBalance(Number(result.new_balance));
+            const displayed = getBalanceValue();
+            const target = Number(result.new_balance);
+            if (displayed !== target) animateBalanceChange(displayed, target);
         }
 
         const status = document.getElementById('slots-status');
@@ -822,6 +826,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Restore slot interaction state after result processed
         try {
+            // Remove one pending deduction (the spin that just finished)
+            if (typeof window._pendingSlotDeductions !== 'undefined') {
+                const apuestaInput = document.getElementById('slot-apuesta');
+                const lastWager = (currentSlotBonus && currentSlotBonus.remaining > 0) ? currentSlotBonus.wager : Number(apuestaInput?.value || 0);
+                window._pendingSlotDeductions = Math.max(0, window._pendingSlotDeductions - lastWager);
+            }
+
             unlockSlotAfterResult();
             scheduleAutoSlotSpin();
         } catch (e) {
@@ -1104,6 +1115,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try { window.slotButtonHandler = slotButtonHandler; } catch (e) { }
 
+        // debounce accidental duplicate events (protects against duplicate bindings or rapid double events)
+        const now = Date.now();
+        if (!window._lastSlotClick) window._lastSlotClick = 0;
+        if (now - window._lastSlotClick < 300) {
+            // ignore near-duplicate event
+            return;
+        }
+        window._lastSlotClick = now;
+
         const apuestaInput = document.getElementById('slot-apuesta');
         const storedWager = currentSlotBonus && currentSlotBonus.remaining > 0 ? currentSlotBonus.wager : Number(apuestaInput?.value || 0);
         const isBonusSpin = currentSlotBonus && currentSlotBonus.remaining > 0;
@@ -1124,9 +1144,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const projectedBalance = !isBonusSpin ? Math.max(0, currentBalance - storedWager) : currentBalance;
         if (!isBonusSpin) {
-            updateBalance(projectedBalance);
+            // accumulate pending optimistic deductions to avoid visual mismatches
+            if (typeof window._pendingSlotDeductions === 'undefined') window._pendingSlotDeductions = 0;
+            window._pendingSlotDeductions += storedWager;
+            updateBalance(Math.max(0, currentBalance - window._pendingSlotDeductions));
         }
 
+        // mark a logical spin-in-progress but do not visually disable controls
         window.slotSpinInProgress = true;
         slotSpinInProgress = true;
 
