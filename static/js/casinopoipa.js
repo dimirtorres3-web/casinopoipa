@@ -39,10 +39,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function updateBalance(value) {
         const balanceEls = Array.from(document.querySelectorAll('.balance-value'));
+        const compactEls = Array.from(document.querySelectorAll('.compact-balance'));
         const cornerEl = document.getElementById('corner-balance-value');
         const formatted = `Gs. ${new Intl.NumberFormat('es-PY').format(value)}`;
         if (balanceEls.length) {
             balanceEls.forEach((el) => {
+                el.textContent = formatted;
+            });
+        }
+        if (compactEls.length) {
+            compactEls.forEach((el) => {
                 el.textContent = formatted;
             });
         }
